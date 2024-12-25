@@ -47,10 +47,10 @@ export function ArtworkForm({ userId }: ArtworkFormProps) {
         throw new Error(result.error);
       }
 
-      router.push('/artist/dashboard');
+      router.push('/artist/artworks');
     } catch (err: any) {
       if (err?.digest?.includes('NEXT_REDIRECT')) {
-        router.push('/artist/dashboard');
+        router.push('/artist/artworks');
         return;
       }
 
@@ -66,7 +66,7 @@ export function ArtworkForm({ userId }: ArtworkFormProps) {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Add New Artwork</h1>
         <Button variant="outline" asChild>
-          <Link href="/artist/dashboard">Cancel</Link>
+          <Link href="/artist/artworks">Cancel</Link>
         </Button>
       </div>
 
