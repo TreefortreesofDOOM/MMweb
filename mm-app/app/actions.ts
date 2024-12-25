@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Database } from "@/lib/database.types";
 import { sendArtistApplicationEmail } from "@/lib/emails/artist-notifications"
+import { updateArtworkEmbeddings, findSimilarArtworks } from '@/lib/ai/embeddings';
 
 type Profile = Database['public']['Tables']['profiles']['Update'];
 
@@ -429,6 +430,17 @@ export async function createArtwork(formData: FormData) {
       .single();
 
     if (artworkError) throw artworkError;
+
+    // Generate and store embeddings for the artwork
+    if (artwork) {
+      try {
+        await updateArtworkEmbeddings(artwork.id, title, description || '');
+      } catch (embeddingError) {
+        console.error('Error generating embeddings:', embeddingError);
+        // Don't fail the artwork creation if embeddings fail
+      }
+    }
+
     return { artwork };
   } catch (error: any) {
     console.error('Error creating artwork:', error);
@@ -530,4 +542,122 @@ export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   return redirect('/');
+}
+
+export async function updateArtwork(artworkId: string, formData: FormData) {
+  const supabase = await createClient();
+  const user = await getUser();
+
+  if (!user) {
+    return { error: 'Not authenticated' };
+  }
+
+  const title = formData.get('title') as string;
+  const description = formData.get('description') as string;
+  const price = parseFloat(formData.get('price') as string);
+  const imagesJson = formData.get('images') as string;
+
+  if (!title || !price || !imagesJson) {
+    return { error: 'Missing required fields' };
+  }
+
+  try {
+    const images = JSON.parse(imagesJson);
+    
+    if (!Array.isArray(images) || images.length === 0) {
+      return { error: 'At least one image is required' };
+    }
+
+    if (!images.some(img => img.isPrimary)) {
+      return { error: 'Primary image is required' };
+    }
+
+    // First check if the artwork belongs to the user
+    const { data: existingArtwork } = await supabase
+      .from('artworks')
+      .select('artist_id')
+      .eq('id', artworkId)
+      .single();
+
+    if (!existingArtwork || existingArtwork.artist_id !== user.id) {
+      return { error: 'Unauthorized' };
+    }
+
+    const { data: artwork, error: artworkError } = await supabase
+      .from('artworks')
+      .update({
+        title,
+        description,
+        price,
+        images,
+      })
+      .eq('id', artworkId)
+      .select()
+      .single();
+
+    if (artworkError) throw artworkError;
+
+    // Update embeddings for the artwork
+    if (artwork) {
+      try {
+        await updateArtworkEmbeddings(artwork.id, title, description || '');
+      } catch (embeddingError) {
+        console.error('Error updating embeddings:', embeddingError);
+        // Don't fail the artwork update if embeddings fail
+      }
+    }
+
+    return { artwork };
+  } catch (error: any) {
+    console.error('Error updating artwork:', error);
+    return { error: error.message };
+  }
+}
+
+export async function getSimilarArtworks(artworkId: string) {
+  const supabase = await createClient();
+
+  try {
+    // First get the artwork details
+    const { data: artwork, error: artworkError } = await supabase
+      .from('artworks')
+      .select('title, description')
+      .eq('id', artworkId)
+      .single();
+
+    if (artworkError) throw artworkError;
+    if (!artwork) throw new Error('Artwork not found');
+
+    // Use the artwork's title and description to find similar artworks
+    const queryText = `${artwork.title} ${artwork.description || ''}`;
+    const similarArtworks = await findSimilarArtworks(queryText, {
+      match_threshold: 0.7,
+      match_count: 6
+    });
+
+    if (!similarArtworks) return { artworks: [] };
+
+    // Get the full artwork details for the similar artworks
+    const { data: artworksData, error: artworksError } = await supabase
+      .from('artworks')
+      .select('*')
+      .in('id', similarArtworks.map(a => a.artwork_id))
+      .neq('id', artworkId) // Exclude the current artwork
+      .eq('status', 'published'); // Only include published artworks
+
+    if (artworksError) throw artworksError;
+
+    // Sort by similarity score
+    const sortedArtworks = artworksData
+      .map(artwork => ({
+        ...artwork,
+        similarity: similarArtworks.find(a => a.artwork_id === artwork.id)?.similarity || 0
+      }))
+      .sort((a, b) => b.similarity - a.similarity);
+
+    return { artworks: sortedArtworks };
+  } catch (error: any) {
+    console.error('Error finding similar artworks:', error);
+    return { error: error.message };
+  }
 }
