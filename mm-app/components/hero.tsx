@@ -1,7 +1,12 @@
+'use client';
+
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Hero() {
+  const { user } = useAuth();
+
   return (
     <div className="flex flex-col items-center text-center space-y-8 py-12">
       <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
@@ -14,12 +19,12 @@ export default function Hero() {
 
       <div className="flex gap-4">
         <Button asChild size="lg">
-          <Link href="/explore">
+          <Link href="/gallery">
             Explore Art
           </Link>
         </Button>
         <Button asChild variant="outline" size="lg">
-          <Link href="/create">
+          <Link href={user ? "/artist-application" : "/sign-in"}>
             Create Art
           </Link>
         </Button>

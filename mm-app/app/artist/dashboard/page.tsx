@@ -1,25 +1,34 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { DashboardClient } from './dashboard-client';
+import DashboardClient from './dashboard-client';
 
-export default async function ArtistDashboardPage() {
+export default async function DashboardPage() {
   const supabase = await createClient();
-
+  
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    redirect('/sign-in');
+    return redirect('/sign-in');
   }
 
-  // Get user profile with Stripe info
+  // Check if user is artist
   const { data: profile } = await supabase
     .from('profiles')
     .select('role, stripe_account_id, stripe_onboarding_complete')
     .eq('id', user.id)
     .single();
 
-  if (!profile || profile.role !== 'artist') {
-    redirect('/');
+  if (profile?.role !== 'artist') {
+    return redirect('/profile');
   }
 
-  return <DashboardClient profile={profile} />;
+  // Get artist's artworks
+  const { data: artworks } = await supabase
+    .from('artworks')
+    .select('id, status')
+    .eq('artist_id', user.id);
+
+  return <DashboardClient 
+    artworks={artworks || []} 
+    profile={profile}
+  />;
 } 

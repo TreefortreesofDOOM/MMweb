@@ -1,13 +1,22 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { ArtworkQR } from '@/components/artwork/artwork-qr';
+import { PatronAssistant } from '@/components/ai/patron-assistant';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Image from 'next/image';
+import { formatPrice } from '@/lib/utils';
 
 export default async function ArtworkPage({ params }: { params: { id: string } }) {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
   
   const { data: artwork } = await supabase
     .from('artworks')
-    .select('*')
+    .select(`
+      *,
+      profiles (
+        name,
+        bio
+      )
+    `)
     .eq('id', params.id)
     .single();
 
@@ -15,22 +24,74 @@ export default async function ArtworkPage({ params }: { params: { id: string } }
     return <div>Artwork not found</div>;
   }
 
+  // Get primary image
+  const primaryImage = artwork.images.find((img: any) => img.isPrimary);
+  const imageUrl = primaryImage?.url || artwork.images[0]?.url;
+
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-4">{artwork.title}</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          {/* Artwork details */}
-          <p className="text-gray-600">{artwork.description}</p>
-          <p className="text-xl font-semibold mt-4">${artwork.price / 100}</p>
+    <div className="container max-w-7xl mx-auto py-8 px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Left Column - Artwork Image */}
+        <div className="relative aspect-square rounded-lg overflow-hidden">
+          {imageUrl && (
+            <Image
+              src={imageUrl}
+              alt={artwork.title}
+              fill
+              className="object-cover"
+            />
+          )}
         </div>
-        <div>
-          {/* QR Code section */}
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Purchase In Gallery</h2>
-            <ArtworkQR artworkId={artwork.id} title={artwork.title} />
+
+        {/* Right Column - Details and AI Assistant */}
+        <div className="space-y-8">
+          {/* Artwork Details */}
+          <div className="space-y-4">
+            <h1 className="text-3xl font-bold">{artwork.title}</h1>
+            <div className="space-y-2">
+              <p className="text-2xl font-semibold">{formatPrice(artwork.price)}</p>
+              <p className="text-muted-foreground">By {artwork.profiles.name}</p>
+            </div>
+            <p className="text-muted-foreground">{artwork.description}</p>
           </div>
+
+          {/* Artist Bio */}
+          {artwork.profiles.bio && (
+            <Card>
+              <CardHeader>
+                <CardTitle>About the Artist</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">{artwork.profiles.bio}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* QR Code for In-Gallery Purchase */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Purchase In Gallery</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ArtworkQR artworkId={artwork.id} title={artwork.title} />
+            </CardContent>
+          </Card>
         </div>
+      </div>
+
+      {/* AI Art Advisor Section */}
+      <div className="mt-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>AI Art Advisor</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PatronAssistant 
+              artworkId={artwork.id} 
+              imageUrl={imageUrl}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

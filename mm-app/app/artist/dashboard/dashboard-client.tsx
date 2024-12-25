@@ -1,112 +1,125 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
+import { ArtistAssistant } from '@/components/ai/artist-assistant';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface DashboardClientProps {
+  artworks: Array<{
+    id: string;
+    status: string;
+  }>;
   profile: {
-    stripe_account_id: string | null;
-    stripe_onboarding_complete: boolean;
+    stripe_account_id?: string | null;
+    stripe_onboarding_complete?: boolean;
   };
 }
 
-export function DashboardClient({ profile }: DashboardClientProps) {
-  const needsStripeConnect = !profile.stripe_account_id;
-  const needsStripeOnboarding = !profile.stripe_onboarding_complete;
+export default function DashboardClient({ artworks, profile }: DashboardClientProps) {
+  const totalArtworks = artworks.length;
+  const publishedArtworks = artworks.filter(a => a.status === 'published').length;
 
   return (
-    <div className="container max-w-7xl mx-auto py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Artist Dashboard</h1>
+    <div className="max-w-7xl mx-auto p-4 space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Artist Dashboard</h1>
+          <p className="text-muted-foreground">
+            Manage your artworks and track your performance
+          </p>
+        </div>
         <Button asChild>
-          <Link href="/artist/artworks/new">
-            Upload New Artwork
-          </Link>
+          <Link href="/artist/artworks/new">Upload New Artwork</Link>
         </Button>
       </div>
 
       {/* Stripe Setup Alert */}
-      {(needsStripeConnect || needsStripeOnboarding) && (
-        <Card className="mb-8 bg-primary/10">
-          <CardHeader>
-            <CardTitle className="text-lg">Complete Your Setup</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              To start selling your artwork, you need to connect your Stripe account for payments.
+      {!profile.stripe_account_id && (
+        <Alert>
+          <AlertTitle>Set up payments to start selling</AlertTitle>
+          <AlertDescription>
+            <p className="mb-2">
+              Connect your Stripe account to receive payments for your artwork sales.
             </p>
-            <Button asChild variant="default">
-              <Link href="/artist/connect">
-                {needsStripeConnect ? 'Connect Stripe Account' : 'Complete Stripe Onboarding'}
+            <Button asChild variant="outline" size="sm">
+              <Link href="/api/stripe/connect">
+                Connect with Stripe
               </Link>
             </Button>
-          </CardContent>
-        </Card>
+          </AlertDescription>
+        </Alert>
       )}
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {profile.stripe_account_id && !profile.stripe_onboarding_complete && (
+        <Alert>
+          <AlertTitle>Complete your Stripe onboarding</AlertTitle>
+          <AlertDescription>
+            <p className="mb-2">
+              Please complete your Stripe account setup to start receiving payments.
+            </p>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/api/stripe/connect">
+                Complete Setup
+              </Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Quick Stats */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Your Artworks
-            </CardTitle>
+          <CardHeader>
+            <CardTitle>Quick Stats</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button variant="link" className="px-0" asChild>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Artworks</p>
+                <p className="text-2xl font-bold">{totalArtworks}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Published</p>
+                <p className="text-2xl font-bold">{publishedArtworks}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Button asChild className="w-full">
+              <Link href="/artist/artworks/new">
+                Upload New Artwork
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
               <Link href="/artist/artworks">
-                Manage Artworks →
+                Manage Artworks
               </Link>
             </Button>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Sales & Analytics
-            </CardTitle>
+        {/* AI Artist Assistant */}
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>AI Artist Assistant</CardTitle>
+            <CardDescription>
+              Get help with portfolio management, artwork descriptions, and professional development
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="link" className="px-0" asChild>
-              <Link href="/artist/sales">
-                View Reports →
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Profile & Settings
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Button variant="link" className="px-0" asChild>
-              <Link href="/profile">
-                Edit Profile →
-              </Link>
-            </Button>
+            <ArtistAssistant />
           </CardContent>
         </Card>
       </div>
-
-      {/* Resources */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Artist Resources</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2 text-muted-foreground">
-            <p>• Photography Guidelines</p>
-            <p>• Pricing Strategies</p>
-            <p>• Marketing Tips</p>
-            <p>• Community Forum</p>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 } 
