@@ -30,10 +30,10 @@
 ## Next Phase: Payment Implementation [🚧]
 
 ### 1. Payment Intent Endpoint
-- [ ] Create `/api/stripe/payment-intent` route
-- [ ] Implement fee calculations (50% platform fee)
-- [ ] Validate artwork availability
-- [ ] Include metadata for tracking
+- [x] Create `/api/stripe/payment-intent` route
+- [x] Implement fee calculations (50% platform fee)
+- [x] Validate artwork availability
+- [x] Include metadata for tracking
 
 ### 2. Purchase UI
 - [ ] Add purchase button to artwork detail page
@@ -110,13 +110,44 @@
 - Add Stripe Express dashboard links [🔄]
 
 ### 5. AI Gallery Assistant [⬜]
-- Set up Google Cloud Project [⬜]
+- Set up Google Cloud Project [✅]
 - Enable Multimodal Live API [⬜]
 - Create WebSocket proxy server [⬜]
 - Implement chat interface [⬜]
 - Add session management [⬜]
 - Set up real-time streaming [⬜]
 - Implement rate limiting [⬜]
+
+### 6. AI Artist Assistant
+- available to all artists.
+- helps create and manage their portfolios.
+- helps write artist statements.
+- helps write artist bios.
+- helps write artist marketing materials.
+- helps write artist press releases.
+- helps write artist sales materials.
+- helps write art descriptions for their artworks. Needs to have access to the images and be able to generate text from the images.
+- must have access to all artists and their portfolios, bios, website and social media.
+- must have access to all art history and art movements.
+- must have access to all art market analysis.
+- must have access to all art techniques and mediums.
+- must have access to all art curation and exhibition design.
+- must have access to all art conservation and preservation.
+- must have access to all digital art and NFTs.
+
+### 7. AI Patron Assistant
+- helps art buyers find art
+- helps art buyers understand art
+- available to all users.
+- must have access to all artworks available for sale
+- must have access to all artists and their portfolios, bios, website and social media.
+- must have access to all art history and art movements.
+- must have access to all art market analysis.
+- must have access to all art techniques and mediums.
+- must have access to all art curation and exhibition design.
+- must have access to all art conservation and preservation.
+- must have access to the artbuyer (user) profile, transaction history, and purchase history. 
+- Must understand the artbuyer's preferences and purchase history in order to make recommendations.
 
 ## Implementation Order
 1. **Artist Application Page & Form** [✅]
@@ -409,134 +440,6 @@ This document provides a step-by-step guide to implement the AI Gallery Assistan
 
 #### Database Schema & Role-Based Access Control: [DONE]
 
-```sql
--- Profiles Table
-CREATE TYPE user_role AS ENUM ('user', 'artist', 'admin');
-CREATE TYPE artist_application_status AS ENUM ('draft', 'pending', 'approved', 'rejected');
-
-CREATE TABLE profiles (
-  id UUID REFERENCES auth.users(id) PRIMARY KEY,
-  email TEXT UNIQUE NOT NULL,
-  name TEXT,
-  role user_role DEFAULT 'user'::user_role,
-  artist_status artist_application_status DEFAULT 'draft',
-  artist_approved_at TIMESTAMPTZ,
-  artist_approved_by UUID REFERENCES auth.users(id),
-  artist_rejection_reason TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Artworks Table
-CREATE TYPE artwork_status AS ENUM ('draft', 'published');
-
-CREATE TABLE artworks (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  title TEXT NOT NULL,
-  description TEXT,
-  price INTEGER NOT NULL,
-  artist_id UUID REFERENCES auth.users(id) NOT NULL,
-  status artwork_status DEFAULT 'draft',
-  images JSONB DEFAULT '[]'::jsonb,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Storage Bucket
-INSERT INTO storage.buckets (id, name)
-VALUES ('artwork-images', 'artwork-images');
-
--- RLS Policies
-
--- Profiles Policies
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Public profiles are viewable by everyone"
-ON profiles FOR SELECT USING (true);
-
-CREATE POLICY "Users can update own profile"
-ON profiles FOR UPDATE
-USING (auth.uid() = id);
-
--- Artworks Policies
-ALTER TABLE artworks ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Published artworks are viewable by everyone"
-ON artworks FOR SELECT
-USING (status = 'published');
-
-CREATE POLICY "Artists can view all their artworks"
-ON artworks FOR SELECT
-USING (artist_id = auth.uid());
-
-CREATE POLICY "Artists can create artworks"
-ON artworks FOR INSERT
-WITH CHECK (
-  artist_id = auth.uid() AND
-  EXISTS (
-    SELECT 1 FROM profiles
-    WHERE id = auth.uid()
-    AND role = 'artist'
-  )
-);
-
-CREATE POLICY "Artists can update own artworks"
-ON artworks FOR UPDATE
-USING (
-  artist_id = auth.uid() AND
-  EXISTS (
-    SELECT 1 FROM profiles
-    WHERE id = auth.uid()
-    AND role = 'artist'
-  )
-);
-
-CREATE POLICY "Artists can delete own artworks"
-ON artworks FOR DELETE
-USING (
-  artist_id = auth.uid() AND
-  EXISTS (
-    SELECT 1 FROM profiles
-    WHERE id = auth.uid()
-    AND role = 'artist'
-  )
-);
-
--- Storage Policies
-CREATE POLICY "Artists can upload artwork images"
-ON storage.objects FOR INSERT
-WITH CHECK (
-  bucket_id = 'artwork-images' AND
-  auth.uid() IN (
-    SELECT id FROM profiles
-    WHERE role = 'artist'
-  )
-);
-
-CREATE POLICY "Artists can update own artwork images"
-ON storage.objects FOR UPDATE
-USING (
-  bucket_id = 'artwork-images' AND
-  auth.uid() = owner
-);
-
-CREATE POLICY "Artists can delete own artwork images"
-ON storage.objects FOR DELETE
-USING (
-  bucket_id = 'artwork-images' AND
-  auth.uid() = owner
-);
-
-CREATE POLICY "Artwork images are publicly accessible"
-ON storage.objects FOR SELECT
-USING (bucket_id = 'artwork-images');
-
--- Indexes
-CREATE INDEX artworks_artist_id_idx ON artworks(artist_id);
-CREATE INDEX artworks_status_idx ON artworks(status);
-CREATE INDEX profiles_role_idx ON profiles(role);
-```
-
 #### Artist Application Workflow: [✅]
 
 1. **Application Submission** [✅]
@@ -588,25 +491,15 @@ CREATE INDEX profiles_role_idx ON profiles(role);
    - Clear feedback
    - Error handling
    - Success messaging
-  ```
 
-- Admin review interface:
-  ```typescript
-  // components/admin/artist-applications.tsx
-  export const ArtistApplications = () => {
-    // List of pending applications with review actions
-    // Approval/rejection functionality with feedback
-  };
-  ```
-
-- Add artist features:
+#### 9. Add artist features:
   - Artwork upload interface
   - Portfolio management
   - Sales tracking
   - Payout history
   - Analytics dashboard
 
-- Admin dashboard features:
+#### 10. Admin dashboard features:
   - Artist approval queue
   - Artist management interface
   - Artwork moderation tools
@@ -617,22 +510,6 @@ CREATE INDEX profiles_role_idx ON profiles(role);
 
 2. **Stripe Integration:** [⬜]
    
-   - Initial Setup:
-```bash
-     npm install stripe @stripe/stripe-js
-     ```
-
-   - Create Stripe service utilities:
-     ```typescript
-     // utils/stripe/stripe.ts
-     import Stripe from 'stripe';
-     
-     export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-       apiVersion: '2023-10-16',
-       typescript: true,
-     });
-     ```
-
    - Database Schema for Transaction Tracking:
      ```sql
      -- Track essential transaction data
@@ -834,11 +711,11 @@ CREATE INDEX profiles_role_idx ON profiles(role);
      };
      ```
 
-3. **Vector Database Implementation:** [⬜]
+### 3. **Vector Database Implementation:** [⬜]
    - Enable pgvector in Supabase:
-```sql
-CREATE EXTENSION IF NOT EXISTS vector;
-```
+    ```sql
+    CREATE EXTENSION IF NOT EXISTS vector;
+    ```
    - Create tables for vector storage:
    ```sql
    CREATE TABLE artwork_embeddings (
@@ -849,7 +726,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
    - Implement embedding generation using OpenAI API
    - Add similarity search endpoints
 
-4. **AI Gallery Assistant:** [⬜]
+### 4. **AI Gallery Assistant:** [⬜]
    - Set up Google Cloud Project:
      - Set up API key for Multimodal Live API
      - Note: Server-to-server authentication only
@@ -864,7 +741,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
      - Handle authentication and session management
      - Implement rate limiting and error handling
 
-   - Implement AI service in `utils/ai/`:
+### 5. Implement AI service in `utils/ai/`:
      ```typescript
      // Example Multimodal Live API implementation
      import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -901,7 +778,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
      - Rate limits: 4M tokens per minute
      - Server-side authentication required
 
-   Example workflow:
+#### Example workflow:
    1. User initiates session through secure server endpoint
    2. Server establishes WebSocket connection with Google API
    3. Real-time interaction through WebSocket proxy
@@ -1584,14 +1461,6 @@ CREATE EXTENSION IF NOT EXISTS vector;
 
 ## Artist Application Process
 
-### Database Structure
-- Using existing profiles table with fields:
-  - `artist_application`: JSONB (stores application details)
-  - `artist_status`: ENUM ('draft', 'pending', 'approved', 'rejected')
-  - `artist_approved_at`: TIMESTAMP
-  - `artist_approved_by`: UUID (admin's user id)
-  - `artist_rejection_reason`: TEXT (optional)
-
 ### Application Flow
 1. User Access
    - Available to any authenticated user
@@ -1615,201 +1484,3 @@ CREATE EXTENSION IF NOT EXISTS vector;
    - Application submission confirmation
    - Approval/rejection notification
    - Email notifications via existing Supabase email setup
-
-### Implementation Details
-
-#### 1. Artist Application Page & Form
-```typescript
-// app/artist-application/page.tsx
-interface ArtistApplicationForm {
-  artistStatement: string;
-  portfolioUrl: string;
-  instagram?: string;
-  termsAccepted: boolean;
-}
-
-// components/artist/application-form.tsx
-interface ApplicationFormProps {
-  onSubmit: (data: ArtistApplicationForm) => Promise<void>;
-  initialData?: Partial<ArtistApplicationForm>;
-  onSaveDraft?: (data: Partial<ArtistApplicationForm>) => Promise<void>;
-}
-```
-
-#### 2. Server Actions
-```typescript
-// app/actions.ts
-interface ApplicationSubmission {
-  artistStatement: string;
-  portfolioUrl: string;
-  instagram?: string;
-}
-
-async function submitArtistApplication(data: ApplicationSubmission) {
-  // Validation and submission logic
-}
-
-async function saveDraftApplication(data: Partial<ApplicationSubmission>) {
-  // Draft saving logic
-}
-```
-
-#### 3. Admin Review Interface
-```typescript
-// app/admin/applications/page.tsx
-interface AdminApplicationReview {
-  applicationId: string;
-  userId: string;
-  status: 'approved' | 'rejected';
-  rejectionReason?: string;
-}
-
-// components/admin/application-review.tsx
-interface ApplicationReviewProps {
-  application: ArtistApplication;
-  onApprove: (id: string) => Promise<void>;
-  onReject: (id: string, reason: string) => Promise<void>;
-}
-```
-
-#### 4. Email Notifications
-```typescript
-// utils/emails/artist-notifications.ts
-interface ArtistNotification {
-  type: 'submission' | 'approval' | 'rejection';
-  userId: string;
-  applicationId: string;
-  rejectionReason?: string;
-}
-
-async function sendArtistNotification(notification: ArtistNotification) {
-  // Email sending logic using Supabase
-}
-```
-
-### Access Control
-- RLS policies for application data
-- Role-based access to admin functions
-- Status-based route protection
-
-### Integration Points
-- Profiles table for data storage
-- Existing email system for notifications
-- Role-based middleware for access control
-- Admin dashboard for application management
-
-### Database Schema
-
-#### Tables
-
-##### Profiles
-```sql
-CREATE TABLE profiles (
-  id UUID REFERENCES auth.users(id) PRIMARY KEY,
-  email TEXT UNIQUE NOT NULL,
-  name TEXT,
-  bio TEXT,
-  website TEXT,
-  instagram TEXT,
-  role user_role DEFAULT 'user'::user_role,
-  artist_status artist_application_status,
-  artist_application JSONB,
-  artist_approved_at TIMESTAMPTZ,
-  artist_approved_by UUID REFERENCES auth.users,
-  artist_rejection_reason TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
-);
-
--- RLS Policies
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-
--- Allow users to view any profile
-CREATE POLICY "Profiles are viewable by everyone" 
-ON profiles FOR SELECT 
-USING (true);
-
--- Allow users to update their own profile
-CREATE POLICY "Users can update own profile" 
-ON profiles FOR UPDATE 
-USING (auth.uid() = id);
-
--- Allow admins to update any profile
-CREATE POLICY "Only admins can update roles" 
-ON profiles FOR UPDATE 
-USING (
-  auth.uid() IN (
-    SELECT id FROM profiles 
-    WHERE role = 'admin'
-  )
-)
-WITH CHECK (
-  auth.uid() IN (
-    SELECT id FROM profiles 
-    WHERE role = 'admin'
-  )
-);
-
--- Create profile on user signup
-CREATE FUNCTION handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO profiles (id, email)
-  VALUES (new.id, new.email);
-  RETURN new;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE PROCEDURE handle_new_user();
-```
-
-#### Server Actions
-
-```typescript
-// Update profile
-const { error } = await supabase
-  .from('profiles')
-  .update({ bio, website, instagram })
-  .eq('id', user.id);
-
-// Get profile
-const { data: profile } = await supabase
-  .from('profiles')
-  .select('*')
-  .eq('id', user.id)
-  .single();
-
-// Check admin status
-const isAdmin = await supabase
-  .from('profiles')
-  .select('1')
-  .eq('id', auth.uid())
-  .eq('role', 'admin')
-  .single();
-```
-
--- RLS Policies for Profiles
-CREATE POLICY "Users can view own profile"
-ON profiles FOR SELECT
-USING (auth.uid() = id);
-
-CREATE POLICY "Users can update own profile"
-ON profiles FOR UPDATE
-USING (auth.uid() = id);
-
-CREATE POLICY "Only admins can update roles"
-ON profiles FOR UPDATE
-USING (
-  auth.uid() IN (
-    SELECT id FROM profiles
-    WHERE role = 'admin'
-  )
-);
-
--- Check admin status in queries
-SELECT 1 FROM profiles
-WHERE id = auth.uid()
-AND role = 'admin';
-```
