@@ -48,6 +48,45 @@ mm-app/
 └── hooks/              # Custom React hooks
 ```
 
+## Components
+
+### Navigation Components
+- `nav/main-nav.tsx` - Main navigation bar with role-based links
+- `nav/nav-user-menu.tsx` - User dropdown menu with auth actions
+- `nav/nav-menu.tsx` - General navigation menu
+- `nav/nav-mobile.tsx` - Mobile-responsive navigation
+
+### Authentication Components
+- `auth/auth-form.tsx` - Base form component for auth pages
+- `header-auth.tsx` - Authentication header with sign-in/up buttons
+
+### Theme Components
+- `theme-provider.tsx` - Next-themes provider for dark/light mode
+- `theme-switcher.tsx` - Theme toggle button component
+
+### Form Components
+- `form-message.tsx` - Form feedback messages
+- `submit-button.tsx` - Submit button with loading state
+
+### Artwork Components
+- `artwork/artwork-card.tsx` - Artwork display card
+- `artwork/artwork-form.tsx` - Form for artwork creation/editing
+
+### Layout Components
+- `(auth-pages)/layout.tsx` - Auth pages layout
+- `app/layout.tsx` - Root layout with navigation and theme
+
+### UI Components (shadcn/ui)
+- Button
+- Card
+- Dialog
+- Dropdown Menu
+- Input
+- Label
+- Textarea
+- Toast
+- Badge
+
 ## Getting Started
 
 1. Clone the repository
