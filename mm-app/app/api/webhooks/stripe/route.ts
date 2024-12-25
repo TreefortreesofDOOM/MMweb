@@ -1,6 +1,6 @@
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { stripe } from '@/utils/stripe/stripe-server';
+import { stripe } from '@/lib/stripe/stripe-server';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 

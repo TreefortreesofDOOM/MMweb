@@ -1,11 +1,11 @@
 "use server";
 
-import { encodedRedirect } from "@/utils/utils";
-import { createClient } from "@/utils/supabase/server";
+import { encodedRedirect } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Database } from "@/lib/database.types";
-import { sendArtistApplicationEmail } from "@/utils/emails/artist-notifications"
+import { sendArtistApplicationEmail } from "@/lib/emails/artist-notifications"
 
 type Profile = Database['public']['Tables']['profiles']['Update'];
 

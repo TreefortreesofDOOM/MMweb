@@ -1,5 +1,5 @@
-import { stripe } from '@/utils/stripe/stripe-server';
-import { createClient } from '@/utils/supabase/server';
+import { stripe } from '@/lib/stripe/stripe-server';
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
