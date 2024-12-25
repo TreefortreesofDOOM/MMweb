@@ -1,6 +1,6 @@
 'use server';
 
-import { createActionClient } from '@/utils/supabase/action';
+import { createActionClient } from '@/lib/supabase/action';
 
 export async function uploadArtworkImage(formData: FormData) {
   try {
