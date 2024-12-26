@@ -682,7 +682,10 @@ export async function getSimilarArtworks(artworkId: string) {
 
 export async function analyzeArtwork(imageUrl: string) {
   try {
-    const response = await fetch('/api/ai/analyze-artwork', {
+    // Get the origin for the full URL
+    const headersList = await headers();
+    const origin = headersList.get('origin') || '';
+    const response = await fetch(`${origin}/api/ai/analyze-artwork`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageUrl }),

@@ -60,32 +60,27 @@ export async function getGeminiResponse(
   let contents;
   if (options.imageUrl || options.imageBase64) {
     try {
-      let imageData: string;
+      let base64Data: string;
+      let mimeType = 'image/jpeg';
+
       if (options.imageUrl) {
-        // Ensure URL is properly resolved and wait for the fetch
-        const imageResponse = await fetch(options.imageUrl, {
-          cache: 'no-store' // Disable caching to ensure fresh content
-        });
-        
-        if (!imageResponse.ok) {
-          throw new Error(`Failed to fetch image: ${imageResponse.statusText}`);
+        const response = await fetch(options.imageUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch image: ${response.statusText}`);
         }
-        
-        const imageBlob = await imageResponse.blob();
-        if (!imageBlob.type.startsWith('image/')) {
+        const contentType = response.headers.get('content-type');
+        if (!contentType?.startsWith('image/')) {
           throw new Error('Invalid image format');
         }
-        
-        imageData = await blobToBase64(imageBlob);
+        mimeType = contentType;
+        const arrayBuffer = await response.arrayBuffer();
+        base64Data = Buffer.from(arrayBuffer).toString('base64');
       } else if (options.imageBase64) {
-        imageData = options.imageBase64;
+        const [, data] = options.imageBase64.split(',');
+        base64Data = data || options.imageBase64;
       } else {
-        throw new Error('Either imageUrl or imageBase64 must be provided');
+        throw new Error('No image data available');
       }
-
-      // Extract base64 data (remove data:image/xyz;base64, prefix if present)
-      const base64Data = imageData.split(',')[1] || imageData;
-      const mimeType = imageData.match(/^data:([^;]+);base64,/)?.[1] || 'image/jpeg';
 
       contents = [{
         role: 'user',
@@ -123,13 +118,4 @@ export async function getGeminiResponse(
     console.error('Error generating content:', error);
     throw new Error(`Failed to generate content: ${error?.message || 'Unknown error'}`);
   }
-}
-
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
 } 

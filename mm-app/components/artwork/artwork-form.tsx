@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import { useRouter } from 'next/navigation';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { ArtworkUpload, type ArtworkImage } from './artwork-upload';
 import { ArtworkAIAnalysis } from './artwork-ai-analysis';
 import { createArtwork, updateArtwork } from '@/app/actions';
@@ -27,13 +29,6 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
-
-interface FieldProps {
-  field: {
-    value: string | number | string[];
-    onChange: (...event: any[]) => void;
-  };
-}
 
 interface ArtworkFormProps {
   artwork?: {
@@ -100,90 +95,90 @@ export function ArtworkForm({ artwork }: ArtworkFormProps) {
   };
 
   return (
-    <div className="space-y-8">
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="space-y-2">
-          <label htmlFor="title" className="text-sm font-medium">
-            Title
-          </label>
-          <Input
-            id="title"
-            {...form.register('title')}
-            className={form.formState.errors.title ? 'border-red-500' : ''}
-          />
-          {form.formState.errors.title && (
-            <p className="text-sm text-red-500">
-              {form.formState.errors.title.message}
-            </p>
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle>{artwork ? 'Edit Artwork' : 'Create New Artwork'}</CardTitle>
+      </CardHeader>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              {...form.register('title')}
+              className={form.formState.errors.title ? 'border-red-500' : ''}
+            />
+            {form.formState.errors.title && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.title.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Images</Label>
+            <ArtworkUpload
+              userId="test"
+              onImagesChange={handleImagesChange}
+              onError={(error) => console.error(error)}
+              existingImages={artwork?.images}
+            />
+            {form.formState.errors.images && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.images.message}
+              </p>
+            )}
+          </div>
+
+          {form.watch('primaryImage') && (
+            <ArtworkAIAnalysis
+              imageUrl={form.watch('primaryImage')}
+              onApplyDescription={(description) =>
+                form.setValue('description', description)
+              }
+              onApplyStyles={(styles) => form.setValue('styles', styles)}
+              onApplyTechniques={(techniques) =>
+                form.setValue('techniques', techniques)
+              }
+              onApplyKeywords={(keywords) => form.setValue('keywords', keywords)}
+            />
           )}
-        </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Images</label>
-          <ArtworkUpload
-            userId="test"
-            onImagesChange={handleImagesChange}
-            onError={(error) => console.error(error)}
-            existingImages={artwork?.images}
-          />
-          {form.formState.errors.images && (
-            <p className="text-sm text-red-500">
-              {form.formState.errors.images.message}
-            </p>
-          )}
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              {...form.register('description')}
+              className={form.formState.errors.description ? 'border-red-500' : ''}
+            />
+            {form.formState.errors.description && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.description.message}
+              </p>
+            )}
+          </div>
 
-        {form.watch('primaryImage') && (
-          <ArtworkAIAnalysis
-            imageUrl={form.watch('primaryImage')}
-            onApplyDescription={(description) =>
-              form.setValue('description', description)
-            }
-            onApplyStyles={(styles) => form.setValue('styles', styles)}
-            onApplyTechniques={(techniques) =>
-              form.setValue('techniques', techniques)
-            }
-            onApplyKeywords={(keywords) => form.setValue('keywords', keywords)}
-          />
-        )}
-
-        <div className="space-y-2">
-          <label htmlFor="description" className="text-sm font-medium">
-            Description
-          </label>
-          <Textarea
-            id="description"
-            {...form.register('description')}
-            className={form.formState.errors.description ? 'border-red-500' : ''}
-          />
-          {form.formState.errors.description && (
-            <p className="text-sm text-red-500">
-              {form.formState.errors.description.message}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="price" className="text-sm font-medium">
-            Price (USD)
-          </label>
-          <Input
-            id="price"
-            type="number"
-            {...form.register('price')}
-            className={form.formState.errors.price ? 'border-red-500' : ''}
-          />
-          {form.formState.errors.price && (
-            <p className="text-sm text-red-500">
-              {form.formState.errors.price.message}
-            </p>
-          )}
-        </div>
-
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : artwork ? 'Save Changes' : 'Create Artwork'}
-        </Button>
+          <div className="space-y-2">
+            <Label htmlFor="price">Price (USD)</Label>
+            <Input
+              id="price"
+              type="number"
+              {...form.register('price')}
+              className={form.formState.errors.price ? 'border-red-500' : ''}
+            />
+            {form.formState.errors.price && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.price.message}
+              </p>
+            )}
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? 'Saving...' : artwork ? 'Save Changes' : 'Create Artwork'}
+          </Button>
+        </CardFooter>
       </form>
-    </div>
+    </Card>
   );
 } 

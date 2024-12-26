@@ -3,6 +3,7 @@
 Every time you choose to apply a rule(s), explicitly state the rule(s) in the output. You can abbreviate the rule description to a single word or phrase.
 
 - Do not over engineer.
+- 'gemini-1.5-flash' is the correct model for image analysis.
 
 ## Project Context
 This project involves integrating various features and services to create a comprehensive platform for artists and administrators. The key components include:

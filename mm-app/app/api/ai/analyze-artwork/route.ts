@@ -4,37 +4,21 @@ import { ARTWORK_ANALYSIS_PROMPTS } from '@/lib/ai/prompts';
 
 export async function POST(request: Request) {
   try {
-    const { imageUrl, imageBase64 } = await request.json();
+    const { imageUrl } = await request.json();
 
-    if (!imageUrl && !imageBase64) {
+    if (!imageUrl) {
       return NextResponse.json(
-        { error: 'Either imageUrl or imageBase64 must be provided' },
+        { error: 'Image URL is required' },
         { status: 400 }
       );
     }
 
     // Run analyses in parallel
     const [description, style, techniques, keywords] = await Promise.all([
-      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.description, { 
-        imageUrl, 
-        imageBase64,
-        temperature: 0.7 
-      }),
-      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.style, { 
-        imageUrl,
-        imageBase64, 
-        temperature: 0.5 
-      }),
-      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.techniques, { 
-        imageUrl,
-        imageBase64,
-        temperature: 0.5 
-      }),
-      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.keywords, { 
-        imageUrl,
-        imageBase64,
-        temperature: 0.5 
-      })
+      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.description, { imageUrl, temperature: 0.7 }),
+      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.style, { imageUrl, temperature: 0.5 }),
+      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.techniques, { imageUrl, temperature: 0.5 }),
+      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.keywords, { imageUrl, temperature: 0.5 })
     ]);
 
     // Process comma-separated lists into arrays
