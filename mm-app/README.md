@@ -145,3 +145,9 @@ The application uses Supabase with the following main tables:
 ## License
 
 [License Type] - See LICENSE file for details
+
+## Documentation
+
+- [Implementation Details](./docs/implementation.md)
+- [Navigation System](./docs/navigation.md)
+- [Todo List](./docs/todo.md)

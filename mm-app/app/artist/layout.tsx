@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ArtistLayout } from '@/components/layout/artist-layout';
+import { RoleNav } from '@/components/nav/role-nav';
 
 export default async function ArtistLayoutRoot({
   children,
@@ -25,5 +25,5 @@ export default async function ArtistLayoutRoot({
     return redirect('/profile');
   }
 
-  return <ArtistLayout>{children}</ArtistLayout>;
+  return <RoleNav role="artist">{children}</RoleNav>;
 } 

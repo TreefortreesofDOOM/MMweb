@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { AdminLayout } from '@/components/layout/admin-layout';
+import { RoleNav } from '@/components/nav/role-nav';
 
 export default async function AdminLayoutRoot({
   children,
@@ -27,5 +27,5 @@ export default async function AdminLayoutRoot({
     return redirect('/profile');
   }
 
-  return <AdminLayout>{children}</AdminLayout>;
+  return <RoleNav role="admin">{children}</RoleNav>;
 } 
