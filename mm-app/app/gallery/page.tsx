@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { ArtworkGrid } from '@/components/artwork/artwork-grid';
+import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
 import { GalleryAssistant } from '@/components/ai/gallery-assistant';
 
 export const revalidate = 3600; // Revalidate every hour
@@ -7,17 +7,29 @@ export const revalidate = 3600; // Revalidate every hour
 export default async function GalleryPage() {
   const supabase = await createClient();
 
-  // Fetch published artworks
+  // Fetch published artworks with artist information
   const { data: artworks } = await supabase
     .from('artworks')
     .select(`
       *,
       profiles (
-        name
+        id,
+        name,
+        bio
       )
     `)
     .eq('status', 'published')
     .order('created_at', { ascending: false });
+
+  // Transform the data to match the component's expected format
+  const transformedArtworks = artworks?.map(artwork => ({
+    ...artwork,
+    artist: artwork.profiles ? {
+      id: artwork.profiles.id,
+      name: artwork.profiles.name,
+      bio: artwork.profiles.bio
+    } : undefined
+  })) || [];
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-8">
@@ -31,7 +43,7 @@ export default async function GalleryPage() {
 
         <div className="grid grid-cols-1 gap-12">
           <div>
-            <ArtworkGrid artworks={artworks || []} />
+            <ArtworkGallery artworks={transformedArtworks} />
           </div>
 
           <div>

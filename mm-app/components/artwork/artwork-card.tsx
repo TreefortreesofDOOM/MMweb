@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useState } from "react";
 import type { ArtworkImage } from './artwork-upload';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 interface ArtworkCardProps {
   artwork: {
@@ -17,12 +18,18 @@ interface ArtworkCardProps {
     price: number;
     status: string;
     images: ArtworkImage[];
+    description?: string;
+    artist?: {
+      name?: string;
+      bio?: string;
+    };
   };
   showStatus?: boolean;
   showEdit?: boolean;
   onPublish?: (id: string) => void;
   onUnpublish?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onSelect?: () => void;
   isLoading?: boolean;
 }
 
@@ -33,6 +40,7 @@ export function ArtworkCard({
   onPublish, 
   onUnpublish, 
   onDelete,
+  onSelect,
   isLoading 
 }: ArtworkCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -74,7 +82,13 @@ export function ArtworkCard({
   }
 
   return (
-    <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <Card 
+      className={cn(
+        "overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300",
+        onSelect && "cursor-pointer"
+      )}
+      onClick={onSelect}
+    >
       <div className="relative aspect-square">
         <Image
           src={sortedImages[currentImageIndex].url}
