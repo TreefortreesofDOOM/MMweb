@@ -78,3 +78,23 @@
 - [ ] Add proper TypeScript types for all components
 - [ ] Add unit tests
 - [ ] Add end-to-end tests 
+
+
+## Key Recommendations
+
+- [x] Move artist-application under `/profile/applications`
+- [ ] Consolidate all actions into `/lib/actions`
+- [ ] Group dashboard-related pages under a common layout
+- [ ] Keep public routes (`/artists`, `/artworks`) separate from private ones
+- [ ] Use route groups (parentheses) to better organize related pages
+- [ ] Consider moving some utility routes (like `ai-test`) to a development-only group
+
+## Benefits
+
+- [ ] Clearer separation between public and private routes
+- [ ] More intuitive URL structure 
+- [ ] Better organization of related functionality
+- [ ] Easier to maintain and scale
+- [ ] Clearer distinction between user roles and permissions
+
+> Would you like me to elaborate on any of these points or provide more specific recommendations for certain areas?

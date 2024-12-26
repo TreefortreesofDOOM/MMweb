@@ -84,7 +84,7 @@ export default async function ProfilePage() {
   
             {canApplyAsArtist && (
               <Button asChild variant="outline">
-                <Link href="/artist-application">
+                <Link href="/profile/application">
                   Apply as Artist
                 </Link>
               </Button>

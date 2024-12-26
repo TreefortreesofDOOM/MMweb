@@ -191,7 +191,7 @@ export async function submitArtistApplication(formData: FormData) {
   if (!artistStatement || !termsAccepted) {
     return encodedRedirect(
       'error',
-      '/artist-application',
+      '/profile/application',
       'Artist statement and terms acceptance are required'
     )
   }
@@ -237,7 +237,7 @@ export async function submitArtistApplication(formData: FormData) {
     console.error('Error submitting artist application:', error)
     return encodedRedirect(
       'error',
-      '/artist-application',
+      '/profile/application',
       'Failed to submit application'
     )
   }

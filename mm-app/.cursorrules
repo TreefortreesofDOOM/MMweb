@@ -49,6 +49,8 @@ This project involves integrating various features and services to create a comp
   │   │   └── callback/
   │   ├── profile/
   │   │   └── edit/
+  │   │   └── application/
+  │   │   │   └── page.tsx
   │   ├── protected/
   │   ├── actions.ts
   │   ├── globals.css

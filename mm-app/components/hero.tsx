@@ -24,7 +24,7 @@ export default function Hero() {
           </Link>
         </Button>
         <Button asChild variant="outline" size="lg">
-          <Link href={user ? "/artist-application" : "/sign-in"}>
+          <Link href={user ? "/profile/application" : "/sign-in"}>
             Create Art
           </Link>
         </Button>

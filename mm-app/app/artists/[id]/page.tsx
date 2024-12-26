@@ -6,17 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export const revalidate = 3600; // Revalidate every hour
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }> | { id: string };
 }
 
 export default async function ArtistPage({ params }: PageProps) {
   const supabase = await createClient();
+  
+  // Await params before using
+  const { id } = await params;
 
   // Fetch artist profile
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('role', 'artist')
     .single();
 
@@ -35,7 +38,7 @@ export default async function ArtistPage({ params }: PageProps) {
         bio
       )
     `)
-    .eq('artist_id', params.id)
+    .eq('artist_id', id)
     .eq('status', 'published')
     .order('created_at', { ascending: false });
 

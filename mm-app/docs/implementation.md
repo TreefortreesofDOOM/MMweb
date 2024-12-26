@@ -1,4 +1,3 @@
-
 # AI Gallery Assistant Application Architecture (Detailed Implementation Guide)
 
 ## Status Legend
@@ -154,7 +153,7 @@
 
 ## Implementation Order
 1. **Artist Application Page & Form** [✅]
-   - Create `/artist-application` route [✅]
+   - Create `/profile/application` route [✅]
    - Build application form component [✅]
    - Implement form validation [✅]
    - Add submission state handling [✅]
@@ -292,7 +291,7 @@ This document provides a step-by-step guide to implement the AI Gallery Assistan
   mm-app/
   ├── app/
   │   ├── (auth-pages)/
-  │   │   ├── sign-in/
+  ��   │   ├── sign-in/
   │   │   ├── sign-up/
   │   │   └── reset-password/
   │   ├── actions/
