@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/logo';
 
 interface MainNavProps {
   userRole?: string | null;
@@ -17,15 +18,7 @@ export function MainNav({ userRole }: MainNavProps) {
 
   return (
     <nav className="flex items-center space-x-6 lg:space-x-8">
-      <Link
-        href="/"
-        className={cn(
-          'text-sm font-medium transition-colors hover:text-primary',
-          isActive('/') ? 'text-black dark:text-white' : 'text-muted-foreground'
-        )}
-      >
-        Home
-      </Link>
+      <Logo />
 
       {/* Artist-specific links */}
       {userRole === 'artist' && (
