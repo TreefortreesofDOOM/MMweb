@@ -13,6 +13,7 @@ A modern art gallery platform built with Next.js 13, Supabase, and TailwindCSS.
   - Artist application process
   - Portfolio management
   - Artwork upload and management
+  - AI-powered artwork analysis
   - Stripe Connect integration for payments
 
 - **Admin Dashboard**
@@ -28,6 +29,7 @@ A modern art gallery platform built with Next.js 13, Supabase, and TailwindCSS.
   - shadcn/ui components
   - TypeScript for type safety
   - Stripe for payments
+  - Google Gemini for AI analysis
 
 ## Project Structure
 
@@ -40,8 +42,11 @@ mm-app/
 │   └── profile/         # User profile management
 ├── components/          # React components
 │   ├── ui/             # shadcn/ui components
-│   └── nav/            # Navigation components
+│   ├── nav/            # Navigation components
+│   ├── artwork/        # Artwork-related components
+│   └── layout/         # Layout components
 ├── lib/                # Core utilities
+│   ├── actions/        # Server actions
 │   ├── supabase/       # Supabase client utilities
 │   ├── stripe/         # Stripe integration
 │   └── emails/         # Email templates
@@ -50,36 +55,28 @@ mm-app/
 
 ## Components
 
-### Navigation Components
-- `nav/main-nav.tsx` - Main navigation bar with role-based links
-- `nav/nav-user-menu.tsx` - User dropdown menu with auth actions
-- `nav/nav-menu.tsx` - General navigation menu
-- `nav/nav-mobile.tsx` - Mobile-responsive navigation
+### Layout Components
+- `layout/sidebar-nav.tsx` - Shared sidebar/drawer navigation
+- `layout/admin-layout.tsx` - Admin dashboard layout
+- `layout/artist-layout.tsx` - Artist dashboard layout
+
+### Artwork Components
+- `artwork/artwork-card.tsx` - Artwork display card
+- `artwork/artwork-form.tsx` - Form for artwork creation/editing
+- `artwork/artwork-modal.tsx` - Artwork detail modal
+- `artwork/artwork-upload.tsx` - Image upload component
+- `artwork/artwork-ai-analysis.tsx` - AI analysis component
+- `artwork/artwork-qr.tsx` - QR code generator for in-gallery purchases
 
 ### Authentication Components
 - `auth/auth-form.tsx` - Base form component for auth pages
 - `header-auth.tsx` - Authentication header with sign-in/up buttons
 
-### Theme Components
-- `theme-provider.tsx` - Next-themes provider for dark/light mode
-- `theme-switcher.tsx` - Theme toggle button component
-
-### Form Components
-- `form-message.tsx` - Form feedback messages
-- `submit-button.tsx` - Submit button with loading state
-
-### Artwork Components
-- `artwork/artwork-card.tsx` - Artwork display card
-- `artwork/artwork-form.tsx` - Form for artwork creation/editing
-
-### Layout Components
-- `(auth-pages)/layout.tsx` - Auth pages layout
-- `app/layout.tsx` - Root layout with navigation and theme
-
 ### UI Components (shadcn/ui)
 - Button
 - Card
 - Dialog
+- Sheet
 - Dropdown Menu
 - Input
 - Label
@@ -108,6 +105,7 @@ mm-app/
    STRIPE_SECRET_KEY=your_stripe_secret_key
    STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
    RESEND_API_KEY=your_resend_api_key
+   GOOGLE_AI_API_KEY=your_gemini_api_key
    ```
 
 4. Run the development server
@@ -126,14 +124,17 @@ mm-app/
 - Add appropriate loading states
 - Ensure responsive design
 - Follow accessibility best practices
+- Use server actions for data mutations
+- Import actions from index file
 
 ## Database Schema
 
 The application uses Supabase with the following main tables:
 - `profiles` - User profiles and roles
-- `artworks` - Artwork listings
+- `artworks` - Artwork listings and metadata
 - `transactions` - Payment records
 - `artist_applications` - Artist application tracking
+- `artwork_embeddings` - Vector embeddings for artwork search
 
 ## Contributing
 
