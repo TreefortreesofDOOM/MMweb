@@ -34,5 +34,5 @@ export default async function EditArtworkPage({ params }: PageProps) {
     redirect('/artist/artworks');
   }
 
-  return <ArtworkForm artwork={artwork} />;
+  return <ArtworkForm artwork={artwork} userId={user.id} />;
 } 

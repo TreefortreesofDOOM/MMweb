@@ -148,7 +148,7 @@ export const updateProfileAction = async (formData: FormData) => {
 
   // Build update data, filtering out null/empty values
   const updateData: Partial<Profile> = {};
-  const fields = ['bio', 'website', 'instagram'] as const;
+  const fields = ['name', 'bio', 'website', 'instagram'] as const;
   
   fields.forEach(field => {
     const value = formData.get(field) as string;

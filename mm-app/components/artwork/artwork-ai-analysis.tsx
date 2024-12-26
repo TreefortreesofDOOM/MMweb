@@ -98,11 +98,11 @@ export function ArtworkAIAnalysis({
   };
 
   return (
-    <Card className="border-2 border-muted">
-      <CardHeader className="space-y-1">
+    <Card className="border-2 border-muted shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <CardHeader className="space-y-1 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900 dark:to-indigo-900">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <CardTitle>AI Analysis</CardTitle>
+            <CardTitle className="text-2xl font-bold text-primary">AI Analysis</CardTitle>
             <p className="text-sm text-muted-foreground">
               Get AI-powered suggestions for your artwork
             </p>
@@ -111,7 +111,7 @@ export function ArtworkAIAnalysis({
             onClick={handleAnalyze} 
             disabled={isAnalyzing}
             variant="secondary"
-            className="min-w-[120px]"
+            className="min-w-[120px] bg-primary text-primary-foreground hover:bg-primary/90"
           >
             {isAnalyzing ? (
               <>
@@ -124,98 +124,82 @@ export function ArtworkAIAnalysis({
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Description Section */}
+      <CardContent className="space-y-6 p-6">
         {analysis.description && (
-          <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-sm">Description</h3>
-              <Button
-                onClick={handleApplyDescription}
-                size="sm"
-                variant={applied.description ? "secondary" : "default"}
-                disabled={applied.description}
-                className="min-w-[100px]"
-              >
-                {applied.description ? 'Applied ✓' : 'Apply'}
-              </Button>
-            </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">{analysis.description}</p>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-primary">Description</h3>
+            <p className="text-sm text-muted-foreground">{analysis.description}</p>
+            <Button 
+              onClick={handleApplyDescription} 
+              disabled={applied.description}
+              variant="outline"
+              className="mt-2 text-sm"
+            >
+              {applied.description ? 'Applied' : 'Apply Description'}
+            </Button>
           </div>
         )}
 
-        {/* Styles Section */}
         {analysis.styles && analysis.styles.length > 0 && (
-          <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-sm">Styles</h3>
-              <Button
-                onClick={handleApplyStyles}
-                size="sm"
-                variant={applied.styles ? "secondary" : "default"}
-                disabled={applied.styles}
-                className="min-w-[100px]"
-              >
-                {applied.styles ? 'Applied ✓' : 'Apply'}
-              </Button>
-            </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-primary">Styles</h3>
             <div className="flex flex-wrap gap-2">
               {analysis.styles.map((style, index) => (
-                <Badge key={index} variant="outline" className="bg-background">
+                <Badge key={index} variant="secondary" className="text-xs">
                   {style}
                 </Badge>
               ))}
             </div>
+            <Button 
+              onClick={handleApplyStyles} 
+              disabled={applied.styles}
+              variant="outline"
+              className="mt-2 text-sm"
+            >
+              {applied.styles ? 'Applied' : 'Apply Styles'}
+            </Button>
           </div>
         )}
 
-        {/* Techniques Section */}
         {analysis.techniques && analysis.techniques.length > 0 && (
-          <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-sm">Techniques</h3>
-              <Button
-                onClick={handleApplyTechniques}
-                size="sm"
-                variant={applied.techniques ? "secondary" : "default"}
-                disabled={applied.techniques}
-                className="min-w-[100px]"
-              >
-                {applied.techniques ? 'Applied ✓' : 'Apply'}
-              </Button>
-            </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-primary">Techniques</h3>
             <div className="flex flex-wrap gap-2">
               {analysis.techniques.map((technique, index) => (
-                <Badge key={index} variant="outline" className="bg-background">
+                <Badge key={index} variant="secondary" className="text-xs">
                   {technique}
                 </Badge>
               ))}
             </div>
+            <Button 
+              onClick={handleApplyTechniques} 
+              disabled={applied.techniques}
+              variant="outline"
+              className="mt-2 text-sm"
+            >
+              {applied.techniques ? 'Applied' : 'Apply Techniques'}
+            </Button>
           </div>
         )}
 
-        {/* Keywords Section */}
         {analysis.keywords && analysis.keywords.length > 0 && (
-          <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-sm">Keywords</h3>
-              <Button
-                onClick={handleApplyKeywords}
-                size="sm"
-                variant={applied.keywords ? "secondary" : "default"}
-                disabled={applied.keywords}
-                className="min-w-[100px]"
-              >
-                {applied.keywords ? 'Applied ✓' : 'Apply'}
-              </Button>
-            </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-primary">Keywords</h3>
             <div className="flex flex-wrap gap-2">
               {analysis.keywords.map((keyword, index) => (
-                <Badge key={index} variant="outline" className="bg-background">
+                <Badge key={index} variant="secondary" className="text-xs">
                   {keyword}
                 </Badge>
               ))}
             </div>
+            <Button 
+              onClick={handleApplyKeywords} 
+              disabled={applied.keywords}
+              variant="outline"
+              className="mt-2 text-sm"
+            >
+              {applied.keywords ? 'Applied' : 'Apply Keywords'}
+            </Button>
           </div>
         )}
 

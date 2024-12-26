@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ArtworkCard } from './artwork-card';
 import { getSimilarArtworks } from '@/app/actions';
+import { Loader2 } from 'lucide-react';
 
 interface Artwork {
   id: string;
@@ -48,42 +49,56 @@ export function ArtworkGrid({ artworks, showSimilar = true }: ArtworkGridProps) 
   }, [selectedArtwork, showSimilar]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       {/* Main Artwork Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
         {artworks.map((artwork) => (
           <div
             key={artwork.id}
-            className="cursor-pointer"
+            className="group cursor-pointer"
             onClick={() => setSelectedArtwork(artwork.id)}
           >
-            <ArtworkCard artwork={artwork} />
+            <div className="transform transition-all duration-300 group-hover:translate-y-[-4px]">
+              <ArtworkCard artwork={artwork} />
+            </div>
           </div>
         ))}
       </div>
 
       {/* Similar Artworks Section */}
       {showSimilar && selectedArtwork && (
-        <div className="mt-12">
-          <h2 className="text-2xl font-semibold mb-6">
-            Similar Artworks
-            {isLoadingSimilar && <span className="ml-2 text-muted-foreground">(Loading...)</span>}
-          </h2>
+        <div className="border-t pt-12">
+          <div className="flex items-center gap-3 mb-8">
+            <h2 className="text-2xl font-bold text-primary">Similar Artworks</h2>
+            {isLoadingSimilar && (
+              <div className="flex items-center text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <span className="text-sm">Loading similar artworks...</span>
+              </div>
+            )}
+          </div>
+          
           {similarArtworks.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
               {similarArtworks.map((artwork) => (
-                <div key={artwork.id} className="cursor-pointer">
-                  <ArtworkCard artwork={artwork} />
-                  {artwork.similarity && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {Math.round(artwork.similarity * 100)}% match
-                    </p>
-                  )}
+                <div key={artwork.id} className="group cursor-pointer">
+                  <div className="transform transition-all duration-300 group-hover:translate-y-[-4px]">
+                    <ArtworkCard artwork={artwork} />
+                    {artwork.similarity !== undefined && (
+                      <div className="mt-2 text-center">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                          {Math.round(artwork.similarity * 100)}% match
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           ) : !isLoadingSimilar && (
-            <p className="text-muted-foreground">No similar artworks found.</p>
+            <div className="text-center py-12 bg-muted/30 rounded-lg">
+              <p className="text-muted-foreground">No similar artworks found.</p>
+            </div>
           )}
         </div>
       )}

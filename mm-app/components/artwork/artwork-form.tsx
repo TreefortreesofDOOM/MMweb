@@ -20,7 +20,8 @@ const formSchema = z.object({
   price: z.coerce
     .number()
     .min(0, 'Price must be 0 or greater')
-    .max(1000000, 'Price must be less than 1,000,000'),
+    .max(1000000, 'Price must be less than 1,000,000')
+    .transform(val => Number(val.toFixed(2))),
   images: z.array(z.string()).min(1, 'At least one image is required'),
   primaryImage: z.string(),
   styles: z.array(z.string()).optional(),
@@ -31,6 +32,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface ArtworkFormProps {
+  userId: string;
   artwork?: {
     id: string;
     title: string;
@@ -43,7 +45,7 @@ interface ArtworkFormProps {
   };
 }
 
-export function ArtworkForm({ artwork }: ArtworkFormProps) {
+export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -118,7 +120,7 @@ export function ArtworkForm({ artwork }: ArtworkFormProps) {
           <div className="space-y-2">
             <Label>Images</Label>
             <ArtworkUpload
-              userId="test"
+              userId={userId}
               onImagesChange={handleImagesChange}
               onError={(error) => console.error(error)}
               existingImages={artwork?.images}
@@ -163,6 +165,9 @@ export function ArtworkForm({ artwork }: ArtworkFormProps) {
             <Input
               id="price"
               type="number"
+              step="0.01"
+              min="0"
+              max="1000000"
               {...form.register('price')}
               className={form.formState.errors.price ? 'border-red-500' : ''}
             />

@@ -44,7 +44,9 @@ export async function getGeminiResponse(
   
   // Use vision model if image is provided, otherwise use text model
   const model = genAI.getGenerativeModel({ 
-    model: options.imageUrl || options.imageBase64 ? 'gemini-1.5-flash' : 'gemini-pro'
+    model: options.imageUrl || options.imageBase64 
+      ? process.env.GEMINI_VISION_MODEL || 'gemini-1.5-flash'
+      : process.env.GEMINI_TEXT_MODEL || 'gemini-pro'
   });
 
   const generationConfig = {

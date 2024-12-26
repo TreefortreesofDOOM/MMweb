@@ -38,6 +38,16 @@ export default async function EditProfilePage({
         <CardContent>
           <form action={updateProfileAction} className="space-y-6">
             <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                name="name"
+                defaultValue={profile?.name || ''}
+                placeholder="Your name"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="bio">Bio</Label>
               <Textarea
                 id="bio"

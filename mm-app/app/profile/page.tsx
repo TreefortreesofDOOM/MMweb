@@ -40,6 +40,11 @@ export default async function ProfilePage() {
           )}
   
           <div className="space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Name</h3>
+            <p className="text-sm">{profile?.name || 'No name added'}</p>
+          </div>
+  
+          <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">Bio</h3>
             <p className="text-sm">{profile?.bio || 'No bio yet'}</p>
           </div>
