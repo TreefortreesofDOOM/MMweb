@@ -2,11 +2,19 @@
 
 import { useState } from 'react';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
+import { CreditCard } from 'lucide-react';
 
 const artistNavItems = [
   { href: '/artist/dashboard', title: 'Overview' },
   { href: '/artist/artworks', title: 'My Artworks' },
   { href: '/artist/artworks/new', title: 'Upload New Artwork' },
+  { 
+    href: 'https://connect.stripe.com/express-login',
+    title: 'Stripe Dashboard',
+    icon: CreditCard,
+    external: true,
+    className: 'text-blue-600 hover:text-blue-700'
+  },
 ];
 
 interface ArtistLayoutProps {

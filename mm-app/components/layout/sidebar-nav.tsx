@@ -5,10 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LucideIcon } from 'lucide-react';
 
 interface NavItem {
   href: string;
   title: string;
+  icon?: LucideIcon;
+  external?: boolean;
+  className?: string;
 }
 
 interface SidebarNavProps {
@@ -46,18 +50,49 @@ export function SidebarNav({ items, title, description, isOpen, onOpenChange }: 
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
       <nav className="space-y-2">
-        {items.map((item) => (
-          <Button
-            key={item.href}
-            asChild
-            variant="ghost"
-            className="w-full justify-start"
-          >
-            <Link href={item.href}>
+        {items.map((item) => {
+          const Icon = item.icon;
+          const LinkComponent = (
+            <Link 
+              href={item.href}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noopener noreferrer" : undefined}
+              className="flex items-center gap-2"
+            >
+              {Icon && <Icon className="h-4 w-4" />}
               {item.title}
+              {item.external && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="ml-1"
+                >
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              )}
             </Link>
-          </Button>
-        ))}
+          );
+
+          return (
+            <Button
+              key={item.href}
+              asChild
+              variant="ghost"
+              className={cn("w-full justify-start", item.className)}
+            >
+              {LinkComponent}
+            </Button>
+          );
+        })}
       </nav>
     </div>
   );

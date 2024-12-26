@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import Link from "next/link";
 import { ArtistAssistant } from '@/components/ai/artist-assistant';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { StripeOnboarding } from '@/components/artist/stripe-onboarding';
 
 interface DashboardClientProps {
   artworks: Array<{
@@ -35,38 +36,11 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
         </Button>
       </div>
 
-      {/* Stripe Setup Alert */}
-      {!profile.stripe_account_id && (
-        <Alert>
-          <AlertTitle>Set up payments to start selling</AlertTitle>
-          <AlertDescription>
-            <p className="mb-2">
-              Connect your Stripe account to receive payments for your artwork sales.
-            </p>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/api/stripe/connect">
-                Connect with Stripe
-              </Link>
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {profile.stripe_account_id && !profile.stripe_onboarding_complete && (
-        <Alert>
-          <AlertTitle>Complete your Stripe onboarding</AlertTitle>
-          <AlertDescription>
-            <p className="mb-2">
-              Please complete your Stripe account setup to start receiving payments.
-            </p>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/api/stripe/connect">
-                Complete Setup
-              </Link>
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
+      {/* Stripe Setup */}
+      <StripeOnboarding 
+        stripeAccountId={profile.stripe_account_id || null} 
+        onboardingComplete={!!profile.stripe_onboarding_complete} 
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Quick Stats */}

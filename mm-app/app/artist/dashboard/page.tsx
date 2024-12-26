@@ -15,6 +15,7 @@ export default async function DashboardPage() {
   const { data: profile } = await supabase
     .from('profiles')
     .select('stripe_account_id, stripe_onboarding_complete')
+    .eq('id', user?.id)
     .single();
 
   return <DashboardClient 

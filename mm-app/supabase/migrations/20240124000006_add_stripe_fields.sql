@@ -3,6 +3,7 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_account_id TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_onboarding_complete BOOLEAN DEFAULT FALSE;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_charges_enabled BOOLEAN DEFAULT FALSE;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_payouts_enabled BOOLEAN DEFAULT FALSE;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_external_account_setup BOOLEAN DEFAULT FALSE;
 
 -- Create transactions table
 CREATE TABLE IF NOT EXISTS transactions (
