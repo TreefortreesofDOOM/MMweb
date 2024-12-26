@@ -1,29 +1,9 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { getAdminStats } from '@/lib/actions';
 
 export default async function AdminDashboardPage() {
-  const supabase = await createClient();
-  
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return redirect('/sign-in');
-  }
-
-  // Check if user is admin
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (profile?.role !== 'admin') {
-    return redirect('/profile');
-  }
-
   const { stats, error } = await getAdminStats();
 
   if (error) {
@@ -31,9 +11,9 @@ export default async function AdminDashboardPage() {
   }
 
   return (
-    <div className="container max-w-7xl mx-auto py-8">
+    <div className="p-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold">Overview</h1>
       </div>
 
       {/* Quick Stats */}
