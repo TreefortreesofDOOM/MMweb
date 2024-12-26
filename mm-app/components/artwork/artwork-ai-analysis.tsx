@@ -52,7 +52,7 @@ export function ArtworkAIAnalysis({
         toast.error(result.error);
         return;
       }
-      setAnalysis(result.analysis);
+      setAnalysis(result.analysis ?? { description: '', styles: [], techniques: [], keywords: [] });
       // Reset applied state when new analysis is performed
       setApplied({
         description: false,

@@ -84,7 +84,7 @@
 
 - [x] Move artist-application under `/profile/applications`
 - [x] Consolidate all actions into `/lib/actions`
-- [ ] Group dashboard-related pages under a common layout
+- [x] Group dashboard-related pages under a common layout
 - [ ] Keep public routes (`/artists`, `/artworks`) separate from private ones
 - [ ] Use route groups (parentheses) to better organize related pages
 - [ ] Consider moving some utility routes (like `ai-test`) to a development-only group

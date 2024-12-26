@@ -58,19 +58,19 @@ export function ArtworkModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-full h-[90vh] p-0">
+      <DialogContent className="max-w-4xl w-full h-[90vh] p-0 overflow-hidden">
         <DialogHeader className="sr-only">
           <DialogTitle>{artwork.title}</DialogTitle>
         </DialogHeader>
         
-        <div className="relative h-full flex flex-col md:flex-row">
+        <div className="relative h-full flex flex-col md:flex-row overflow-hidden">
           {/* Image Section */}
           <div className="relative w-full md:w-1/2 h-[40vh] md:h-full">
             <Image
               src={primaryImage.url}
               alt={artwork.title}
               fill
-              className="object-cover"
+              className="object-contain"
               priority
             />
             
