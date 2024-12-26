@@ -19,6 +19,7 @@ interface ArtworkCardProps {
     images: ArtworkImage[];
   };
   showStatus?: boolean;
+  showEdit?: boolean;
   onPublish?: (id: string) => void;
   onUnpublish?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -27,7 +28,8 @@ interface ArtworkCardProps {
 
 export function ArtworkCard({ 
   artwork, 
-  showStatus, 
+  showStatus,
+  showEdit = false,
   onPublish, 
   onUnpublish, 
   onDelete,
@@ -128,9 +130,11 @@ export function ArtworkCard({
         )}
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between">
-        <Link href={`/artist/artworks/${artwork.id}/edit`} passHref>
-          <Button variant="outline" className="w-full mr-2">Edit</Button>
-        </Link>
+        {showEdit && (
+          <Link href={`/artist/artworks/${artwork.id}/edit`} passHref>
+            <Button variant="outline" className="w-full mr-2">Edit</Button>
+          </Link>
+        )}
         {showStatus && (
           artwork.status === 'published' ? (
             <Button

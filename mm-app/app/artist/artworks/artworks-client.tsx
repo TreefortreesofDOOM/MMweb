@@ -105,6 +105,7 @@ export default function ArtworksClient({ artworks: initialArtworks }: ArtworksCl
               key={artwork.id}
               artwork={artwork}
               showStatus
+              showEdit
               onPublish={handlePublish}
               onUnpublish={handleUnpublish}
               isLoading={isLoading === artwork.id}
