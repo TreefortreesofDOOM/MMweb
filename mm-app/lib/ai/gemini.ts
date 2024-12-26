@@ -29,6 +29,7 @@ const defaultConfig = {
 interface GenerateOptions {
   context?: string;
   imageUrl?: string;
+  imageBase64?: string;
   temperature?: number;
   topK?: number;
   topP?: number;
@@ -41,9 +42,9 @@ export async function getGeminiResponse(
 ) {
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
   
-  // Use vision model if imageUrl is provided, otherwise use text model
+  // Use vision model if image is provided, otherwise use text model
   const model = genAI.getGenerativeModel({ 
-    model: options.imageUrl ? 'gemini-pro-vision' : 'gemini-pro'
+    model: options.imageUrl || options.imageBase64 ? 'gemini-1.5-flash' : 'gemini-pro'
   });
 
   const generationConfig = {
@@ -57,24 +58,51 @@ export async function getGeminiResponse(
   const fullPrompt = `${context}${prompt}`;
 
   let contents;
-  if (options.imageUrl) {
-    // Convert image URL to base64
-    const imageResponse = await fetch(options.imageUrl);
-    const imageBlob = await imageResponse.blob();
-    const imageBase64 = await blobToBase64(imageBlob);
-
-    contents = [{
-      role: 'user',
-      parts: [
-        { text: fullPrompt },
-        {
-          inlineData: {
-            mimeType: imageBlob.type,
-            data: imageBase64.split(',')[1]
-          }
+  if (options.imageUrl || options.imageBase64) {
+    try {
+      let imageData: string;
+      if (options.imageUrl) {
+        // Ensure URL is properly resolved and wait for the fetch
+        const imageResponse = await fetch(options.imageUrl, {
+          cache: 'no-store' // Disable caching to ensure fresh content
+        });
+        
+        if (!imageResponse.ok) {
+          throw new Error(`Failed to fetch image: ${imageResponse.statusText}`);
         }
-      ]
-    }];
+        
+        const imageBlob = await imageResponse.blob();
+        if (!imageBlob.type.startsWith('image/')) {
+          throw new Error('Invalid image format');
+        }
+        
+        imageData = await blobToBase64(imageBlob);
+      } else if (options.imageBase64) {
+        imageData = options.imageBase64;
+      } else {
+        throw new Error('Either imageUrl or imageBase64 must be provided');
+      }
+
+      // Extract base64 data (remove data:image/xyz;base64, prefix if present)
+      const base64Data = imageData.split(',')[1] || imageData;
+      const mimeType = imageData.match(/^data:([^;]+);base64,/)?.[1] || 'image/jpeg';
+
+      contents = [{
+        role: 'user',
+        parts: [
+          { text: fullPrompt },
+          {
+            inlineData: {
+              mimeType,
+              data: base64Data
+            }
+          }
+        ]
+      }];
+    } catch (error: any) {
+      console.error('Error processing image:', error);
+      throw new Error(`Failed to process image: ${error?.message || 'Unknown error'}`);
+    }
   } else {
     contents = [{ 
       role: 'user', 
@@ -82,14 +110,19 @@ export async function getGeminiResponse(
     }];
   }
 
-  const result = await model.generateContent({
-    contents,
-    generationConfig,
-    safetySettings,
-  });
+  try {
+    const result = await model.generateContent({
+      contents,
+      generationConfig,
+      safetySettings,
+    });
 
-  const response = result.response;
-  return response.text();
+    const response = result.response;
+    return response.text();
+  } catch (error: any) {
+    console.error('Error generating content:', error);
+    throw new Error(`Failed to generate content: ${error?.message || 'Unknown error'}`);
+  }
 }
 
 function blobToBase64(blob: Blob): Promise<string> {

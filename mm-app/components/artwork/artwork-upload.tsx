@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { uploadArtworkImage } from '@/app/actions/upload';
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -29,15 +29,26 @@ interface ArtworkUploadProps {
   userId: string;
   onImagesChange: (images: ArtworkImage[]) => void;
   onError: (error: string) => void;
+  existingImages?: ArtworkImage[];
 }
 
-export function ArtworkUpload({ userId, onImagesChange, onError }: ArtworkUploadProps) {
+export function ArtworkUpload({ userId, onImagesChange, onError, existingImages }: ArtworkUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [images, setImages] = useState<ArtworkImage[]>(existingImages || []);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>({
     progress: 0,
     status: 'pending'
   });
-  const [images, setImages] = useState<ArtworkImage[]>([]);
+
+  // Initialize with existing images only once on mount
+  useEffect(() => {
+    if (existingImages?.length) {
+      setImages(existingImages);
+      // Call onImagesChange outside the dependency array to avoid infinite loop
+      onImagesChange(existingImages);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingImages]); // Remove onImagesChange from dependencies
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -185,6 +196,7 @@ export function ArtworkUpload({ userId, onImagesChange, onError }: ArtworkUpload
                 src={image.url}
                 alt="Artwork"
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover rounded-lg"
               />
               <div className="absolute top-2 right-2 flex gap-2">

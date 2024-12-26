@@ -38,6 +38,7 @@ export default async function ArtworkPage({ params }: { params: { id: string } }
               src={imageUrl}
               alt={artwork.title}
               fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
             />
           )}

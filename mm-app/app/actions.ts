@@ -400,6 +400,9 @@ export async function createArtwork(formData: FormData) {
   const price = parseFloat(formData.get('price') as string);
   const isPublished = formData.get('publish') === 'true';
   const imagesJson = formData.get('images') as string;
+  const stylesJson = formData.get('styles') as string;
+  const techniquesJson = formData.get('techniques') as string;
+  const keywordsJson = formData.get('keywords') as string;
 
   if (!title || !price || !imagesJson) {
     return { error: 'Missing required fields' };
@@ -407,6 +410,9 @@ export async function createArtwork(formData: FormData) {
 
   try {
     const images = JSON.parse(imagesJson);
+    const styles = stylesJson ? JSON.parse(stylesJson) : [];
+    const techniques = techniquesJson ? JSON.parse(techniquesJson) : [];
+    const keywords = keywordsJson ? JSON.parse(keywordsJson) : [];
     
     if (!Array.isArray(images) || images.length === 0) {
       return { error: 'At least one image is required' };
@@ -424,6 +430,9 @@ export async function createArtwork(formData: FormData) {
         price,
         artist_id: user.id,
         images,
+        styles,
+        techniques,
+        keywords,
         status: isPublished ? 'published' : 'draft'
       })
       .select()
@@ -434,7 +443,16 @@ export async function createArtwork(formData: FormData) {
     // Generate and store embeddings for the artwork
     if (artwork) {
       try {
-        await updateArtworkEmbeddings(artwork.id, title, description || '');
+        // Include styles, techniques, and keywords in the text for embeddings
+        const fullText = [
+          title,
+          description || '',
+          ...styles,
+          ...techniques,
+          ...keywords
+        ].join(' ');
+        
+        await updateArtworkEmbeddings(artwork.id, title, fullText);
       } catch (embeddingError) {
         console.error('Error generating embeddings:', embeddingError);
         // Don't fail the artwork creation if embeddings fail
@@ -659,5 +677,25 @@ export async function getSimilarArtworks(artworkId: string) {
   } catch (error: any) {
     console.error('Error finding similar artworks:', error);
     return { error: error.message };
+  }
+}
+
+export async function analyzeArtwork(imageUrl: string) {
+  try {
+    const response = await fetch('/api/ai/analyze-artwork', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageUrl }),
+    });
+
+    if (!response.ok) {
+      return { error: 'Failed to analyze artwork' };
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error analyzing artwork:', error);
+    return { error: 'Failed to analyze artwork' };
   }
 }

@@ -9,6 +9,7 @@ declare global {
       NEXT_PUBLIC_SUPABASE_ANON_KEY: string
       SUPABASE_SERVICE_ROLE_KEY: string
       OPENAI_API_KEY: string
+      GOOGLE_AI_API_KEY: string
     }
   }
 }
@@ -19,6 +20,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   OPENAI_API_KEY: z.string().min(1),
+  GOOGLE_AI_API_KEY: z.string().min(1),
 })
 
 export const env = envSchema.parse(process.env) 

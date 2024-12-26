@@ -9,6 +9,59 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      artworks: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          price: number
+          artist_id: string
+          images: Json
+          styles: string[]
+          techniques: string[]
+          keywords: string[]
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          price: number
+          artist_id: string
+          images: Json
+          styles?: string[]
+          techniques?: string[]
+          keywords?: string[]
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          price?: number
+          artist_id?: string
+          images?: Json
+          styles?: string[]
+          techniques?: string[]
+          keywords?: string[]
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artworks_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       profiles: {
         Row: {
           artist_application: Json | null

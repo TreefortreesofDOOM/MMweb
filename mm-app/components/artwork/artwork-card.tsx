@@ -87,6 +87,7 @@ export function ArtworkCard({
           src={sortedImages[currentImageIndex].url}
           alt={artwork.title}
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover"
         />
         {sortedImages.length > 1 && (
@@ -137,15 +138,28 @@ export function ArtworkCard({
       </CardContent>
       {(onPublish || onUnpublish || onDelete) && (
         <CardFooter className="p-4 pt-0 flex gap-2">
-          {artwork.status === 'draft' && onPublish && (
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => onPublish(artwork.id)}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Publishing...' : 'Publish'}
-            </Button>
+          {artwork.status === 'draft' && (
+            <>
+              {onPublish && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => onPublish(artwork.id)}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Publishing...' : 'Publish'}
+                </Button>
+              )}
+              <Button
+                variant="secondary"
+                size="sm"
+                asChild
+              >
+                <Link href={`/artist/artworks/${artwork.id}/edit`}>
+                  Edit
+                </Link>
+              </Button>
+            </>
           )}
           {artwork.status === 'published' && onUnpublish && (
             <Button
