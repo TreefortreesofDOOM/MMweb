@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { updateProfileAction } from '@/app/actions'
+import { updateProfileAction, getProfileAction } from "@/lib/actions"
 import { FormMessage, Message } from "@/components/form-message"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,14 +17,23 @@ export default async function EditProfilePage({
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user?.id)
-    .single()
-  
   if (!user) {
     return redirect('/sign-in')
+  }
+
+  const { profile, error } = await getProfileAction()
+  
+  if (error) {
+    console.error('Error fetching profile:', error)
+    return (
+      <div className="container max-w-2xl mx-auto py-8">
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground">
+            Failed to load profile. Please try again later.
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
   
   const params = await searchParams;

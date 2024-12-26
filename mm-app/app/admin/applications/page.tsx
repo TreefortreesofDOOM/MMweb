@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { approveArtistApplication, rejectArtistApplication } from "@/app/actions"
+import { approveArtistApplication, rejectArtistApplication, getArtistApplications } from "@/lib/actions"
 
 export default async function AdminApplicationsPage() {
   const supabase = await createClient()
@@ -26,17 +26,21 @@ export default async function AdminApplicationsPage() {
     return redirect('/profile')
   }
 
-  // Get pending applications
-  const { data: applications } = await supabase
-    .from('profiles')
-    .select(`
-      id,
-      email,
-      artist_application,
-      created_at
-    `)
-    .eq('artist_status', 'pending')
-    .order('created_at', { ascending: false })
+  const { applications, error } = await getArtistApplications()
+  
+  if (error) {
+    console.error('Error fetching applications:', error)
+    return (
+      <div className="max-w-4xl mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Artist Applications</h1>
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground">
+            Failed to load applications. Please try again later.
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4">
@@ -48,7 +52,9 @@ export default async function AdminApplicationsPage() {
             <CardHeader>
               <CardTitle>Application from {application.email}</CardTitle>
               <CardDescription>
-                Submitted {new Date(application.created_at).toLocaleDateString()}
+                Submitted {application.artist_application.submittedAt 
+                  ? new Date(application.artist_application.submittedAt).toLocaleDateString()
+                  : 'Unknown date'}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

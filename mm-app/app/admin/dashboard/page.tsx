@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { getAdminStats } from '@/lib/actions';
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -23,16 +24,11 @@ export default async function AdminDashboardPage() {
     return redirect('/profile');
   }
 
-  // Get counts for overview
-  const { count: pendingApplications } = await supabase
-    .from('artist_applications')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending');
+  const { stats, error } = await getAdminStats();
 
-  const { count: totalArtists } = await supabase
-    .from('profiles')
-    .select('*', { count: 'exact', head: true })
-    .eq('role', 'artist');
+  if (error) {
+    console.error('Error fetching admin stats:', error);
+  }
 
   return (
     <div className="container max-w-7xl mx-auto py-8">
@@ -49,7 +45,7 @@ export default async function AdminDashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingApplications || 0}</div>
+            <div className="text-2xl font-bold">{stats?.pendingApplications || 0}</div>
             <Button variant="link" className="px-0" asChild>
               <Link href="/admin/applications">
                 Review Applications →
@@ -65,7 +61,7 @@ export default async function AdminDashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalArtists || 0}</div>
+            <div className="text-2xl font-bold">{stats?.totalArtists || 0}</div>
             <Button variant="link" className="px-0" asChild>
               <Link href="/admin/artists">
                 Manage Artists →
@@ -77,13 +73,16 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Platform Status
+              Total Artworks
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-sm font-medium text-primary">
-              All Systems Operational
-            </div>
+            <div className="text-2xl font-bold">{stats?.totalArtworks || 0}</div>
+            <Button variant="link" className="px-0" asChild>
+              <Link href="/admin/artworks">
+                View Artworks →
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       </div>

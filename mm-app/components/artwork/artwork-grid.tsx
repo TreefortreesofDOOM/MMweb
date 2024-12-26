@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ArtworkCard } from './artwork-card';
-import { getSimilarArtworks } from '@/app/actions';
+import { getSimilarArtworks } from '@/lib/actions';
 import { Loader2 } from 'lucide-react';
 
 interface Artwork {

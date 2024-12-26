@@ -3,19 +3,29 @@ import { redirect } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getProfileAction } from "@/lib/actions"
 
 export default async function ProfilePage() {
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user?.id)
-    .single()
-
   if (!user) {
     return redirect('/sign-in')
+  }
+
+  const { profile, error } = await getProfileAction()
+  
+  if (error) {
+    console.error('Error fetching profile:', error)
+    return (
+      <div className="container max-w-2xl mx-auto py-8">
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground">
+            Failed to load profile. Please try again later.
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
   
   const canApplyAsArtist = profile?.role === 'user' && 

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { approveArtistApplication, rejectArtistApplication } from "@/app/actions"
+import { approveArtistApplication, rejectArtistApplication } from "@/lib/actions"
 
 interface Application {
   id: string

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { analyzeArtwork } from '@/app/actions';
+import { analyzeArtwork } from '@/lib/actions';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
@@ -45,12 +45,14 @@ export function ArtworkAIAnalysis({
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     try {
-      const result = await analyzeArtwork(imageUrl);
+      const formData = new FormData();
+      formData.append('imageUrl', imageUrl);
+      const result = await analyzeArtwork(formData);
       if (result.error) {
         toast.error(result.error);
         return;
       }
-      setAnalysis(result);
+      setAnalysis(result.analysis);
       // Reset applied state when new analysis is performed
       setApplied({
         description: false,

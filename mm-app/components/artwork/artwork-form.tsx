@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ArtworkUpload, type ArtworkImage } from './artwork-upload';
 import { ArtworkAIAnalysis } from './artwork-ai-analysis';
-import { createArtwork, updateArtwork } from '@/app/actions';
+import { createArtwork, updateArtwork } from '@/lib/actions';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),

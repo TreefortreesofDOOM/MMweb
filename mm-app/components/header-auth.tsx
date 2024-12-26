@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { hasEnvVars } from "@/lib/supabase/check-env-vars";
 import { Button } from '@/components/ui/button';
 import { Badge } from "./ui/badge";
-import { signOutAction } from "@/app/actions";
+import { signOutAction } from "@/lib/actions";
 
 export default async function Header() {
   const supabase = await createClient();

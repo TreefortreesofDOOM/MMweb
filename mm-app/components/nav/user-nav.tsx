@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { signOut } from '@/app/actions';
+import { signOutAction } from '@/lib/actions';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 
 interface UserNavProps {
@@ -30,7 +30,7 @@ export function UserNav({ userEmail }: UserNavProps) {
     <div className="flex items-center gap-4">
       <ThemeSwitcher />
       <span className="text-sm text-muted-foreground">{userEmail}</span>
-      <form action={signOut}>
+      <form action={signOutAction}>
         <Button variant="ghost" size="sm" type="submit">
           Sign Out
         </Button>

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getGeminiResponse } from '@/lib/ai/gemini';
-import { ARTWORK_ANALYSIS_PROMPTS } from '@/lib/ai/prompts';
+import { analyzeArtwork } from '@/lib/actions/ai';
 
 export async function POST(request: Request) {
   try {
@@ -13,25 +12,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // Run analyses in parallel
-    const [description, style, techniques, keywords] = await Promise.all([
-      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.description, { imageUrl, temperature: 0.7 }),
-      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.style, { imageUrl, temperature: 0.5 }),
-      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.techniques, { imageUrl, temperature: 0.5 }),
-      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.keywords, { imageUrl, temperature: 0.5 })
-    ]);
+    // Create FormData to match the function signature
+    const formData = new FormData();
+    formData.append('imageUrl', imageUrl);
 
-    // Process comma-separated lists into arrays
-    const styleArray = style.split(',').map(s => s.trim()).filter(Boolean);
-    const techniquesArray = techniques.split(',').map(t => t.trim()).filter(Boolean);
-    const keywordsArray = keywords.split(',').map(k => k.trim()).filter(Boolean);
+    const result = await analyzeArtwork(formData);
 
-    return NextResponse.json({
-      description,
-      styles: styleArray,
-      techniques: techniquesArray,
-      keywords: keywordsArray
-    });
+    if ('error' in result) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(result.analysis);
 
   } catch (error) {
     console.error('Error analyzing artwork:', error);

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArtworkCard } from "@/components/artwork/artwork-card";
-import { publishArtwork, unpublishArtwork } from '@/app/actions';
+import { publishArtwork, unpublishArtwork } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
