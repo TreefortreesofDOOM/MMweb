@@ -84,8 +84,12 @@
 - [x] Move artist-application under `/profile/applications`
 - [x] Consolidate all actions into `/lib/actions`
 - [x] Group dashboard-related pages under a common layout
-- [ ] Keep public routes (`/artists`, `/artworks`) separate from private ones
-- [ ] Use route groups (parentheses) to better organize related pages
+- [x] Streamline navigation structure
+  - [x] Remove redundant dashboard links from profile pages
+  - [x] Keep dashboard access in header and sidebar only
+  - [x] Maintain consistent navigation patterns
+- [x] Keep public routes (`/artists`, `/artworks`) separate from private ones
+- [x] Use route groups (parentheses) to better organize related pages
 
 ## Benefits
 

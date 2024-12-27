@@ -138,6 +138,18 @@ interface RoleNavigation {
    - Keep URLs consistent with route structure
    - Ensure paths exist in the application
 
+5. **Dashboard Access**
+   - Keep dashboard links in header and sidebar navigation
+   - Avoid redundant dashboard links in content areas
+   - Use role-specific dashboard paths (e.g., `/admin-dashboard`, `/artist-dashboard`)
+   - Maintain consistent access points across the application
+
+6. **Navigation Consistency**
+   - Use standard navigation patterns across all pages
+   - Keep primary navigation in header/sidebar
+   - Avoid duplicating navigation items in multiple locations
+   - Ensure clear hierarchy in navigation structure
+
 ## Examples
 
 ### Adding a New Section
