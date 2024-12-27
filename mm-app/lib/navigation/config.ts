@@ -17,7 +17,7 @@ export const navigationConfig: Record<'admin' | 'artist', RoleNavigation> = {
         items: [
           { 
             title: 'Dashboard', 
-            href: '/admin/dashboard', 
+            href: '/admin-dashboard', 
             icon: LayoutDashboard 
           }
         ]
@@ -52,7 +52,7 @@ export const navigationConfig: Record<'admin' | 'artist', RoleNavigation> = {
         items: [
           { 
             title: 'Dashboard', 
-            href: '/artist/dashboard', 
+            href: '/artist-dashboard', 
             icon: LayoutDashboard 
           }
         ]

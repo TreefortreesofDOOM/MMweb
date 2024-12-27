@@ -13,12 +13,32 @@ export function MainNav({ userRole }: MainNavProps) {
   const pathname = usePathname();
 
   const isActive = (path: string) => {
-    return pathname === path || pathname.startsWith(`${path}/`);
+    return pathname === path || pathname?.startsWith(path + '/');
   };
 
   return (
     <nav className="flex items-center space-x-6 lg:space-x-8">
       <Logo />
+      
+      {/* Public Routes */}
+      <Link
+        href="/gallery"
+        className={cn(
+          "text-sm font-medium transition-colors hover:text-primary",
+          isActive('/gallery') ? "text-foreground" : "text-foreground/60"
+        )}
+      >
+        Gallery
+      </Link>
+      <Link
+        href="/artists"
+        className={cn(
+          "text-sm font-medium transition-colors hover:text-primary",
+          isActive('/artists') ? "text-foreground" : "text-foreground/60"
+        )}
+      >
+        Artists
+      </Link>
 
       {/* Artist-specific links */}
       {userRole === 'artist' && (
@@ -47,7 +67,7 @@ export function MainNav({ userRole }: MainNavProps) {
       {/* Admin-specific links */}
       {userRole === 'admin' && (
         <Link
-          href="/admin"
+          href="/admin/dashboard"
           className={cn(
             'text-sm font-medium transition-colors hover:text-primary',
             isActive('/admin') ? 'text-black dark:text-white' : 'text-muted-foreground'

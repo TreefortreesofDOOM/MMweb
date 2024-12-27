@@ -57,6 +57,11 @@
   - Market analysis integration
   - Price range calculation
   - Confidence scoring
+- [ ] AI Authentication & Access Control
+  - Public/private endpoint configuration
+  - Guest user access limits
+  - Authentication state handling
+  - Error messaging for unauthorized access
 
 ### Infrastructure & Security
 - [ ] Rate limiting implementation

@@ -1,12 +1,13 @@
+import { type ReactNode, type ReactElement } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { RoleNav } from '@/components/nav/role-nav';
 
-export default async function ArtistLayoutRoot({
+export default async function AdminLayout({
   children,
 }: {
-  children: React.ReactNode;
-}) {
+  children: ReactNode;
+}): Promise<ReactElement> {
   const supabase = await createClient();
   
   const { data: { user } } = await supabase.auth.getUser();
@@ -14,16 +15,24 @@ export default async function ArtistLayoutRoot({
     return redirect('/sign-in');
   }
 
-  // Check if user is artist
+  // Check if user is admin
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)
     .single();
 
-  if (profile?.role !== 'artist') {
+  if (profile?.role !== 'admin') {
     return redirect('/profile');
   }
 
-  return <RoleNav role="artist">{children}</RoleNav>;
+  return (
+    <div className="min-h-screen">
+      <RoleNav role="admin">
+        <main className="flex-1">
+          {children}
+        </main>
+      </RoleNav>
+    </div>
+  );
 } 

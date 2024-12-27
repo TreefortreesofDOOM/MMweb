@@ -289,6 +289,12 @@ Required Access:
 - [x] Add Stripe Express dashboard links
 - [x] Handle account relinks
 - [x] Manage account status
+- [x] Stripe Dashboard Access
+  - [x] Keep Stripe dashboard link in sidebar navigation
+  - [x] Show Connect setup status in Quick Actions only when incomplete
+  - [x] Remove Connect status from dashboard header
+  - [x] Move setup prompts to Quick Actions section
+  - [x] Clear Quick Actions after setup complete
 
 #### Sales Features [✅]
 - [x] Implement purchase UI
@@ -383,7 +389,7 @@ mm-app/
 │   ├── globals.css
 │   ├── layout.tsx
 │   └── page.tsx
-├── components/
+├��─ components/
 │   ├── artwork/
 │   │   ├── artwork-card.tsx
 │   │   ├── artwork-form.tsx

@@ -40,6 +40,34 @@ export function StripeOnboarding({ stripeAccountId, onboardingComplete }: Stripe
     }
   };
 
+  const handleOpenDashboard = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch('/api/stripe/login-link', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to access Stripe dashboard');
+      }
+
+      const { url } = await response.json();
+      window.open(url, '_blank');
+    } catch (error) {
+      console.error('Error accessing Stripe dashboard:', error);
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (onboardingComplete) {
     return (
       <div className="rounded-lg border p-4 bg-green-50">
@@ -50,9 +78,10 @@ export function StripeOnboarding({ stripeAccountId, onboardingComplete }: Stripe
         <Button
           variant="outline"
           className="mt-4"
-          onClick={() => window.open('https://connect.stripe.com/express-login', '_blank')}
+          onClick={handleOpenDashboard}
+          disabled={loading}
         >
-          View Stripe Dashboard
+          {loading ? 'Loading...' : 'View Stripe Dashboard'}
         </Button>
       </div>
     );

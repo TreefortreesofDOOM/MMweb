@@ -103,14 +103,6 @@ export default async function ProfilePage() {
                 </Link>
               </Button>
             )}
-  
-            {profile?.role === 'artist' && (
-              <Button asChild variant="outline">
-                <Link href="/artist/dashboard">
-                  Artist Dashboard
-                </Link>
-              </Button>
-            )}
           </div>
   
           {profile?.role === 'admin' && (
