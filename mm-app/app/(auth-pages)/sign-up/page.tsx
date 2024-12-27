@@ -4,7 +4,6 @@ import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { SmtpMessage } from "../smtp-message";
 import { AuthForm } from "@/components/auth/auth-form";
 
 export default async function Signup(props: {
@@ -13,46 +12,70 @@ export default async function Signup(props: {
   const searchParams = await props.searchParams;
   if ("message" in searchParams) {
     return (
-      <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
+      <div className="container flex items-center justify-center h-[calc(100vh-4rem)] -mt-16">
         <FormMessage message={searchParams} />
       </div>
     );
   }
 
   return (
-    <>
-      <AuthForm className="flex flex-col min-w-64 max-w-64 mx-auto">
-        <h1 className="text-2xl font-medium">Sign up</h1>
-        <p className="text-sm text text-foreground">
-          Already have an account?{" "}
-          <Link className="text-primary font-medium underline" href="/sign-in">
-            Sign in
-          </Link>
-        </p>
-        <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-          <Label htmlFor="email">Email</Label>
-          <Input 
-            name="email" 
-            placeholder="you@example.com" 
-            required 
-            suppressHydrationWarning
-          />
-          <Label htmlFor="password">Password</Label>
-          <Input
-            type="password"
-            name="password"
-            placeholder="Your password"
-            minLength={6}
-            required
-            suppressHydrationWarning
-          />
-          <SubmitButton formAction={signUpAction} pendingText="Signing up..." suppressHydrationWarning>
-            Sign up
-          </SubmitButton>
-          <FormMessage message={searchParams} />
+    <div className="container flex items-center justify-center h-[calc(100vh-4rem)] -mt-16">
+      <AuthForm className="w-full max-w-[400px] p-8">
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold tracking-tight">Sign up</h1>
+            <p className="text-sm text-muted-foreground">
+              Already have an account?{" "}
+              <Link 
+                className="text-primary hover:underline" 
+                href="/sign-in"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                name="email" 
+                id="email"
+                type="email"
+                placeholder="name@example.com" 
+                required 
+                className="mt-2"
+                suppressHydrationWarning
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                type="password"
+                name="password"
+                id="password"
+                placeholder="Create a password"
+                minLength={6}
+                required
+                className="mt-2"
+                suppressHydrationWarning
+              />
+            </div>
+
+            <SubmitButton 
+              formAction={signUpAction} 
+              pendingText="Signing up..." 
+              suppressHydrationWarning
+              className="w-full"
+            >
+              Sign up
+            </SubmitButton>
+
+            <FormMessage message={searchParams} />
+          </div>
         </div>
       </AuthForm>
-      <SmtpMessage />
-    </>
+    </div>
   );
 }
