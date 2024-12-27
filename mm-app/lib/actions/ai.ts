@@ -6,13 +6,14 @@ import { updateArtworkEmbeddings, findSimilarArtworks } from '@/lib/ai/embedding
 import { blobToBase64 } from './helpers';
 import { getGeminiResponse } from '@/lib/ai/gemini';
 import { ARTWORK_ANALYSIS_PROMPTS } from '@/lib/ai/prompts';
+import { env } from '@/lib/env';
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!);
+const genAI = new GoogleGenerativeAI(env.GOOGLE_AI_API_KEY);
 
 async function getModel(imageUrl?: string | null) {
   const modelName = imageUrl 
-    ? process.env.GEMINI_VISION_MODEL || 'gemini-1.5-pro-vision'
-    : process.env.GEMINI_TEXT_MODEL || 'gemini-1.5-pro';
+    ? env.GEMINI_VISION_MODEL
+    : env.GEMINI_TEXT_MODEL;
   return genAI.getGenerativeModel({ model: modelName });
 }
 

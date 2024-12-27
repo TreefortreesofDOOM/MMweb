@@ -1,95 +1,278 @@
 import { NextResponse } from 'next/server';
-import { getGeminiResponse } from '@/lib/ai/gemini';
+import { getGeminiResponse, artworkTools } from '@/lib/ai/gemini';
 import { createClient } from '@/lib/supabase/server';
+import { Content } from '@google/generative-ai';
+import { buildSystemInstruction } from '@/lib/ai/instructions';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { env } from '@/lib/env';
 
 interface AssistantRequest {
   message: string;
   assistantType: 'gallery' | 'artist' | 'patron';
   imageUrl?: string;
   artworkId?: string;
+  chatHistory?: Content[];
 }
 
-const ASSISTANT_CONTEXTS = {
-  gallery: `You are an AI Gallery Assistant, helping visitors explore and understand artworks in our digital gallery.
-Your role is to:
-- Help users discover artworks based on their interests
-- Explain art styles, techniques, and movements
-- Share insights about artists and their work
-- Provide historical and cultural context
-- Answer questions about the gallery and its features
+// Function implementations
+const functions = {
+  getArtistArtworks: async ({ artistId, status = "all" }: { artistId: string; status?: "published" | "draft" | "all" }, context?: string) => {
+    const contextData = context ? JSON.parse(context) : {};
+    const supabase = await createClient();
+    let query = supabase
+      .from('artworks')
+      .select(`
+        *,
+        profiles (
+          name,
+          bio
+        )
+      `)
+      .eq('artist_id', contextData.userId || artistId);
+    
+    if (status !== "all") {
+      query = query.eq('status', status);
+    }
 
-Please maintain a friendly, approachable tone while being informative and engaging.`,
+    const { data: artworks, error } = await query;
+    if (error) throw error;
+    return { artworks };
+  },
 
-  artist: `You are an AI Artist Assistant, helping artists manage and grow their presence in our digital gallery.
-Your role is to:
-- Help with portfolio management and curation
-- Provide feedback on artwork presentations
-- Assist with writing artist statements and descriptions
-- Share market insights and pricing strategies
-- Suggest ways to improve visibility and sales
-- Guide professional development
-
-Please maintain a supportive, professional tone while providing practical, actionable advice.`,
-
-  patron: `You are an AI Patron Assistant, helping art collectors and buyers make informed decisions.
-Your role is to:
-- Help discover artworks matching preferences and interests
-- Explain art valuation and investment potential
-- Provide context about artists and their work
-- Share insights about art movements and styles
-- Guide collection building and management
-- Answer questions about purchasing and ownership
-
-Please maintain a professional, knowledgeable tone while being approachable and helpful.`
+  getArtworkDetails: async ({ artworkId }: { artworkId: string }, context?: string) => {
+    const supabase = await createClient();
+    const { data: artwork, error } = await supabase
+      .from('artworks')
+      .select(`
+        *,
+        profiles (
+          name,
+          bio
+        )
+      `)
+      .eq('id', artworkId)
+      .single();
+    
+    if (error) throw error;
+    return { artwork };
+  }
 };
 
 export async function POST(req: Request) {
   try {
-    const { message, assistantType, imageUrl, artworkId } = await req.json() as AssistantRequest;
+    console.log('Starting assistant request processing');
+    const { message, assistantType, imageUrl, artworkId, chatHistory = [] } = await req.json() as AssistantRequest;
 
     if (!message || !assistantType) {
+      console.log('Missing required fields:', { message, assistantType });
       return NextResponse.json(
         { error: 'Message and assistant type are required' },
         { status: 400 }
       );
     }
 
-    // Get the appropriate context
-    const context = ASSISTANT_CONTEXTS[assistantType];
+    // Get current user
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !user) {
+      console.error('Error getting user:', userError);
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
-    // If there's an artwork ID, get its details
-    let artworkDetails = '';
+    // Get user's profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError) {
+      console.error('Error getting profile:', profileError);
+      return NextResponse.json(
+        { error: 'Profile not found' },
+        { status: 404 }
+      );
+    }
+
+    console.log('Request parameters:', {
+      message,
+      assistantType,
+      hasImage: !!imageUrl,
+      artworkId,
+      chatHistoryLength: chatHistory.length,
+      userId: user.id
+    });
+
+    // Get artwork details if artworkId is provided
+    let artworkContext = undefined;
     if (artworkId) {
+      console.log('Fetching artwork details for:', artworkId);
       const supabase = await createClient();
-      const { data: artwork } = await supabase
+      
+      // Get artwork details
+      const { data: artwork, error: artworkError } = await supabase
         .from('artworks')
         .select('title, description, price')
         .eq('id', artworkId)
         .single();
 
+      if (artworkError) {
+        console.error('Error fetching artwork:', artworkError);
+      }
+
+      // Get similar artworks
+      const { data: similarArtworks, error: similarError } = await supabase.rpc('match_artworks', {
+        artwork_id: artworkId,
+        match_threshold: 0.7,
+        match_count: 5
+      });
+
+      if (similarError) {
+        console.error('Error fetching similar artworks:', similarError);
+      }
+
       if (artwork) {
-        artworkDetails = `
-Current artwork context:
-Title: ${artwork.title}
-Description: ${artwork.description || 'No description provided'}
-Price: $${artwork.price}
-`;
+        artworkContext = {
+          artwork: {
+            title: artwork.title,
+            description: artwork.description,
+            price: artwork.price
+          },
+          similarArtworks: similarArtworks || []
+        };
+        console.log('Artwork context built:', artworkContext);
       }
     }
 
-    // Combine context and artwork details
-    const fullContext = `${context}\n\n${artworkDetails}`.trim();
+    // Build system instruction with context
+    console.log('Building system instruction for:', assistantType);
+    const { instruction, contextMessage } = buildSystemInstruction(assistantType, {
+      ...artworkContext,
+      user: {
+        id: user.id,
+        role: assistantType,
+        ...profile
+      }
+    });
+    console.log('System instruction length:', instruction.length);
+
+    // Add context message and user message to chat history
+    const updatedChatHistory = [
+      ...(contextMessage ? [contextMessage] : []),
+      ...chatHistory,
+      {
+        role: 'user',
+        parts: [{ text: message }]
+      }
+    ];
+    console.log('Updated chat history length:', updatedChatHistory.length);
+
+    console.log('Calling Gemini API with parameters:', {
+      messageLength: message.length,
+      hasSystemInstruction: !!instruction,
+      hasImage: !!imageUrl,
+      temperature: 0.5,
+      chatHistoryLength: updatedChatHistory.length,
+      availableFunctions: {
+        count: artworkTools.tools[0].functionDeclarations.length,
+        names: artworkTools.tools[0].functionDeclarations.map((f: { name: string }) => f.name),
+        mode: artworkTools.tool_config.functionCallingConfig.mode
+      }
+    });
 
     const response = await getGeminiResponse(message, { 
-      context: fullContext,
-      imageUrl 
+      systemInstruction: instruction,
+      imageUrl,
+      temperature: 0.5,
+      chatHistory: updatedChatHistory,
+      tools: artworkTools.tools,
+      context: JSON.stringify({ userId: user.id })
     });
     
-    return NextResponse.json({ response });
+    console.log('Received response from Gemini API, length:', response.length);
+
+    // Generate embeddings for message and response
+    const genAI = new GoogleGenerativeAI(env.GOOGLE_AI_API_KEY);
+    const embeddingModel = genAI.getGenerativeModel({ model: "embedding-001" });
+    const [messageEmbeddingResult, responseEmbeddingResult] = await Promise.all([
+      embeddingModel.embedContent(message),
+      embeddingModel.embedContent(response)
+    ]);
+
+    // Convert embedding objects to arrays
+    const messageEmbedding = messageEmbeddingResult.embedding.values;
+    const responseEmbedding = responseEmbeddingResult.embedding.values;
+
+    // Save chat history to database with embeddings
+    const { error: saveError } = await supabase
+      .from('chat_history')
+      .insert({
+        user_id: user.id,
+        assistant_type: assistantType,
+        message,
+        response,
+        artwork_id: artworkId,
+        metadata: {
+          hasImage: !!imageUrl,
+          systemInstructionLength: instruction.length,
+          responseLength: response.length
+        },
+        context: {
+          user: {
+            id: user.id,
+            role: assistantType
+          },
+          artwork: artworkContext?.artwork
+        },
+        message_embedding: messageEmbedding,
+        response_embedding: responseEmbedding
+      });
+
+    if (saveError) {
+      console.error('Error saving chat history:', saveError);
+    }
+
+    // Add assistant response to chat history
+    updatedChatHistory.push({
+      role: 'model',
+      parts: [{ text: response }]
+    });
+
+    return NextResponse.json({ 
+      response,
+      chatHistory: updatedChatHistory
+    });
   } catch (error) {
-    console.error('AI assistant error:', error);
+    // Log detailed error information
+    const err = error as Error;
+    console.error('AI assistant error details:', {
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+      cause: err.cause,
+      safetyDetails: err.cause && typeof err.cause === 'object' ? {
+        blockReason: (err.cause as any).blockReason,
+        safetyRatings: (err.cause as any).safetyRatings
+      } : undefined
+    });
+
+    // If it's a safety block, return a more specific error
+    if (err.message === 'Response blocked by safety settings') {
+      return NextResponse.json(
+        { 
+          error: 'Content was blocked by safety filters',
+          details: err.cause
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to generate response' },
+      { error: err.message || 'Failed to generate response' },
       { status: 500 }
     );
   }

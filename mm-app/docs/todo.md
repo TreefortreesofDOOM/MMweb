@@ -5,6 +5,9 @@
 - the count does not work on admin dashboard for pending applications.
 - upload image progress bar does not have animation.
 
+## AI
+- b. User Customization: Allow users to specify the depth and focus of analysis based on their needs, whether they require a high-level overview or an in-depth critique.
+- c. Integration with Gallery Systems: Connect the analyzer with gallery management systems to automatically update metadata, enhance search functionalities, and improve user experiences.
 
 ## Email Templates
 

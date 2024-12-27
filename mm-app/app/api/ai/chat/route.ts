@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { getGeminiResponse } from '@/lib/ai/gemini';
 import { NextResponse } from 'next/server';
+import { AI_ROLES } from '@/lib/ai/prompts';
 
 export async function POST(request: Request) {
   try {
-    const { prompt, artworkId, imageUrl, role } = await request.json();
+    const { prompt, artworkId, imageUrl, role, chatHistory } = await request.json();
 
     if (!prompt) {
       return NextResponse.json(
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
       const supabase = await createClient();
       const { data: similarArtworks } = await supabase.rpc('match_artworks', {
         artwork_id: artworkId,
-        match_threshold: 0.8,
+        match_threshold: 0.7,
         match_count: 5
       });
 
@@ -58,37 +59,32 @@ export async function POST(request: Request) {
       }
     }
 
-    // Build context based on role
-    let context = '';
+    // Build system instruction based on role
+    let systemInstruction = '';
     if (role === 'patron') {
-      context = `
-        You are an AI Art Advisor, an expert in art history, contemporary art, and art collection.
-        Your role is to help art enthusiasts and collectors understand artworks, make informed decisions,
-        and build meaningful collections.
+      systemInstruction = `
+         ${AI_ROLES.artExpert}
 
         Current artwork details:
         ${artworkContext}
 
         ${similarArtworksContext}
 
-        Please provide thoughtful, educational responses that help users appreciate the artwork's:
-        - Artistic style and technique
-        - Historical and cultural context
-        - Market value and investment potential
-        - Relationship to similar works
-        - Place in contemporary art trends
-
-        Keep responses concise but informative, focusing on helping users make informed decisions.
+        Keep responses concise but informative and entertaining, focus on helping users make informed decisions.
       `;
     }
 
     const response = await getGeminiResponse(prompt, {
-      context,
+      context: systemInstruction,
       imageUrl,
-      temperature: 0.8,
+      temperature: 0.7,
+      chatHistory: chatHistory || []
     });
 
-    return NextResponse.json({ response });
+    return NextResponse.json({ 
+      response,
+      chatHistory: chatHistory || []
+    });
   } catch (error) {
     console.error('Chat API Error:', error);
     return NextResponse.json(

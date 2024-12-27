@@ -40,7 +40,7 @@ export const updateProfileAction = async (formData: FormData) => {
 
   // Build update data, filtering out null/empty values
   const updateData: Partial<Profile> = {};
-  const fields = ['name', 'bio', 'website', 'instagram'] as const;
+  const fields = ['first_name', 'last_name', 'bio', 'website', 'instagram'] as const;
   
   fields.forEach(field => {
     const value = formData.get(field) as string;
@@ -48,6 +48,13 @@ export const updateProfileAction = async (formData: FormData) => {
       updateData[field] = value.trim();
     }
   });
+
+  // Construct full_name from first_name and last_name for backward compatibility
+  if (updateData.first_name || updateData.last_name) {
+    updateData.full_name = [updateData.first_name, updateData.last_name]
+      .filter(Boolean)
+      .join(' ');
+  }
 
   console.log('Updating profile with data:', updateData);
   const { error } = await supabase

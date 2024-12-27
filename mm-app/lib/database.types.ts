@@ -64,52 +64,61 @@ export interface Database {
       }
       profiles: {
         Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          full_name: string | null
+          first_name: string | null
+          last_name: string | null
+          email: string
+          avatar_url: string | null
+          bio: string | null
+          website: string | null
+          instagram: string | null
+          role: string
+          artist_status: string | null
           artist_application: Json | null
           artist_approved_at: string | null
           artist_approved_by: string | null
           artist_rejection_reason: string | null
-          artist_status: Database["public"]["Enums"]["artist_application_status"] | null
-          bio: string | null
-          created_at: string
-          email: string
-          id: string
-          instagram: string | null
-          name: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
-          updated_at: string
-          website: string | null
         }
         Insert: {
+          id: string
+          created_at?: string
+          updated_at?: string
+          full_name?: string | null
+          first_name?: string | null
+          last_name?: string | null
+          email: string
+          avatar_url?: string | null
+          bio?: string | null
+          website?: string | null
+          instagram?: string | null
+          role?: string
+          artist_status?: string | null
           artist_application?: Json | null
           artist_approved_at?: string | null
           artist_approved_by?: string | null
           artist_rejection_reason?: string | null
-          artist_status?: Database["public"]["Enums"]["artist_application_status"] | null
-          bio?: string | null
-          created_at?: string
-          email: string
-          id: string
-          instagram?: string | null
-          name?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          updated_at?: string
-          website?: string | null
         }
         Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          full_name?: string | null
+          first_name?: string | null
+          last_name?: string | null
+          email?: string
+          avatar_url?: string | null
+          bio?: string | null
+          website?: string | null
+          instagram?: string | null
+          role?: string
+          artist_status?: string | null
           artist_application?: Json | null
           artist_approved_at?: string | null
           artist_approved_by?: string | null
           artist_rejection_reason?: string | null
-          artist_status?: Database["public"]["Enums"]["artist_application_status"] | null
-          bio?: string | null
-          created_at?: string
-          email?: string
-          id?: string
-          instagram?: string | null
-          name?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          updated_at?: string
-          website?: string | null
         }
         Relationships: []
       }

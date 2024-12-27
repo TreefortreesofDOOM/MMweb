@@ -46,14 +46,25 @@ export default async function EditProfilePage({
         </CardHeader>
         <CardContent>
           <form action={updateProfileAction} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                name="name"
-                defaultValue={profile?.name || ''}
-                placeholder="Your name"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  name="firstName"
+                  defaultValue={profile?.first_name || ''}
+                  placeholder="Your first name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  defaultValue={profile?.last_name || ''}
+                  placeholder="Your last name"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
