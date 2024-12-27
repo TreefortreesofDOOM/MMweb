@@ -3,6 +3,7 @@
 Every time you choose to apply a rule(s), explicitly state the rule(s) in the output. You can abbreviate the rule description to a single word or phrase.
 
 - Do not over engineer.
+
 - 'gemini-1.5-flash' is the correct model for image analysis.
 
 ## Project Context
@@ -10,9 +11,9 @@ This project involves integrating various features and services to create a comp
 
 - **Stripe Integration**: Setting up Stripe for payment processing, including creating payment intents, handling webhooks, and managing artist payouts.
 - **Artist Application Process**: Implementing a detailed application process for artists, including form submission, admin review, and notifications.
-- **AI Gallery Assistant**: Setting up an AI-powered assistant using Google Cloud's Multimodal Live API for real-time conversation and session management.
+- **AI Gallery Assistant**: Setting up an AI-powered assistant using Google Cloud Multimodal Live API for real-time conversation and session management.
 - **Admin and Artist Dashboards**: Creating dashboards for both admins and artists to manage applications, view sales history, and handle payouts.
-- **Security and Access Control**: Implementing role-based access control, data validation, and rate limiting to ensure the platform's security and integrity.
+- **Security and Access Control**: Implementing role-based access control, data validation, and rate limiting to ensure platform security and integrity.
 
 ## Code Style and Structure
 - Write concise, technical TypeScript code with accurate examples
@@ -23,71 +24,84 @@ This project involves integrating various features and services to create a comp
 ```
 ## Directory Structure
 
-  MM-web/
-  mm-app/
-  ├── app/
-  │   ├── (auth-pages)/
-  │   │   ├── sign-in/
-  │   │   ├── sign-up/
-  │   │   └── reset-password/
-  │   ├── actions/
-  │   │   └── upload.ts
-  │   ├── admin/
-  │   │   └── applications/
-  │   ├── api/
-  │   │   ├── artworks/
-  │   │   │   ├── create/
-  │   │   │   └── upload/
-  │   │   └── webhooks/
-  │   ├── artist/
-  │   │   └── artworks/
-  │   │       ├── new/
-  │   │       ├── artworks-client.tsx
-  │   │       └── page.tsx
-  │   ├── artist-application/
-  │   ├── auth/
-  │   │   └── callback/
-  │   ├── profile/
-  │   │   └── edit/
-  │   │   └── application/
-  │   │   │   └── page.tsx
-  │   ├── protected/
-  │   ├── actions.ts
-  │   ├── globals.css
-  │   ├── layout.tsx
-  │   └── page.tsx
-  ├── components/
-  │   ├── artwork/
-  │   │   ├── artwork-card.tsx
-  │   │   ├── artwork-form.tsx
-  │   │   └── artwork-upload.tsx
-  │   ├── auth/
-  │   ├── ui/
-  ├── docs/
-  │   └── implementation.md
-  ├── lib/
-  │   └── utils.ts
-  ├── public/
-  │   └── images/
-  │       ├── favicons/
-  │       └── logos/
-  ├── scripts/
-  │   └── create-test-users.ts
-  ├── supabase/
-  │   ├── migrations/
-  │   └── config.toml
-  ├── utils/
-  │   ├── supabase/
-  │   │   ├── action.ts
-  │   │   ├── client.ts
-  │   │   ├── middleware.ts
-  │   │   └── server.ts
-  │   └── utils.ts
-  ├── .env.local
-  ├── middleware.ts
-  ├── next.config.js
-  ├── package.json
-  └── [config files]
+# Core directory structure:
+```
+mm-app/
+├── app/              # Next.js app router pages
+├── components/       # React components
+├── lib/             # Core utilities
+├── public/          # Static assets
+├── utils/           # Helper functions
+└── docs/            # Documentation
+```
+
+# For more detailed organization:
+```
+MM-web/
+mm-app/
+├── app/
+│   ├── (auth-pages)/
+│   │   ├── sign-in/
+│   │   ├── sign-up/
+│   │   └── reset-password/
+│   ├── actions/
+│   │   └── upload.ts
+│   ├── admin/
+│   │   └── applications/
+│   ├── api/
+│   │   ├── artworks/
+│   │   │   ├── create/
+│   │   │   └── upload/
+│   │   └── webhooks/
+│   ├── artist/
+│   │   └── artworks/
+│   │       ├── new/
+│   │       ├── artworks-client.tsx
+│   │       └── page.tsx
+│   ├── artist-application/
+│   ├── auth/
+│   │   └── callback/
+│   ├── profile/
+│   │   └── edit/
+│   │   └── application/
+│   │   │   └── page.tsx
+│   ├── protected/
+│   ├── actions.ts
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── artwork/
+│   │   ├── artwork-card.tsx
+│   │   ├── artwork-form.tsx
+│   │   └── artwork-upload.tsx
+│   ├── auth/
+│   ├── ui/
+├── docs/
+│   └── implementation.md
+├── lib/
+│   └── utils.ts
+├── public/
+│   └── images/
+│       ├── favicons/
+│       └── logos/
+├── scripts/
+│   └── create-test-users.ts
+├── supabase/
+│   ├── migrations/
+│   └── config.toml
+├── utils/
+│   ├── supabase/
+│   │   ├── action.ts
+│   │   ├── client.ts
+│   │   ├── middleware.ts
+│   │   └── server.ts
+│   └── utils.ts
+├── .env.local
+├── middleware.ts
+├── next.config.js
+├── package.json
+└── [config files]
 ```
 
 ## Tech Stack
@@ -101,7 +115,7 @@ This project involves integrating various features and services to create a comp
 - Stripe
 
 ## Key Supabase Usage
-- Do not use supabase's auth-helper library.
+- Do not use supabases auth-helper library
 - Supabase handles cookies
 
 
@@ -114,7 +128,7 @@ This project involves integrating various features and services to create a comp
 - Avoid enums; use const objects with 'as const' assertion
 - Use functional components with TypeScript interfaces
 - Use absolute imports for all files @/...
-- Avoid try/catch blocks unless there's good reason to translate or handle error in that abstraction
+- Avoid try/catch blocks unless there is good reason to translate or handle error in that abstraction
 - Use explicit return types for all functions
 
 ## State Management
@@ -180,3 +194,33 @@ Rules:
 - Test in multiple environments
 - Follow semantic versioning for releases
 - Maintain changelog
+
+## Accessibility Standards
+- Build accessibility from the start
+- Test with keyboard navigation
+- Maintain proper heading hierarchy
+- Ensure proper contrast ratios
+
+# API Design
+- Keep endpoints focused and specific
+- Use consistent response patterns
+- Handle errors at the source
+- Design with scalability in mind
+
+## Data Flow
+- Prefer server components for data fetching
+- Keep client-side state minimal
+- Use server actions for mutations
+- Handle loading and error states at boundaries
+
+## Performance
+- Optimize only with measurable benefits
+- Prefer static over dynamic when possible
+- Cache at the appropriate level
+- Load assets strategically
+
+## Component Architecture
+- Keep components focused and single-purpose
+- Prefer composition over configuration
+- Share logic through hooks, not inheritance
+- Maintain clear component boundaries

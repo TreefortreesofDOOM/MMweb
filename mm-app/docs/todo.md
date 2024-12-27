@@ -64,13 +64,10 @@
 - [ ] Add earnings dashboard
 
 ### Artist Management
-- [ ] Add artist dashboard
 - [ ] Add portfolio management
-- [ ] Add artwork upload functionality
 - [ ] Add commission request system
 
 ### Admin Features
-- [ ] Add admin dashboard
 - [ ] Add user management
 - [ ] Add content moderation tools
 - [ ] Add analytics and reporting
@@ -81,7 +78,6 @@
 - [ ] Add proper TypeScript types for all components
 - [ ] Add unit tests
 - [ ] Add end-to-end tests 
-
 
 ## Key Recommendations
 
