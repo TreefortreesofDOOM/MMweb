@@ -150,14 +150,34 @@ export async function updateArtwork(artworkId: string, formData: FormData) {
   const description = formData.get('description') as string;
   const price = parseFloat(formData.get('price') as string);
   const imagesJson = formData.get('images') as string;
+  const stylesJson = formData.get('styles') as string;
+  const techniquesJson = formData.get('techniques') as string;
+  const keywordsJson = formData.get('keywords') as string;
+
+  console.log('Update Artwork - Form Data:', {
+    artworkId,
+    title,
+    description,
+    price,
+    imagesJson,
+    stylesJson,
+    techniquesJson,
+    keywordsJson
+  });
 
   if (!title || !price || !imagesJson) {
+    console.log('Missing required fields:', { title, price, imagesJson });
     return { error: 'Missing required fields' };
   }
 
   try {
     const images = JSON.parse(imagesJson);
+    const styles = stylesJson ? JSON.parse(stylesJson) : [];
+    const techniques = techniquesJson ? JSON.parse(techniquesJson) : [];
+    const keywords = keywordsJson ? JSON.parse(keywordsJson) : [];
     
+    console.log('Parsed data:', { images, styles, techniques, keywords });
+
     if (!Array.isArray(images) || images.length === 0) {
       return { error: 'At least one image is required' };
     }
@@ -173,9 +193,21 @@ export async function updateArtwork(artworkId: string, formData: FormData) {
       .eq('id', artworkId)
       .single();
 
+    console.log('Existing artwork check:', existingArtwork);
+
     if (!existingArtwork || existingArtwork.artist_id !== user.id) {
       return { error: 'Unauthorized' };
     }
+
+    console.log('Attempting database update with:', {
+      title,
+      description,
+      price,
+      images,
+      styles,
+      techniques,
+      keywords
+    });
 
     const { data: artwork, error: artworkError } = await supabase
       .from('artworks')
@@ -184,17 +216,33 @@ export async function updateArtwork(artworkId: string, formData: FormData) {
         description,
         price,
         images,
+        styles,
+        techniques,
+        keywords,
       })
       .eq('id', artworkId)
       .select()
       .single();
 
-    if (artworkError) throw artworkError;
+    if (artworkError) {
+      console.error('Database update error:', artworkError);
+      throw artworkError;
+    }
+
+    console.log('Update successful:', artwork);
 
     // Update embeddings for the artwork
     if (artwork) {
       try {
-        await updateArtworkEmbeddings(artwork.id, title, description || '');
+        // Include styles, techniques, and keywords in the text for embeddings
+        const fullText = [
+          title,
+          description || '',
+          ...styles,
+          ...techniques,
+          ...keywords
+        ].join(' ');
+        await updateArtworkEmbeddings(artwork.id, title, fullText);
       } catch (embeddingError) {
         console.error('Error updating embeddings:', embeddingError);
         // Don't fail the artwork update if embeddings fail

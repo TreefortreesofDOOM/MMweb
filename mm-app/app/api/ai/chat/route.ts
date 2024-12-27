@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     const response = await getGeminiResponse(prompt, {
       context,
       imageUrl,
-      temperature: 0.7,
+      temperature: 0.8,
     });
 
     return NextResponse.json({ response });

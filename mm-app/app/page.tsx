@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
 import { GalleryAssistant } from '@/components/ai/gallery-assistant';
 
-export const revalidate = 3600; // Revalidate every hour
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const supabase = await createClient();

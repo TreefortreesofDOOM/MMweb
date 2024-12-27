@@ -48,6 +48,7 @@ interface ArtworkFormProps {
 export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentImages, setCurrentImages] = useState<ArtworkImage[]>(artwork?.images || []);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -66,22 +67,53 @@ export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
+      console.log('Form submission data:', data);
+      
       const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          formData.append(key, JSON.stringify(value));
-        } else {
-          formData.append(key, value.toString());
-        }
+      
+      // Use the current images state which maintains the full image structure
+      const images = currentImages.map(img => ({
+        ...img,
+        isPrimary: img.url === data.primaryImage
+      }));
+      
+      // Prepare the form data
+      formData.append('title', data.title);
+      formData.append('description', data.description);
+      formData.append('price', data.price.toString());
+      formData.append('images', JSON.stringify(images));
+      formData.append('styles', JSON.stringify(data.styles || []));
+      formData.append('techniques', JSON.stringify(data.techniques || []));
+      formData.append('keywords', JSON.stringify(data.keywords || []));
+
+      console.log('Prepared form data:', {
+        title: data.title,
+        description: data.description,
+        price: data.price,
+        images,
+        styles: data.styles,
+        techniques: data.techniques,
+        keywords: data.keywords
       });
 
       if (artwork?.id) {
-        await updateArtwork(artwork.id, formData);
+        const result = await updateArtwork(artwork.id, formData);
+        if (result.error) {
+          console.error('Error updating artwork:', result.error);
+          return;
+        }
+        console.log('Update successful:', result);
       } else {
-        await createArtwork(formData);
+        const result = await createArtwork(formData);
+        if (result.error) {
+          console.error('Error creating artwork:', result.error);
+          return;
+        }
+        console.log('Create successful:', result);
       }
       
       router.push('/artist/artworks');
+      router.refresh(); // Force a refresh of the page data
     } catch (error) {
       console.error('Error saving artwork:', error);
     } finally {
@@ -90,10 +122,21 @@ export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
   };
 
   const handleImagesChange = (images: ArtworkImage[]) => {
+    // Update the current images state
+    setCurrentImages(images);
+    
+    // Update form values
     const urls = images.map((img) => img.url);
     const primaryImage = images.find((img) => img.isPrimary)?.url || '';
-    form.setValue('images', urls);
-    form.setValue('primaryImage', primaryImage);
+    
+    form.setValue('images', urls, { shouldValidate: true });
+    form.setValue('primaryImage', primaryImage, { shouldValidate: true });
+    
+    console.log('Images updated:', {
+      currentImages: images,
+      urls,
+      primaryImage
+    });
   };
 
   return (
