@@ -21,6 +21,22 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
+              Featured Artist
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">Manage</div>
+            <Button variant="link" className="px-0" asChild>
+              <Link href="/admin/featured-artist">
+                Set Featured Artist →
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
               Pending Applications
             </CardTitle>
           </CardHeader>
@@ -45,22 +61,6 @@ export default async function AdminDashboardPage() {
             <Button variant="link" className="px-0" asChild>
               <Link href="/admin/artists">
                 Manage Artists →
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Artworks
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalArtworks || 0}</div>
-            <Button variant="link" className="px-0" asChild>
-              <Link href="/admin/artworks">
-                View Artworks →
               </Link>
             </Button>
           </CardContent>

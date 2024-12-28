@@ -16,6 +16,75 @@ import {
 import type { RoleNavigation, UserRole } from './types';
 
 export const navigationConfig: Record<UserRole, RoleNavigation> = {
+  admin: {
+    role: 'admin',
+    navigation: [
+      {
+        title: 'Overview',
+        items: [
+          {
+            title: 'Dashboard',
+            href: '/admin-dashboard',
+            icon: LayoutDashboard
+          },
+          {
+            title: 'Applications',
+            href: '/applications',
+            icon: Users
+          },
+          {
+            title: 'Featured Artist',
+            href: '/featured-artist',
+            icon: Award
+          }
+          /* Future Features:
+          {
+            title: 'Artists',
+            href: '/admin/artists',
+            icon: Users
+          },
+          {
+            title: 'Artworks',
+            href: '/admin/artworks',
+            icon: Image
+          }
+          */
+        ]
+      }
+      /* Future Features:
+      {
+        title: 'Verification',
+        items: [
+          {
+            title: 'Artist Verification',
+            href: '/admin/verification',
+            icon: BadgeCheck
+          },
+          {
+            title: 'Requirements',
+            href: '/admin/requirements',
+            icon: Award
+          }
+        ]
+      },
+      {
+        title: 'System',
+        items: [
+          {
+            title: 'Settings',
+            href: '/admin/settings',
+            icon: Settings
+          },
+          {
+            title: 'Analytics',
+            href: '/admin/analytics',
+            icon: LineChart
+          }
+        ]
+      }
+      */
+    ]
+  },
   verified_artist: {
     role: 'verified_artist',
     navigation: [
@@ -111,61 +180,6 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
             title: 'QR Code',
             href: '/artist/qr-code',
             icon: QrCode
-          }
-        ]
-      }
-    ]
-  },
-  admin: {
-    role: 'admin',
-    navigation: [
-      {
-        title: 'Overview',
-        items: [
-          {
-            title: 'Dashboard',
-            href: '/admin/dashboard',
-            icon: LayoutDashboard
-          },
-          {
-            title: 'Artists',
-            href: '/admin/artists',
-            icon: Users
-          },
-          {
-            title: 'Artworks',
-            href: '/admin/artworks',
-            icon: Image
-          }
-        ]
-      },
-      {
-        title: 'Verification',
-        items: [
-          {
-            title: 'Artist Verification',
-            href: '/admin/verification',
-            icon: BadgeCheck
-          },
-          {
-            title: 'Requirements',
-            href: '/admin/requirements',
-            icon: Award
-          }
-        ]
-      },
-      {
-        title: 'System',
-        items: [
-          {
-            title: 'Settings',
-            href: '/admin/settings',
-            icon: Settings
-          },
-          {
-            title: 'Analytics',
-            href: '/admin/analytics',
-            icon: LineChart
           }
         ]
       }
