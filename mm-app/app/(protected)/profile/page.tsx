@@ -3,6 +3,15 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getProfileAction } from "@/lib/actions"
 import { redirect } from 'next/navigation'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { ArtistBadge } from "@/components/ui/artist-badge"
+import { ExhibitionBadge } from "@/components/ui/exhibition-badge"
+import { MapPin, Globe, Instagram } from "lucide-react"
+import { ARTIST_ROLES } from "@/lib/types/custom-types"
+import type { Database } from '@/lib/database.types'
+
+type Profile = Database['public']['Tables']['profiles']['Row']
 
 export default async function ProfilePage() {
   const { profile, error } = await getProfileAction()
@@ -24,17 +33,83 @@ export default async function ProfilePage() {
     return redirect('/sign-in')
   }
   
-  const canApplyAsArtist = profile?.role === 'user' && 
-    (!profile?.artist_status || profile.artist_status === 'rejected')
+  const canApplyAsArtist = profile.role === 'user' && 
+    (!profile.artist_status || profile.artist_status === 'rejected')
+
+  const isArtist = profile.role === 'artist'
+  const isVerifiedArtist = isArtist && profile.artist_type === ARTIST_ROLES.VERIFIED
+  const isEmergingArtist = isArtist && profile.artist_type === ARTIST_ROLES.EMERGING
+  
+  // Calculate initials for avatar fallback
+  const initials = profile.full_name
+    ?.split(' ')
+    .map((name: string) => name[0])
+    .join('')
+    .toUpperCase() || '';
   
   return (
     <div className="container max-w-2xl mx-auto py-8">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Profile</CardTitle>
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            <Avatar className="h-24 w-24 border">
+              <AvatarImage 
+                src={profile.avatar_url || undefined} 
+                alt={`${profile.full_name}'s profile picture`}
+              />
+              <AvatarFallback className="text-xl">{initials}</AvatarFallback>
+            </Avatar>
+            
+            <div className="space-y-2 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-bold">
+                  {profile.full_name || 'Your Profile'}
+                </h1>
+                {isVerifiedArtist && <ArtistBadge type={ARTIST_ROLES.VERIFIED} />}
+                {isEmergingArtist && <ArtistBadge type={ARTIST_ROLES.EMERGING} />}
+                {profile.exhibition_badge && <ExhibitionBadge />}
+              </div>
+              
+              {profile.bio && (
+                <p className="text-muted-foreground">{profile.bio}</p>
+              )}
+              
+              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                {profile.location && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-4 w-4" />
+                    {profile.location}
+                  </div>
+                )}
+                {profile.website && (
+                  <a 
+                    href={profile.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 hover:text-primary"
+                  >
+                    <Globe className="h-4 w-4" />
+                    Website
+                  </a>
+                )}
+                {profile.instagram && (
+                  <a 
+                    href={`https://instagram.com/${profile.instagram.replace('@', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 hover:text-primary"
+                  >
+                    <Instagram className="h-4 w-4" />
+                    {profile.instagram}
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
         </CardHeader>
+
         <CardContent className="space-y-6">
-          {profile?.role === 'artist' && (
+          {isArtist && (
             <div className="rounded-md bg-primary/10 p-4">
               <p className="text-sm font-medium text-primary">
                 Artist Account
@@ -44,54 +119,30 @@ export default async function ProfilePage() {
               </p>
             </div>
           )}
-  
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Name</h3>
-            <p className="text-sm">
-              {profile?.first_name && profile?.last_name 
-                ? `${profile.first_name} ${profile.last_name}`
-                : profile?.first_name || profile?.last_name || 'No name added'}
-            </p>
-          </div>
-  
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Bio</h3>
-            <p className="text-sm">{profile?.bio || 'No bio yet'}</p>
-          </div>
-  
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Website</h3>
-            <p className="text-sm">{profile?.website || 'No website added'}</p>
-          </div>
-  
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Instagram</h3>
-            <p className="text-sm">{profile?.instagram || 'No Instagram added'}</p>
-          </div>
-  
-          {profile?.artist_status === 'pending' && (
+
+          {profile.artist_status === 'pending' && (
             <div className="rounded-md bg-yellow-50 p-4">
               <p className="text-sm text-yellow-800">
                 Your artist application is pending review. We'll notify you once it's been processed.
               </p>
             </div>
           )}
-  
-          {profile?.artist_status === 'rejected' && (
-            <div className="rounded-md bg-destructive/10 p-4 mb-4">
+
+          {profile.artist_status === 'rejected' && (
+            <div className="rounded-md bg-destructive/10 p-4">
               <p className="text-sm text-destructive">
                 Your previous artist application was not approved. You may submit a new application.
               </p>
             </div>
           )}
-  
+
           <div className="flex flex-col gap-2">
             <Button asChild variant="default">
               <Link href="/profile/edit">
-                {profile ? 'Edit Profile' : 'Create Profile'}
+                Edit Profile
               </Link>
             </Button>
-  
+
             {canApplyAsArtist && (
               <Button asChild variant="outline">
                 <Link href="/profile/application">
@@ -100,19 +151,6 @@ export default async function ProfilePage() {
               </Button>
             )}
           </div>
-  
-          {profile?.role === 'admin' && (
-            <div className="mt-8 pt-8 border-t">
-              <h2 className="text-xl font-semibold mb-4">Admin Tools</h2>
-              <div className="flex flex-col gap-2">
-                <Button asChild variant="outline">
-                  <Link href="/admin/dashboard">
-                    Admin Dashboard
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

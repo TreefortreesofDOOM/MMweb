@@ -3,8 +3,6 @@ import { notFound } from 'next/navigation';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const revalidate = 3600; // Revalidate every hour
-
 interface PageProps {
   params: Promise<{ id: string }> | { id: string };
 }

@@ -12,6 +12,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, CheckCircle2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { ProfileAvatarForm } from '@/components/profile/profile-avatar-form'
+import type { Database } from '@/lib/database.types'
+
+type Profile = Database['public']['Tables']['profiles']['Row']
 
 export default async function EditProfilePage({
   searchParams,
@@ -39,15 +43,26 @@ export default async function EditProfilePage({
       </div>
     )
   }
+
+  if (!profile) {
+    return redirect('/sign-in')
+  }
   
   const params = await searchParams;
-  const isArtist = profile?.role === 'artist';
-  const isVerifiedArtist = isArtist && profile?.artist_type === 'verified';
-  const isEmergingArtist = isArtist && profile?.artist_type === 'emerging';
-  const verificationProgress = profile?.verification_progress || 0;
+  const isArtist = profile.role === 'artist';
+  const isVerifiedArtist = isArtist && profile.artist_type === 'verified';
+  const isEmergingArtist = isArtist && profile.artist_type === 'emerging';
+  const verificationProgress = profile.verification_progress || 0;
+  
+  // Calculate initials for avatar
+  const initials = profile.full_name
+    ?.split(' ')
+    .map((name: string) => name[0])
+    .join('')
+    .toUpperCase() || '';
   
   return (
-    <div className="container max-w-2xl mx-auto py-8">
+    <div className="container max-w-2xl mx-auto py-8 space-y-6">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
@@ -70,7 +85,13 @@ export default async function EditProfilePage({
             </CardDescription>
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          {/* Avatar Upload Section */}
+          <ProfileAvatarForm 
+            currentAvatarUrl={profile?.avatar_url} 
+            initials={initials}
+          />
+
           <form action={updateProfileAction} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -102,17 +123,20 @@ export default async function EditProfilePage({
                 name="bio"
                 defaultValue={profile?.bio || ''}
                 placeholder="Tell us about yourself"
-                className="min-h-[100px]"
                 required={isArtist}
               />
-              {isArtist && (
-                <p className="text-sm text-muted-foreground">
-                  A detailed bio helps collectors understand your artistic journey.
-                  {isEmergingArtist && " This is required for verification."}
-                </p>
-              )}
             </div>
-    
+
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                name="location"
+                defaultValue={profile?.location || ''}
+                placeholder="City, Country"
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="website">Website</Label>
               <Input
@@ -120,68 +144,26 @@ export default async function EditProfilePage({
                 name="website"
                 type="url"
                 defaultValue={profile?.website || ''}
-                placeholder="https://example.com"
-                required={isVerifiedArtist}
+                placeholder="https://your-website.com"
               />
-              {isArtist && (
-                <p className="text-sm text-muted-foreground">
-                  Your professional website or portfolio.
-                  {isVerifiedArtist && " Required for verified artists."}
-                </p>
-              )}
             </div>
-    
+
             <div className="space-y-2">
               <Label htmlFor="instagram">Instagram</Label>
               <Input
                 id="instagram"
                 name="instagram"
                 defaultValue={profile?.instagram || ''}
-                placeholder="@username"
-                required={isVerifiedArtist}
+                placeholder="@your.instagram"
               />
-              {isArtist && (
-                <p className="text-sm text-muted-foreground">
-                  Your Instagram handle for social presence.
-                  {isVerifiedArtist && " Required for verified artists."}
-                </p>
-              )}
             </div>
 
-            {isEmergingArtist && (
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="space-y-3">
-                  <p>Complete your profile to progress towards verification.</p>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>Verification Progress</span>
-                      <span>{verificationProgress}%</span>
-                    </div>
-                    <Progress value={verificationProgress} className="h-2" />
-                  </div>
-                  <Link 
-                    href="/artist/verification" 
-                    className="text-primary hover:underline block text-sm mt-2"
-                  >
-                    View verification requirements
-                  </Link>
-                </AlertDescription>
-              </Alert>
-            )}
-    
-            <div className="flex gap-4">
-              <Button type="submit">
-                Save Changes
-              </Button>
+            <div className="flex justify-end gap-4">
               <Button asChild variant="outline">
-                <Link href="/profile">
-                  Cancel
-                </Link>
+                <Link href="/profile">Cancel</Link>
               </Button>
+              <Button type="submit">Save Changes</Button>
             </div>
-            
-            <FormMessage message={params} />
           </form>
         </CardContent>
       </Card>

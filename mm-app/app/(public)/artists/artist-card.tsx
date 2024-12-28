@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { MapPin } from 'lucide-react'
+import { MapPin, ImageIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, KeyboardEvent, useMemo } from 'react'
 import { ArtistBadge } from '@/components/ui/artist-badge'
@@ -62,38 +62,43 @@ export function ArtistCard({ artist, index, totalArtists }: ArtistCardProps) {
           isVerified && "border-primary/20",
           !isVerified && "border-secondary/20"
         )}>
-          <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-            <Avatar className="h-10 w-10">
-              <AvatarImage 
-                src={artist.avatar_url || undefined} 
-                alt={`${artist.full_name}'s profile picture`} 
-              />
-              <AvatarFallback aria-hidden="true">{initials}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <p className="font-semibold leading-none">{artist.full_name}</p>
-                {isVerified && (
-                  <div className="flex items-center gap-2">
-                    <ArtistBadge type={ARTIST_ROLES.VERIFIED} />
-                    {artist.exhibition_badge && <ExhibitionBadge />}
-                  </div>
+          <CardHeader className="space-y-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-12 w-12 border">
+                  <AvatarImage 
+                    src={artist.avatar_url || undefined} 
+                    alt={`${artist.full_name}'s profile picture`} 
+                  />
+                  <AvatarFallback aria-hidden="true">{initials}</AvatarFallback>
+                </Avatar>
+                <div className="space-y-1">
+                  <h3 className="font-semibold leading-none">{artist.full_name}</h3>
+                  {artist.location && (
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <MapPin className="h-3 w-3" aria-hidden="true" />
+                      <span>{artist.location}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <ArtistBadge type={artistType} />
+                {isVerified && artist.exhibition_badge && (
+                  <ExhibitionBadge />
                 )}
               </div>
-              {artist.location && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="h-3 w-3" aria-hidden="true" />
-                  <span>{artist.location}</span>
-                </div>
-              )}
             </div>
+            {artist.bio && (
+              <p className="text-sm text-muted-foreground line-clamp-2">{artist.bio}</p>
+            )}
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <ImageIcon className="h-4 w-4" />
+              <span>
                 {artworkCount} {artworkCount === 1 ? 'artwork' : 'artworks'}
-              </p>
-              <ArtistBadge type={artistType} />
+              </span>
             </div>
           </CardContent>
         </Card>

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { encodedRedirect } from "@/lib/utils";
 import { Database } from "@/lib/database.types";
 
-type Profile = Database['public']['Tables']['profiles']['Update'];
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 export async function getProfileAction() {
   const supabase = await createActionClient();
@@ -31,7 +31,10 @@ export async function getProfileAction() {
         artist_type,
         artist_status,
         verification_progress,
-        verification_requirements
+        verification_requirements,
+        avatar_url,
+        exhibition_badge,
+        location
       `)
       .eq('id', user.id)
       .single();

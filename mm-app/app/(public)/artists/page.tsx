@@ -12,13 +12,11 @@ export const metadata: Metadata = {
   description: 'Browse our curated artists.',
 }
 
-export const revalidate = 3600 // revalidate every hour
-
 export default async function ArtistsPage(): Promise<React.ReactElement> {
   const supabase = await createClient()
 
   // Fetch initial artists data
-  const { data: initialArtists } = await supabase
+  const { data: initialArtists, error } = await supabase
     .from('profiles')
     .select(`
       id,
@@ -40,6 +38,11 @@ export default async function ArtistsPage(): Promise<React.ReactElement> {
     .order('artist_type', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .range(0, 11)
+
+  // Debug logs
+  console.log('Query error:', error)
+  console.log('Found artists:', initialArtists?.length)
+  console.log('Artist types:', initialArtists?.map(a => ({ id: a.id, type: a.artist_type })))
 
   // Transform the data to match ArtistWithCount type
   const transformedArtists = initialArtists?.map(artist => ({
