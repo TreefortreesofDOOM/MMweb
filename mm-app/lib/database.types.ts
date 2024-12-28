@@ -580,6 +580,33 @@ export type Database = {
           },
         ]
       }
+      partial_registrations: {
+        Row: {
+          id: string
+          email: string
+          data: Json
+          created_at: string
+          updated_at: string
+          expires_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          data?: Json
+          created_at?: string
+          updated_at?: string
+          expires_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          data?: Json
+          created_at?: string
+          updated_at?: string
+          expires_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       profile_roles: {

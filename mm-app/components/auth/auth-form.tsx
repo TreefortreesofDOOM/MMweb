@@ -13,6 +13,7 @@ export function AuthForm({
 }) {
   return (
     <form 
+      method="post"
       className={className}
       suppressHydrationWarning
       {...props}
@@ -20,4 +21,4 @@ export function AuthForm({
       {children}
     </form>
   );
-} 
+}  

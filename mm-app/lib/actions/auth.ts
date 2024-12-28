@@ -19,24 +19,26 @@ export const signUpAction = async (formData: FormData) => {
     );
   }
 
-  const { error } = await supabase.auth.signUp({
+  // Sign up the user
+  const { data, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/callback`,
-    },
+      emailRedirectTo: `${origin}/callback`
+    }
   });
 
-  if (error) {
-    console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
-  } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link.",
-    );
+  if (signUpError) {
+    console.error("Signup error:", signUpError);
+    return encodedRedirect("error", "/sign-up", signUpError.message);
   }
+
+  if (!data?.session) {
+    console.error("No session returned from signUp");
+    return encodedRedirect("error", "/sign-up", "Failed to create account");
+  }
+
+  return redirect("/profile?verification=pending");
 };
 
 export const signInAction = async (formData: FormData) => {
@@ -44,7 +46,7 @@ export const signInAction = async (formData: FormData) => {
   const password = formData.get("password") as string;
   const supabase = await createActionClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });

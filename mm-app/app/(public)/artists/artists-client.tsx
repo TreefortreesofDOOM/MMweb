@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState, useMemo } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import supabaseClient from '@/lib/supabase/client'
 import { ArtistCard } from './artist-card'
 import { useInView } from 'react-intersection-observer'
 import { AlertCircle, Loader2 } from 'lucide-react'
@@ -51,7 +51,6 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState(2) // Start from page 2 since we have initial data
   const [hasMore, setHasMore] = useState(initialArtists.length === ARTISTS_PER_PAGE)
-  const supabase = createClient()
   const { toast } = useToast()
   
   const { ref, inView } = useInView({
@@ -66,7 +65,7 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
       const from = (page - 1) * ARTISTS_PER_PAGE
       const to = from + ARTISTS_PER_PAGE - 1
 
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('profiles')
         .select(`
           id,
@@ -115,7 +114,7 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
     } finally {
       setIsLoading(false)
     }
-  }, [supabase, page, toast])
+  }, [supabaseClient, page, toast])
 
   const handleRetry = useCallback(() => {
     setPage(2) // Reset to page 2 since we have initial data

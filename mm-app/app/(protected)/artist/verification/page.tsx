@@ -6,6 +6,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { checkVerificationRequirements } from '@/lib/actions/verification';
+import type { Database } from '@/lib/database.types';
+
+type UserRole = Database['public']['Enums']['user_role'];
 
 export default async function VerificationPage() {
   const supabase = await createClient();
@@ -21,15 +24,16 @@ export default async function VerificationPage() {
     .eq('id', user.id)
     .single();
 
-  if (!profile || profile.role !== 'artist') {
+  // Check if user is either an artist or emerging_artist
+  if (!profile || (profile.role !== 'artist' && profile.role !== 'emerging_artist')) {
     return redirect('/profile');
   }
 
   // Check verification requirements
   const { verified, progress, error } = await checkVerificationRequirements(user.id);
 
-  const isVerifiedArtist = profile.artist_type === 'verified' || verified;
-  const isEmergingArtist = profile.artist_type === 'emerging' && !verified;
+  const isVerifiedArtist = profile.artist_type === 'verified_artist' || verified;
+  const isEmergingArtist = profile.artist_type === 'emerging_artist' && !verified;
   const hasExhibitionBadge = profile.exhibition_badge;
 
   return (

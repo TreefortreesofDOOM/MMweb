@@ -10,11 +10,19 @@ import { ExhibitionBadge } from "@/components/ui/exhibition-badge"
 import { MapPin, Globe, Instagram } from "lucide-react"
 import { ARTIST_ROLES } from "@/lib/types/custom-types"
 import type { Database } from '@/lib/database.types'
+import { VerificationBanner } from "@/components/verification-banner"
+import { createActionClient } from "@/lib/supabase/action"
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined }
+}) {
   const { profile, error } = await getProfileAction()
+  const supabase = await createActionClient()
+  const { data: { user } } = await supabase.auth.getUser()
   
   if (error) {
     console.error('Error fetching profile:', error)
@@ -46,9 +54,25 @@ export default async function ProfilePage() {
     .map((name: string) => name[0])
     .join('')
     .toUpperCase() || '';
+
+  // Show verification banner only if email is not confirmed
+  const showVerificationBanner = !user?.email_confirmed_at;
+  
+  // Debug logs
+  console.log('Auth User:', {
+    email: user?.email,
+    email_confirmed_at: user?.email_confirmed_at,
+    showBanner: showVerificationBanner
+  });
   
   return (
     <div className="container max-w-2xl mx-auto py-8">
+      {showVerificationBanner && (
+        <div className="mb-6">
+          <VerificationBanner />
+        </div>
+      )}
+      
       <Card>
         <CardHeader>
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">

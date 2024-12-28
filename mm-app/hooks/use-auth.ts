@@ -44,11 +44,15 @@ export function useAuth(): AuthState {
         .single();
       
       if (profileError) {
+        if (profileError.code === 'PGRST116') {
+          // Profile not found - this is expected for new users
+          return null;
+        }
         throw profileError;
       }
 
       if (!dbProfile) {
-        throw new Error('Profile not found');
+        return null;
       }
 
       // Convert database profile to ArtistProfile type
@@ -62,7 +66,8 @@ export function useAuth(): AuthState {
       return artistProfile;
     } catch (error) {
       console.error('Error fetching profile:', error);
-      throw error;
+      // Don't throw the error, just return null
+      return null;
     }
   };
 
@@ -81,7 +86,7 @@ export function useAuth(): AuthState {
 
         if (session?.user) {
           const profile = await fetchProfile(session.user.id);
-          setProfile(profile);
+          setProfile(profile); // profile may be null for new users
         }
 
         setIsLoading(false);
@@ -104,15 +109,20 @@ export function useAuth(): AuthState {
         
         if (session?.user) {
           const profile = await fetchProfile(session.user.id);
-          setProfile(profile);
+          setProfile(profile); // profile may be null for new users
         } else {
           setProfile(null);
         }
 
         setIsLoading(false);
       } catch (error) {
-        console.error('Error updating auth state:', error);
-        setError(error instanceof Error ? error.message : 'Failed to update auth state');
+        if (error instanceof Error) {
+          console.error('Error updating auth state:', error.message);
+          setError(error.message);
+        } else {
+          console.error('Error updating auth state:', error);
+          setError('Failed to update auth state');
+        }
         setIsLoading(false);
       }
     });

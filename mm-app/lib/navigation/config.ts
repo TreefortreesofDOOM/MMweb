@@ -37,36 +37,9 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
             href: '/featured-artist',
             icon: Award
           }
-          /* Future Features:
-          {
-            title: 'Artists',
-            href: '/admin/artists',
-            icon: Users
-          },
-          {
-            title: 'Artworks',
-            href: '/admin/artworks',
-            icon: Image
-          }
-          */
         ]
       }
       /* Future Features:
-      {
-        title: 'Verification',
-        items: [
-          {
-            title: 'Artist Verification',
-            href: '/admin/verification',
-            icon: BadgeCheck
-          },
-          {
-            title: 'Requirements',
-            href: '/admin/requirements',
-            icon: Award
-          }
-        ]
-      },
       {
         title: 'System',
         items: [
@@ -159,17 +132,12 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
         ]
       },
       {
-        title: 'Verification',
+        title: 'Artist',
         items: [
           {
-            title: 'Verification Journey',
+            title: 'Get Verified',
             href: '/artist/verification',
             icon: BadgeCheck
-          },
-          {
-            title: 'Requirements',
-            href: '/artist/requirements',
-            icon: Award
           }
         ]
       },
