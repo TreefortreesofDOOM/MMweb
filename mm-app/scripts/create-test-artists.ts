@@ -171,6 +171,14 @@ const testArtists = [
   }
 ];
 
+const emergingArtistBio = `As an emerging artist based in Atlanta, I am deeply passionate about exploring the intersection of traditional techniques and contemporary themes. My work draws inspiration from urban landscapes and personal narratives, creating pieces that invite viewers to question their relationship with everyday spaces and objects.
+
+Currently, I'm developing a series that examines the transformation of industrial spaces into cultural hubs, reflecting Atlanta's evolving identity. Through my mixed-media approach, I combine traditional painting techniques with experimental materials, pushing the boundaries of conventional artistic expression.
+
+My recent exhibitions at local galleries and participation in community art initiatives have allowed me to engage with Atlanta's vibrant art scene. I'm particularly interested in creating works that spark dialogue about urban development, community identity, and the role of art in social change.
+
+I hold a BFA from SCAD Atlanta and have been actively creating and exhibiting in the Southeast region for the past three years. When not in my studio, I collaborate with other emerging artists and participate in local art education programs, believing strongly in the power of art to build community connections.`;
+
 async function deleteArtist(email: string) {
   try {
     const { data: user, error: findError } = await supabase

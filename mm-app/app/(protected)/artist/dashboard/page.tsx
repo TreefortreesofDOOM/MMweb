@@ -14,7 +14,7 @@ export default async function DashboardPage() {
   // Get artist's profile with type assertion
   const { data: profile } = await supabase
     .from('profiles')
-    .select('stripe_account_id, stripe_onboarding_complete')
+    .select('stripe_account_id, stripe_onboarding_complete, exhibition_badge')
     .eq('id', user?.id)
     .single();
 
@@ -22,7 +22,8 @@ export default async function DashboardPage() {
     artworks={artworks || []} 
     profile={{
       stripe_account_id: profile?.stripe_account_id,
-      stripe_onboarding_complete: profile?.stripe_onboarding_complete
+      stripe_onboarding_complete: profile?.stripe_onboarding_complete,
+      exhibition_badge: profile?.exhibition_badge
     }}
   />;
 } 

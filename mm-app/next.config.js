@@ -17,6 +17,11 @@ const nextConfig = {
         hostname: 'images.unsplash.com',
         port: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'files.stripe.com',
+        port: '',
+      }
     ],
     domains: [
       '192.168.86.29', // Local Supabase storage

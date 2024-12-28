@@ -22,6 +22,7 @@ interface DashboardClientProps {
     stripe_account_id?: string | null;
     stripe_onboarding_complete?: boolean;
     role?: string;
+    exhibition_badge?: boolean | null;
   };
 }
 
@@ -45,17 +46,25 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">Artist Dashboard</h1>
-            {isVerifiedArtist ? (
-              <Badge variant="outline" className="gap-1" role="status" aria-label="Verified Artist Status">
-                <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                Verified Artist
-              </Badge>
-            ) : (
-              <Badge variant="secondary" className="gap-1" role="status" aria-label="Emerging Artist Status">
-                <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                Emerging Artist
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {isVerifiedArtist ? (
+                <Badge variant="outline" className="gap-1" role="status" aria-label="Verified Artist Status">
+                  <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                  Verified Artist
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="gap-1" role="status" aria-label="Emerging Artist Status">
+                  <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                  Emerging Artist
+                </Badge>
+              )}
+              {profile.exhibition_badge && (
+                <Badge variant="outline" className="gap-1" role="status" aria-label="Exhibition Badge Status">
+                  <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                  Exhibition Badge
+                </Badge>
+              )}
+            </div>
           </div>
           <p className="text-muted-foreground">
             Manage your artworks and track your performance

@@ -37,7 +37,7 @@ export default async function GalleryPage() {
         <div>
           <h1 className="text-3xl font-bold mb-2">Gallery</h1>
           <p className="text-muted-foreground mb-6">
-            Discover unique pieces from our talented artists
+            Meaning Machine is a curated collection of artworks by exhibiting and emerging artists.
           </p>
         </div>
 
