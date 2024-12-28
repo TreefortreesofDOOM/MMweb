@@ -85,6 +85,7 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
           artworks:artworks(count)
         `)
         .in('artist_type', [ARTIST_ROLES.VERIFIED, ARTIST_ROLES.EMERGING])
+        .order('exhibition_badge', { ascending: false, nullsFirst: false })
         .order('artist_type', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })
         .range(from, to)
@@ -124,16 +125,12 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
   }, [fetchArtists, initialArtists])
 
   useEffect(() => {
-    if (inView && hasMore && !isLoading && !error) {
-      setPage(prev => prev + 1)
+    if (inView && hasMore && !isLoading) {
+      fetchArtists().then(() => {
+        setPage(prev => prev + 1)
+      })
     }
-  }, [inView, hasMore, isLoading, error])
-
-  useEffect(() => {
-    if (page > 2) { // Only fetch if we're past the initial data
-      fetchArtists()
-    }
-  }, [page, fetchArtists])
+  }, [inView, hasMore, isLoading, fetchArtists])
 
   const artistGrid = useMemo(() => (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

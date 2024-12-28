@@ -177,7 +177,7 @@ This document outlines the implementation strategy for the public artist browsin
 2. **Verified Artist** [✅]
    - Achieved through:
      - Automatic verification (meeting requirements) [✅]
-     - OR being approved for exhibition [✅]
+     - OR being approved for exhibition by admin [✅]
    - Unlimited artworks [✅]
    - Full platform features [✅]
 

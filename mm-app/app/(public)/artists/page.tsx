@@ -35,6 +35,7 @@ export default async function ArtistsPage(): Promise<React.ReactElement> {
       artworks:artworks(count)
     `)
     .in('artist_type', [ARTIST_ROLES.VERIFIED, ARTIST_ROLES.EMERGING])
+    .order('exhibition_badge', { ascending: false, nullsFirst: false })
     .order('artist_type', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .range(0, 11)
