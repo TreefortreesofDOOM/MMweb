@@ -15,12 +15,15 @@ A modern art gallery platform built with Next.js 13, Supabase, and TailwindCSS.
   - Artwork upload and management
   - AI-powered artwork analysis
   - Stripe Connect integration for payments
+  - Featured artist system with admin controls
 
 - **Admin Dashboard**
   - Artist application review
   - User management
   - Platform statistics
   - Content moderation
+  - Featured artist management
+  - Homepage curation tools
 
 - **Modern Tech Stack**
   - Next.js 13 with App Router
@@ -37,13 +40,14 @@ A modern art gallery platform built with Next.js 13, Supabase, and TailwindCSS.
 mm-app/
 ├── app/                  # Next.js 13 App Router pages
 │   ├── (auth-pages)/    # Authentication pages
-│   ├── admin/           # Admin dashboard
+│   ├── (admin)/         # Admin dashboard & features
 │   ├── artist/          # Artist features
 │   └── profile/         # User profile management
 ├── components/          # React components
 │   ├── ui/             # shadcn/ui components
 │   ├── nav/            # Navigation components
 │   ├── artwork/        # Artwork-related components
+│   ├── admin/          # Admin-specific components
 │   └── layout/         # Layout components
 ├── lib/                # Core utilities
 │   ├── actions/        # Server actions

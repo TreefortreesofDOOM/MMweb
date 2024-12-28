@@ -7,6 +7,7 @@
 - [x] TailwindCSS with shadcn/ui components
 - [x] Dark mode support
 - [x] Toast notification system
+- [x] Featured artist system with admin controls
 
 ### Artist Features
 - [x] Artist profile management
@@ -14,6 +15,25 @@
 - [x] Portfolio management
 - [x] Status tracking
 - [x] Email notifications
+- [x] Featured artist showcase on homepage
+
+### Admin Features
+- [x] Admin review interface
+  - Application review dashboard
+  - Bulk approval/rejection tools
+  - Status change notifications
+  - Application filtering and search
+- [x] Homepage management
+  - Featured artist selection
+  - Automatic fallback to random selection
+  - Artist showcase customization
+
+### Gallery Features
+- [x] Enhanced curation tools
+  - Featured artist management
+  - Collection organization
+  - Exhibition planning
+  - QR code generation
 
 ### Artwork Management
 - [x] Multi-image upload system
@@ -38,13 +58,6 @@
 - [x] Input validation with Zod
 
 ## Sprint 1 (Current) - Core Features & Essential Setup
-### Admin Features
-- [x] Admin review interface
-  - Application review dashboard
-  - Bulk approval/rejection tools
-  - Status change notifications
-  - Application filtering and search
-
 ### AI Integration Essentials
 - [ ] Google Cloud Project setup
   - Configure Gemini-1.5-flash model
@@ -78,16 +91,6 @@
   - Deployment automation
 
 ## Sprint 2 - Enhancement & Polish
-### Gallery Features
-- [x] Enhanced curation tools
-  - Collection organization
-  - Exhibition planning
-  - QR code generation
-- [ ] Virtual gallery setup
-  - 3D view options
-  - Gallery layout tools
-  - Exhibition previews
-
 ### AI Improvements
 - [ ] Real-time AI features
   - Streaming responses
