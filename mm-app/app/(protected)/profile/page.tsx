@@ -1,18 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getProfileAction } from "@/lib/actions"
+import { redirect } from 'next/navigation'
 
 export default async function ProfilePage() {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return redirect('/sign-in')
-  }
-
   const { profile, error } = await getProfileAction()
   
   if (error) {
@@ -26,6 +18,10 @@ export default async function ProfilePage() {
         </Card>
       </div>
     )
+  }
+
+  if (!profile) {
+    return redirect('/sign-in')
   }
   
   const canApplyAsArtist = profile?.role === 'user' && 

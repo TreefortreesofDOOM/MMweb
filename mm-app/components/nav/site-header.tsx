@@ -2,9 +2,10 @@
 
 import { MainNav } from './main-nav';
 import { UserNav } from './user-nav';
+import type { UserRole } from '@/lib/navigation/types';
 
 interface SiteHeaderProps {
-  userRole?: string | null;
+  userRole?: UserRole | null;
   userEmail?: string | null;
 }
 

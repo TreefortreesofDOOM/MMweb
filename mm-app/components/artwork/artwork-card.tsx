@@ -31,6 +31,8 @@ interface ArtworkCardProps {
   onDelete?: (id: string) => void;
   onSelect?: () => void;
   isLoading?: boolean;
+  isEmergingArtist?: boolean;
+  isAtPublishLimit?: boolean;
 }
 
 export function ArtworkCard({ 
@@ -41,9 +43,12 @@ export function ArtworkCard({
   onUnpublish, 
   onDelete,
   onSelect,
-  isLoading 
+  isLoading,
+  isEmergingArtist,
+  isAtPublishLimit
 }: ArtworkCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageError, setImageError] = useState(false);
 
   const sortedImages = (artwork.images || [])
     .filter(img => img.url && img.url.trim() !== '')
@@ -90,13 +95,23 @@ export function ArtworkCard({
       onClick={onSelect}
     >
       <div className="relative aspect-square">
-        <Image
-          src={sortedImages[currentImageIndex].url}
-          alt={`${artwork.title} - Image ${currentImageIndex + 1}`}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover transition-opacity duration-300"
-        />
+        {imageError ? (
+          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+            <span className="text-gray-400">Image unavailable</span>
+          </div>
+        ) : (
+          <Image
+            src={sortedImages[currentImageIndex].url}
+            alt={`${artwork.title} - Image ${currentImageIndex + 1}`}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover transition-opacity duration-300"
+            loading="lazy"
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx4eHRoaHSQtJSEkLzYvLy0vLi44QjQ4OEQ4LjE1REVHS1NTW1xfXkVRZGZsZ2tpU1P/2wBDARUXFx4aHh4pKSk8Ozs7U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+            onError={() => setImageError(true)}
+          />
+        )}
         {sortedImages.length > 1 && (
           <>
             <Button
@@ -163,8 +178,9 @@ export function ArtworkCard({
             <Button
               variant="default"
               onClick={() => onPublish?.(artwork.id)}
-              disabled={isLoading}
+              disabled={isLoading || (isEmergingArtist && isAtPublishLimit)}
               className="w-full ml-2"
+              title={isAtPublishLimit ? "Emerging artists can only publish 10 artworks" : undefined}
             >
               Publish
             </Button>

@@ -1,5 +1,7 @@
 import { LucideIcon } from 'lucide-react';
 
+export type UserRole = 'admin' | 'verified_artist' | 'emerging_artist' | 'user';
+
 export interface NavItem {
   title: string;
   href: string;
@@ -13,6 +15,6 @@ export interface NavSection {
 }
 
 export interface RoleNavigation {
-  role: 'user' | 'artist' | 'admin';
+  role: UserRole;
   navigation: NavSection[];
 } 
