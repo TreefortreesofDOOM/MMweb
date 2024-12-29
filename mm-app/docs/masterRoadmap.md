@@ -363,7 +363,7 @@ graph TD
 
 2. **Artist Directory** *(see [Artist Browse System](#artist-browse-system))*
    - [⚠️] Filter by artist status (Backend implemented, UI needs enhancement)
-   - [⚠️] Activity feed (Basic events tracked, feed UI in development)
+   - [⚠️] Activity feed (Basic events tracked, feed UI in development) [Deferred]
 
 3. **Platform Engagement** *(see [Platform Engagement Requirements](#platform-engagement))*
    - [⚠️] Profile views threshold (View counting implemented, threshold logic pending)

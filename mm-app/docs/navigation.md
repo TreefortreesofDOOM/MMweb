@@ -1,65 +1,245 @@
-# Navigation System
+# Navigation Documentation
 
-The navigation system provides a role-based, accessible, and responsive navigation structure for the application.
+> **Setup Note**: To view the navigation map, you'll need:
+> 1. VS Code with the "Markdown Preview Mermaid Support" extension
+> OR
+> 2. A Markdown viewer that supports Mermaid diagrams
+> OR
+> 3. View this documentation on GitHub, which has built-in Mermaid support
+>
+> You can also view/edit the diagram online at [Mermaid Live Editor](https://mermaid.live)
 
-## Components
+## Navigation Map
 
-### MainNav
-The top navigation bar component that handles user role-based navigation items.
+%%{init: {'theme': 'default', 'themeVariables': { 'fontSize': '12px', 'fontFamily': 'arial', 'lineWidth': '1px', 'nodeSpacing': 50, 'rankSpacing': 40 }}}%%
+```mermaid
+flowchart LR
+    %% Main nodes
+    Root["/"] --> Admin
+    Root --> Artist
+    Root --> User
 
-```typescript
-import { MainNav } from '@/components/nav/main-nav';
+    %% Admin Navigation
+    subgraph AdminSection["Admin Section"]
+        direction LR
+        Admin[("Admin")]
+        Admin --> AdminDash["/admin-dashboard"]
+        Admin --> Apps["/applications"]
+        Admin --> Featured["/featured-artist"]
+    end
 
-// Usage in layouts
-<MainNav userRole={userRole} />
+    %% Artist Navigation
+    Artist --> VerifiedArtist
+    Artist --> EmergingArtist
+
+    %% Verified Artist
+    subgraph VerifiedSection["Verified Artist Section"]
+        direction LR
+        VerifiedArtist[("Verified Artist")]
+        
+        subgraph VA_OverviewSection["Overview"]
+            direction LR
+            VA_Dashboard["/artist/dashboard"]
+            VA_Portfolio["/artist/portfolio"]
+            VA_Artworks["/artist/artworks"]
+        end
+
+        subgraph VA_SalesSection["Sales"]
+            direction LR
+            VA_Store["/artist/store"]
+            VA_Analytics["/artist/analytics"]
+        end
+
+        subgraph VA_CommunitySection["Community"]
+            direction LR
+            VA_Messages["/artist/messages"]
+            VA_QR["/artist/qr-code"]
+        end
+
+        VerifiedArtist --> VA_OverviewSection
+        VerifiedArtist --> VA_SalesSection
+        VerifiedArtist --> VA_CommunitySection
+    end
+
+    %% Emerging Artist
+    subgraph EmergingSection["Emerging Artist Section"]
+        direction LR
+        EmergingArtist[("Emerging Artist")]
+        
+        subgraph EA_OverviewSection["Overview"]
+            direction LR
+            EA_Dashboard["/artist/dashboard"]
+            EA_Portfolio["/artist/portfolio"]
+            EA_Artworks["/artist/artworks"]
+        end
+
+        subgraph EA_ArtistSection["Artist"]
+            direction LR
+            EA_Verify["/artist/verification"]
+        end
+
+        subgraph EA_CommunitySection["Community"]
+            direction LR
+            EA_QR["/artist/qr-code"]
+        end
+
+        EmergingArtist --> EA_OverviewSection
+        EmergingArtist --> EA_ArtistSection
+        EmergingArtist --> EA_CommunitySection
+    end
+
+    %% User Navigation
+    subgraph UserSection["User Section"]
+        direction LR
+        User[("User")]
+        User --> UserProfile["/profile"]
+        User --> UserSettings["/settings"]
+    end
+
+    %% Styling
+    classDef default fill:#fff,stroke:#333,stroke-width:1px,font-size:12px
+    classDef root fill:#f5f5f5,stroke:#333,stroke-width:2px,font-size:14px
+    classDef role fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#0288d1,font-size:14px
+    classDef route fill:#fff,stroke:#666,stroke-width:1px,color:#333,font-size:12px
+    classDef section fill:#f8f9fa,stroke:#ddd,stroke-width:1px,font-size:12px
+    
+    class Root root
+    class Admin,VerifiedArtist,EmergingArtist,User role
+    class AdminDash,Apps,Featured,VA_Dashboard,VA_Portfolio,VA_Artworks,VA_Store,VA_Analytics,VA_Messages,VA_QR,EA_Dashboard,EA_Portfolio,EA_Artworks,EA_Verify,EA_QR,UserProfile,UserSettings route
+    class VA_OverviewSection,VA_SalesSection,VA_CommunitySection,EA_OverviewSection,EA_ArtistSection,EA_CommunitySection section
 ```
 
-### SidebarNav
-The sidebar navigation component that provides role-specific navigation items with collapsible functionality.
+## Overview
+The platform implements a role-based navigation system with distinct features and access levels for each user type.
 
-```typescript
-import { SidebarNav } from '@/components/layout/sidebar-nav';
+## Role-Based Navigation Structure
 
-// Usage in layouts
-<SidebarNav
-  items={navItems}
-  title="Optional Title"
-  description="Optional description"
-  isOpen={isOpen}
-  onOpenChange={setIsOpen}
-/>
+### 1. Admin Navigation
+**Overview Section**
+- Dashboard (`/admin-dashboard`)
+  - Quick stats and metrics
+  - Platform overview
+  - Quick access to key features
+- Applications (`/applications`)
+  - Review artist applications
+  - Process verifications
+  - Manage artist status
+- Featured Artist (`/featured-artist`)
+  - Select featured artists
+  - Manage featured duration
+  - Monitor performance
 
-// Trigger component
-<SidebarNav.Trigger isOpen={isOpen} onOpenChange={setIsOpen} />
-```
+### 2. Verified Artist Navigation
+**Overview Section**
+- Dashboard (`/artist/dashboard`)
+  - Performance metrics
+  - Portfolio overview
+  - Quick actions
+- Portfolio (`/artist/portfolio`)
+  - Portfolio management
+  - Artwork showcase
+  - Profile customization
+- Artworks (`/artist/artworks`)
+  - Artwork management
+  - Upload/edit works
+  - Unlimited uploads
 
-### Navigation Configuration
+**Sales Section**
+- Store (`/artist/store`)
+  - Sales management
+  - Pricing controls
+  - Transaction history
+- Analytics (`/artist/analytics`)
+  - Performance tracking
+  - Engagement metrics
+  - Sales analytics
 
-Navigation is configured in `lib/navigation/config.ts`. Each role has its own navigation structure:
+**Community Section**
+- Messages (`/artist/messages`)
+  - Direct messaging
+  - Inquiry management
+  - Communication history
+- QR Code (`/artist/qr-code`)
+  - Gallery QR generation
+  - Digital portfolio access
+  - Event integration
 
-```typescript
-export const navigationConfig: Record<UserRole, RoleNavigation> = {
-  admin: {
-    navigation: [
-      {
-        title: 'Section Title',
-        items: [
-          { 
-            title: 'Item Title',
-            href: '/path',
-            icon: IconComponent,
-            isExternal?: boolean
-          }
-        ]
-      }
-    ]
-  },
-  verified_artist: { ... },
-  emerging_artist: { ... }
-};
-```
+### 3. Emerging Artist Navigation
+**Overview Section**
+- Dashboard (`/artist/dashboard`)
+  - Basic metrics
+  - Portfolio overview
+  - Limited features
+- Portfolio (`/artist/portfolio`)
+  - Basic portfolio
+  - Limited to 10 artworks
+  - Profile management
+- Artworks (`/artist/artworks`)
+  - Basic artwork management
+  - Limited upload quota
+  - Essential features
 
-## Features
+**Artist Section**
+- Get Verified (`/artist/verification`)
+  - Verification requirements
+  - Progress tracking
+  - Application process
+
+**Community Section**
+- QR Code (`/artist/qr-code`)
+  - Basic QR generation
+  - Portfolio access
+  - Event sharing
+
+### 4. User Navigation
+**Overview Section**
+- Profile (`/profile`)
+  - Basic profile management
+  - Account settings
+- Settings (`/settings`)
+  - Account preferences
+  - User settings
+
+## Implementation Details
+
+### Access Control
+- Protected routes via layout wrappers
+- Role-based access verification
+- Secure API endpoints
+- Authentication checks
+
+### Feature Differentiation
+1. Verified vs Emerging Artists
+   - Upload limits
+   - Feature access
+   - Analytics capabilities
+   - Sales features
+
+2. Admin vs Artist Access
+   - Management features
+   - Platform controls
+   - Analytics depth
+   - System access
+
+### Shared Features
+1. QR Code System
+   - Available to all artists
+   - Basic functionality
+   - Portfolio integration
+   - Event sharing
+
+2. Profile Management
+   - Basic profile features
+   - Role-appropriate settings
+   - Security controls
+
+## Navigation Components
+- RoleNav component for role-based rendering
+- Protected layouts for security
+- Dynamic route handling
+- Icon integration (Lucide icons)
+
+## Technical Features
 
 ### Accessibility
 - Full keyboard navigation support
@@ -80,129 +260,223 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
 - Escape: Close mobile menu or collapse sidebar
 - Auto-focus on active items
 
-## Types
+## Implementation Guidelines
 
-### NavItem
-```typescript
-interface NavItem {
-  title: string;      // Display text
-  href: string;       // URL path
-  icon?: LucideIcon;  // Optional icon
-  isExternal?: boolean; // External link flag
-  disabled?: boolean;   // Disabled state
-}
-```
+### Code Organization
+- Keep navigation configs in dedicated files
+- Use TypeScript for type safety
+- Implement role-based guards consistently
+- Follow component composition patterns
 
-### NavSection
-```typescript
-interface NavSection {
-  title: string;     // Section header
-  items: NavItem[];  // Navigation items
-}
-```
+### Icon Usage
+- Use consistent icon sizes (h-4 w-4)
+- Mark icons as `aria-hidden="true"`
+- Include meaningful labels
+- Use Lucide icons for consistency
+- Provide fallback text for screen readers
 
-### RoleNavigation
-```typescript
-type UserRole = 'admin' | 'verified_artist' | 'emerging_artist';
+### External Links
+- Use `isExternal: true` for external URLs
+- Include security attributes (noopener, noreferrer)
+- Add visual indicators for external links
+- Handle external links in new tabs
+- Implement proper security headers
 
-interface RoleNavigation {
-  navigation: NavSection[];
-}
-```
+### Navigation Structure
+- Group related items in sections
+- Use clear, concise section titles
+- Limit items per section for better UX
+- Maintain consistent hierarchy
+- Keep nesting depth to maximum of 2 levels
+- Use semantic grouping for related items
 
-## Layout Integration
+### URL Management
+- Use absolute paths
+- Keep URLs consistent with route structure
+- Ensure paths exist in application
+- Handle dynamic routes properly
+- Implement proper error boundaries
+- Use typed route parameters
 
-### Admin Layout
-```typescript
-// components/layout/admin-layout.tsx
-const adminNavItems = [
-  {
-    title: "Dashboard",
-    href: "/admin",
-    icon: LayoutDashboard
-  },
-  // ... other admin items
-];
+### Dashboard Access
+- Maintain dashboard links in header/sidebar
+- Use role-specific dashboard paths
+- Provide consistent access points
+- Avoid redundant navigation items
+- Implement proper role checks
+- Handle loading and error states
 
-<SidebarNav items={adminNavItems} />
-```
+### Navigation Consistency
+- Use standard patterns across pages
+- Keep primary navigation in header/sidebar
+- Avoid duplicate navigation items
+- Ensure clear visual hierarchy
+- Maintain predictable behavior
+- Follow platform conventions
 
-### Artist Layout
-```typescript
-// components/layout/artist-layout.tsx
-const artistNavItems = [
-  {
-    title: "Portfolio",
-    href: "/artist/portfolio",
-    icon: Image
-  },
-  // ... other artist items
-];
+### State Management
+- Handle active states properly
+- Persist necessary navigation state
+- Clear state on role changes
+- Manage mobile menu state
+- Handle route transitions
 
-<SidebarNav items={artistNavItems} />
-```
+### Error Handling
+- Implement fallbacks for missing routes
+- Handle unauthorized access gracefully
+- Show appropriate error messages
+- Provide clear user feedback
+- Maintain navigation state during errors
 
-## Best Practices
+### Performance
+- Lazy load route components
+- Optimize icon imports
+- Minimize navigation re-renders
+- Use proper memoization
+- Handle route transitions smoothly
 
-1. **Icons**
-   - Use consistent icon sizes (h-4 w-4)
-   - Mark icons as `aria-hidden="true"`
-   - Include meaningful labels
+## Future Enhancements
+- [ ] Enhanced analytics for verified artists
+- [ ] Exhibition space management
+- [ ] Advanced QR features
+- [ ] Improved messaging system
+- [ ] Role-specific dashboards 
 
-2. **External Links**
-   - Always use `isExternal: true` for external URLs
-   - Include proper security attributes (noopener, noreferrer)
-   - Visual indicator will be automatically added
+---
 
-3. **Sections**
-   - Group related items together
-   - Use clear, concise section titles
-   - Limit items per section for better UX
+## Implementation Review (As of March 2024)
 
-4. **URLs**
-   - Use absolute paths
-   - Keep URLs consistent with route structure
-   - Ensure paths exist in the application
+### Navigation Components Review
+✅ **Implemented**
+- RoleNav component for role-based rendering
+- Protected layouts with proper security
+- Dynamic route handling
+- Lucide icon integration
+- Mobile-responsive navigation (Sheet/drawer)
+- Proper role-based access controls
+- Navigation state persistence
+- Error boundaries and fallbacks
 
-5. **Dashboard Access**
-   - Keep dashboard links in header and sidebar navigation
-   - Avoid redundant dashboard links in content areas
-   - Use role-specific dashboard paths (e.g., `/admin-dashboard`, `/artist-dashboard`)
-   - Maintain consistent access points across the application
+⚠️ **Partially Implemented**
+- Progressive enhancement (basic implementation)
+- Focus management (needs enhancement)
+- Mobile menu state management (basic implementation)
+- Route transition handling (needs improvement)
 
-6. **Navigation Consistency**
-   - Use standard navigation patterns across all pages
-   - Keep primary navigation in header/sidebar
-   - Avoid duplicating navigation items in multiple locations
-   - Ensure clear hierarchy in navigation structure
+❌ **Missing/Needs Implementation**
+- External link indicators
+- Enhanced keyboard navigation patterns
+- Screen reader optimizations
+- Navigation analytics tracking
 
-## Examples
+### Technical Features Review
 
-### Adding a New Section
-```typescript
-{
-  title: 'Management',
-  items: [
-    {
-      title: 'Dashboard',
-      href: '/admin/dashboard',
-      icon: LayoutDashboard
-    },
-    {
-      title: 'Users',
-      href: '/admin/users',
-      icon: Users
-    }
-  ]
-}
-```
+#### Accessibility Implementation
+✅ **Complete**
+- Basic keyboard navigation
+- ARIA labels for main sections
+- Role attributes for navigation elements
+- Focus visible indicators
 
-### Adding an External Link
-```typescript
-{
-  title: 'External Service',
-  href: 'https://external.service.com',
-  icon: ExternalLink,
-  isExternal: true
-}
-``` 
+⚠️ **Needs Enhancement**
+- Screen reader support needs improvement
+- Focus management in mobile navigation
+- Skip navigation links
+- Better ARIA descriptions
+
+#### Responsive Design Status
+✅ **Working**
+- Desktop: Persistent sidebar
+- Mobile: Sheet/drawer navigation
+- Breakpoint handling (md: 768px)
+- Collapsible sidebar
+
+⚠️ **Needs Improvement**
+- Transition animations
+- Touch gesture support
+- Tablet-specific optimizations
+- Loading states during navigation
+
+#### Keyboard Navigation Status
+✅ **Implemented**
+- Basic Tab navigation
+- Enter/Space activation
+- Escape for mobile menu
+
+⚠️ **Missing**
+- Arrow key navigation
+- Shortcut keys
+- Focus trapping in modals
+- Better focus restoration
+
+### Implementation Guidelines Review
+
+#### Code Organization
+✅ **Following Best Practices**
+- Navigation configs in dedicated files
+- TypeScript for type safety
+- Consistent role-based guards
+- Component composition patterns
+
+⚠️ **Areas for Improvement**
+- Better error handling patterns
+- More comprehensive type definitions
+- Enhanced testing coverage
+- Performance optimizations
+
+#### Current Technical Debt
+1. **Navigation State Management**
+   - Need better handling of deep linking
+   - Route transition animations missing
+   - Mobile menu state could be more robust
+
+2. **Accessibility Gaps**
+   - Screen reader experience needs work
+   - Keyboard navigation could be more comprehensive
+   - Missing some ARIA attributes
+
+3. **Performance Considerations**
+   - Route prefetching not optimized
+   - Some unnecessary re-renders
+   - Mobile performance could be improved
+
+### Recommendations
+
+#### High Priority
+1. **Accessibility Improvements**
+   - Implement missing ARIA attributes
+   - Enhance screen reader support
+   - Add skip navigation
+   - Improve keyboard navigation
+
+2. **Performance Optimizations**
+   - Implement route prefetching
+   - Optimize mobile navigation
+   - Reduce unnecessary re-renders
+   - Add loading indicators
+
+3. **User Experience**
+   - Add transition animations
+   - Improve mobile touch interactions
+   - Enhance error handling
+   - Add navigation breadcrumbs
+
+#### Medium Priority
+1. **Feature Enhancements**
+   - Add navigation analytics
+   - Implement shortcut keys
+   - Add more responsive breakpoints
+   - Enhance tablet experience
+
+2. **Developer Experience**
+   - Improve type definitions
+   - Add more comprehensive tests
+   - Better error boundaries
+   - Enhanced documentation
+
+#### Low Priority
+1. **Nice-to-Have Features**
+   - Advanced animation patterns
+   - Extended keyboard shortcuts
+   - Enhanced mobile gestures
+   - Progressive enhancement 

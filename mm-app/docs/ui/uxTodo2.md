@@ -1,5 +1,8 @@
 # UX Improvements Roadmap
 
+**New items to incorporate**
+- [ ] change the badge design.  
+
 ## High Priority Issues 🚨
 
 ### Profile Page
