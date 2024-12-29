@@ -98,3 +98,44 @@
 - [ ] Better organization of related functionality
 - [ ] Easier to maintain and scale
 - [ ] Clearer distinction between user roles and permissions
+
+
+
+
+### QR Code Feature
+
+#### Current Implementation
+- Present in both verified and emerging artist navigation
+- Located under "Community" section
+- No documentation in roadmap about its purpose or implementation
+- No clear indication if this is a core or supplementary feature
+- Both artist types have access, suggesting it's a basic feature
+
+### Admin Features
+
+#### Current Implementation
+- Admin has three main routes:
+  - `/admin-dashboard`
+  - `/applications` 
+  - `/featured-artist`
+- The roadmap mentions "Admin Review" and "Exhibition Status" in the flow diagram
+- However, specific admin features aren't detailed in the roadmap
+- No clear documentation on what "Featured Artist" management entails
+- Applications handling process isn't detailed
+
+### Additional Observations
+
+#### Role Progression
+- Roadmap shows clear progression from emerging to verified artist
+- Current nav implementation reflects this with "Get Verified" option
+- But the specific features unlocked aren't documented
+
+#### Sales Features
+- Store and Analytics are verified-only features
+- Not mentioned in roadmap how these integrate with artist progression
+
+#### Messages Feature
+- Present only for verified artists
+- Not documented in roadmap's communication features
+
+Would you like me to dive deeper into any of these areas or look for additional gaps?

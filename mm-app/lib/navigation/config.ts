@@ -1,11 +1,9 @@
 import {
   LayoutDashboard,
   Palette,
-  Image,
   Users,
   Settings,
   BadgeCheck,
-  Rocket,
   QrCode,
   LineChart,
   MessageSquare,
@@ -39,23 +37,6 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
           }
         ]
       }
-      /* Future Features:
-      {
-        title: 'System',
-        items: [
-          {
-            title: 'Settings',
-            href: '/admin/settings',
-            icon: Settings
-          },
-          {
-            title: 'Analytics',
-            href: '/admin/analytics',
-            icon: LineChart
-          }
-        ]
-      }
-      */
     ]
   },
   verified_artist: {
@@ -75,8 +56,8 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
             icon: Palette
           },
           {
-            title: 'Gallery',
-            href: '/artist/gallery',
+            title: 'Artworks',
+            href: '/artist/artworks',
             icon: GalleryVertical
           }
         ]
@@ -128,6 +109,11 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
             title: 'Portfolio',
             href: '/artist/portfolio',
             icon: Palette
+          },
+          {
+            title: 'Artworks',
+            href: '/artist/artworks',
+            icon: GalleryVertical
           }
         ]
       },
@@ -172,5 +158,9 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
         ]
       }
     ]
+  },
+  artist: {
+    role: 'artist',
+    navigation: [] // Legacy role, empty navigation
   }
 }; 

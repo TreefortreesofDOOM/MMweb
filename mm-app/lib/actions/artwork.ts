@@ -117,6 +117,17 @@ export async function createArtwork(formData: FormData) {
       return { error: 'Primary image is required' };
     }
 
+    // Get the current max display_order for the artist
+    const { data: maxOrder } = await supabase
+      .from('artworks')
+      .select('display_order')
+      .eq('artist_id', user.id)
+      .order('display_order', { ascending: false })
+      .limit(1)
+      .single();
+
+    const nextOrder = (maxOrder?.display_order ?? -1) + 1;
+
     const { data: artwork, error: artworkError } = await supabase
       .from('artworks')
       .insert({
@@ -128,7 +139,8 @@ export async function createArtwork(formData: FormData) {
         styles,
         techniques,
         keywords,
-        status: isPublished ? 'published' : 'draft'
+        status: isPublished ? 'published' : 'draft',
+        display_order: nextOrder
       })
       .select()
       .single();
@@ -279,74 +291,138 @@ export async function updateArtwork(artworkId: string, formData: FormData) {
   }
 }
 
-export async function publishArtwork(artworkId: string) {
+export async function publishArtwork(id: string) {
+  console.log('Server: Starting publish for artwork:', id);
   const supabase = await createActionClient();
   const user = await getArtist();
 
   if (!user) {
+    console.log('Server: Not authenticated');
     return { error: 'Not authenticated' };
   }
 
-  try {
-    // Verify ownership
-    const { data: artwork, error: fetchError } = await supabase
-      .from('artworks')
-      .select('artist_id')
-      .eq('id', artworkId)
-      .single();
+  // First check if the artwork belongs to the user
+  const { data: existingArtwork, error: fetchError } = await supabase
+    .from('artworks')
+    .select('artist_id, status')
+    .eq('id', id)
+    .single();
 
-    if (fetchError) throw fetchError;
-    if (artwork.artist_id !== user.id) {
-      return { error: 'Not authorized' };
+  if (fetchError) {
+    console.error('Server: Error fetching artwork:', fetchError);
+    return { error: 'Failed to fetch artwork' };
+  }
+
+  if (!existingArtwork || existingArtwork.artist_id !== user.id) {
+    console.log('Server: Unauthorized - artwork not found or wrong artist');
+    return { error: 'Unauthorized' };
+  }
+
+  // Check if already published
+  if (existingArtwork.status === 'published') {
+    console.log('Server: Artwork is already published');
+    return { error: 'Artwork is already published' };
+  }
+
+  // Get user's role from profiles
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError) {
+    console.error('Server: Error fetching profile:', profileError);
+    return { error: 'Failed to fetch profile' };
+  }
+
+  if (!profile) {
+    console.log('Server: Profile not found');
+    return { error: 'Profile not found' };
+  }
+
+  // Check artwork count limit for emerging artists
+  if (profile.role === 'emerging_artist') {
+    const { count, error: countError } = await supabase
+      .from('artworks')
+      .select('*', { count: 'exact', head: true })
+      .eq('artist_id', user.id)
+      .eq('status', 'published');
+
+    if (countError) {
+      console.error('Server: Error counting published artworks:', countError);
+      return { error: 'Failed to check artwork limit' };
     }
 
-    // Update status
-    const { error: updateError } = await supabase
-      .from('artworks')
-      .update({ status: 'published' })
-      .eq('id', artworkId);
-
-    if (updateError) throw updateError;
-    return { success: true };
-  } catch (error: any) {
-    console.error('Error publishing artwork:', error);
-    return { error: error.message };
+    if (count && count >= 10) {
+      console.log('Server: Emerging artist at publish limit');
+      return { error: 'Emerging artists are limited to 10 published artworks' };
+    }
   }
+
+  const { data: artwork, error: updateError } = await supabase
+    .from('artworks')
+    .update({ status: 'published' })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (updateError) {
+    console.error('Server: Error publishing artwork:', updateError);
+    return { error: updateError.message };
+  }
+
+  console.log('Server: Successfully published artwork:', artwork);
+  return { artwork };
 }
 
-export async function unpublishArtwork(artworkId: string) {
+export async function unpublishArtwork(id: string) {
+  console.log('Server: Starting unpublish for artwork:', id);
   const supabase = await createActionClient();
   const user = await getArtist();
 
   if (!user) {
+    console.log('Server: Not authenticated');
     return { error: 'Not authenticated' };
   }
 
-  try {
-    // Verify ownership
-    const { data: artwork, error: fetchError } = await supabase
-      .from('artworks')
-      .select('artist_id')
-      .eq('id', artworkId)
-      .single();
+  // First check if the artwork belongs to the user
+  const { data: existingArtwork, error: fetchError } = await supabase
+    .from('artworks')
+    .select('artist_id, status')
+    .eq('id', id)
+    .single();
 
-    if (fetchError) throw fetchError;
-    if (artwork.artist_id !== user.id) {
-      return { error: 'Not authorized' };
-    }
-
-    // Update status
-    const { error: updateError } = await supabase
-      .from('artworks')
-      .update({ status: 'draft' })
-      .eq('id', artworkId);
-
-    if (updateError) throw updateError;
-    return { success: true };
-  } catch (error: any) {
-    console.error('Error unpublishing artwork:', error);
-    return { error: error.message };
+  if (fetchError) {
+    console.error('Server: Error fetching artwork:', fetchError);
+    return { error: 'Failed to fetch artwork' };
   }
+
+  if (!existingArtwork || existingArtwork.artist_id !== user.id) {
+    console.log('Server: Unauthorized - artwork not found or wrong artist');
+    return { error: 'Unauthorized' };
+  }
+
+  // Check if already unpublished
+  if (existingArtwork.status === 'draft') {
+    console.log('Server: Artwork is already unpublished');
+    return { error: 'Artwork is already unpublished' };
+  }
+
+  const { data: artwork, error: updateError } = await supabase
+    .from('artworks')
+    .update({ status: 'draft' })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (updateError) {
+    console.error('Server: Error unpublishing artwork:', updateError);
+    return { error: updateError.message };
+  }
+
+  console.log('Server: Successfully unpublished artwork:', artwork);
+  return { artwork };
 }
 
 export async function getSimilarArtworks(artworkId: string) {
@@ -394,5 +470,48 @@ export async function getSimilarArtworks(artworkId: string) {
   } catch (error: any) {
     console.error('Error finding similar artworks:', error);
     return { error: error.message };
+  }
+}
+
+export async function updateArtworkOrder(artworkIds: string[]) {
+  try {
+    const supabase = await createActionClient();
+    const user = await getArtist();
+
+    if (!user) {
+      return { error: 'Not authenticated' };
+    }
+
+    // Verify all artworks belong to the user
+    const { data: artworks, error: fetchError } = await supabase
+      .from('artworks')
+      .select('id')
+      .eq('artist_id', user.id)
+      .in('id', artworkIds);
+
+    if (fetchError) {
+      console.error('Error fetching artworks:', fetchError);
+      return { error: 'Failed to verify artwork ownership' };
+    }
+
+    if (!artworks || artworks.length !== artworkIds.length) {
+      return { error: 'Invalid artwork selection' };
+    }
+
+    // Update each artwork's order
+    const updates = artworkIds.map((id, index) => 
+      supabase
+        .from('artworks')
+        .update({ display_order: index })
+        .eq('id', id)
+        .eq('artist_id', user.id)
+    );
+
+    await Promise.all(updates);
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating artwork order:', error);
+    return { error: 'Failed to update artwork order' };
   }
 } 

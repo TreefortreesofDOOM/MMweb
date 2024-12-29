@@ -222,12 +222,32 @@
 - [x] Multiple image support
 - [x] Primary image selection
 - [x] Image reordering
+  - Single artwork image reordering
+  - Gallery artwork reordering with drag-and-drop
+  - Optimistic updates for smooth UX
+  - Keyboard accessibility support
 - [x] Publishing workflow
 - [x] Gallery view
+  - Individual artist profile gallery
+  - Main marketplace gallery
+  - Responsive grid layout
 - [x] Artwork detail modal
 - [x] Artwork pricing
 - [ ] Similar artworks suggestions
 - [ ] Advanced search/filtering
+
+#### Gallery Artwork Reordering
+- [x] Drag-and-drop functionality using dnd-kit
+- [x] Sortable grid layout with keyboard support
+- [x] Real-time order updates
+- [x] Database integration with display_order field
+- [x] Optimistic UI updates for smooth experience
+- [x] Error handling and recovery
+- [x] Accessibility features
+  - Keyboard navigation
+  - ARIA labels
+  - Role attributes
+  - Focus management
 
 ### 3. AI Integration
 

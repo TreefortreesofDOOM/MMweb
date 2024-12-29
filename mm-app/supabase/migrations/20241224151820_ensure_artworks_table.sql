@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.artworks (
     price DECIMAL(10,2),
     status artwork_status NOT NULL DEFAULT 'draft',
     image_url TEXT,
+    display_order INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -24,6 +25,7 @@ CREATE TABLE IF NOT EXISTS public.artworks (
 -- Create indexes
 CREATE INDEX IF NOT EXISTS artworks_artist_id_idx ON public.artworks(artist_id);
 CREATE INDEX IF NOT EXISTS artworks_status_idx ON public.artworks(status);
+CREATE INDEX IF NOT EXISTS artworks_display_order_idx ON public.artworks(display_order);
 
 -- Add trigger for updated_at
 DROP TRIGGER IF EXISTS update_artworks_updated_at ON public.artworks;
@@ -74,3 +76,27 @@ CREATE POLICY "Artists can delete own artworks"
 CREATE POLICY "Anyone can view published artworks"
     ON public.artworks FOR SELECT
     USING (status = 'published');
+
+-- Allow users to view their own artworks and published artworks
+CREATE POLICY "Users can view their own artworks and published artworks"
+    ON public.artworks FOR SELECT
+    USING (
+        auth.uid() = artist_id OR
+        status = 'published'
+    );
+
+-- Allow users to insert their own artworks
+CREATE POLICY "Users can insert their own artworks"
+    ON public.artworks FOR INSERT
+    WITH CHECK (auth.uid() = artist_id);
+
+-- Allow users to update their own artworks
+CREATE POLICY "Users can update their own artworks"
+    ON public.artworks FOR UPDATE
+    USING (auth.uid() = artist_id)
+    WITH CHECK (auth.uid() = artist_id);
+
+-- Allow users to delete their own artworks
+CREATE POLICY "Users can delete their own artworks"
+    ON public.artworks FOR DELETE
+    USING (auth.uid() = artist_id);

@@ -2,14 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArtworkCard } from "@/components/artwork/artwork-card";
-import { publishArtwork, unpublishArtwork } from '@/lib/actions';
+import { SortableArtworkGrid } from "@/components/artwork/sortable-artwork-grid";
+import { publishArtwork, unpublishArtwork, updateArtworkOrder } from '@/lib/actions/artwork';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useArtist } from "@/hooks/use-artist";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
@@ -41,6 +41,8 @@ export default function ArtworksClient({ artworks: initialArtworks }: ArtworksCl
   }, []);
 
   async function handlePublish(id: string) {
+    if (!id) return;
+
     if (isEmergingArtist && artworks.filter(a => a.status === 'published').length >= 10) {
       toast.error('Emerging artists can only have 10 published artworks at a time');
       return;
@@ -49,8 +51,14 @@ export default function ArtworksClient({ artworks: initialArtworks }: ArtworksCl
     setIsLoading(id);
     try {
       const result = await publishArtwork(id);
+      
       if (result.error) {
         toast.error(result.error);
+        return;
+      }
+
+      if (!result.artwork) {
+        toast.error('Failed to publish artwork. Please try again.');
         return;
       }
       
@@ -59,8 +67,8 @@ export default function ArtworksClient({ artworks: initialArtworks }: ArtworksCl
           ? { ...artwork, status: 'published' }
           : artwork
       ));
+      
       toast.success('Artwork published successfully');
-      router.refresh();
     } catch (error) {
       console.error('Failed to publish artwork:', error);
       toast.error('Failed to publish artwork. Please try again later.');
@@ -70,11 +78,19 @@ export default function ArtworksClient({ artworks: initialArtworks }: ArtworksCl
   }
 
   async function handleUnpublish(id: string) {
+    if (!id) return;
+
     setIsLoading(id);
     try {
       const result = await unpublishArtwork(id);
+
       if (result.error) {
         toast.error(result.error);
+        return;
+      }
+
+      if (!result.artwork) {
+        toast.error('Failed to unpublish artwork. Please try again.');
         return;
       }
 
@@ -83,13 +99,39 @@ export default function ArtworksClient({ artworks: initialArtworks }: ArtworksCl
           ? { ...artwork, status: 'draft' }
           : artwork
       ));
+
       toast.success('Artwork unpublished successfully');
-      router.refresh();
     } catch (error) {
       console.error('Failed to unpublish artwork:', error);
       toast.error('Failed to unpublish artwork. Please try again later.');
     } finally {
       setIsLoading(null);
+    }
+  }
+
+  async function handleReorder(artworkIds: string[]) {
+    try {
+      // Update local state immediately for optimistic UI
+      const newArtworks = [...artworks];
+      const reorderedArtworks = artworkIds.map(id => 
+        newArtworks.find(a => a.id === id)!
+      );
+      setArtworks(reorderedArtworks);
+
+      // Then update the server
+      const result = await updateArtworkOrder(artworkIds);
+      if (result.error) {
+        // Revert on error
+        setArtworks(artworks);
+        toast.error(result.error);
+        return;
+      }
+      toast.success('Artwork order updated successfully');
+    } catch (error) {
+      // Revert on error
+      setArtworks(artworks);
+      console.error('Failed to update artwork order:', error);
+      toast.error('Failed to update artwork order. Please try again later.');
     }
   }
 
@@ -101,44 +143,28 @@ export default function ArtworksClient({ artworks: initialArtworks }: ArtworksCl
     <div className="max-w-4xl mx-auto p-4" role="main" aria-label="Artwork Management">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">Your Artworks</h1>
-            {isVerifiedArtist ? (
-              <Badge variant="outline" className="gap-1" role="status" aria-label="Verified Artist Status">
-                <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                Verified Artist
-              </Badge>
-            ) : (
-              <Badge variant="secondary" className="gap-1" role="status" aria-label="Emerging Artist Status">
-                <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                Emerging Artist
-              </Badge>
-            )}
-          </div>
-          <p className="text-muted-foreground mt-1">
-            Manage your artwork collection
-            {isEmergingArtist && (
-              <span className="block text-sm">
-                {publishedCount}/10 published artworks used
-              </span>
-            )}
+          <h1 className="text-2xl font-bold tracking-tight">Artwork Management</h1>
+          <p className="text-muted-foreground">
+            Manage your artwork collection. Changes here will appear in your public portfolio.
           </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {artworks.length} {artworks.length === 1 ? 'artwork' : 'artworks'} total
+          </p>
+          <div className="mt-2">
+            <Link 
+              href="/artist/portfolio" 
+              className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1"
+            >
+              <span>View your public portfolio</span>
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
-        <Button 
-          asChild
-          disabled={isAtPublishLimit}
-          title={isAtPublishLimit ? "Emerging artists can only publish 10 artworks" : undefined}
-        >
-          <Link 
-            href="/artist/artworks/new"
-            role="button"
-            aria-label={isAtPublishLimit ? "Upload limit reached for emerging artists" : "Add New Artwork"}
-            tabIndex={0}
-            onKeyDown={handleKeyDown}
-          >
+        <Link href="/artist/artworks/new" passHref>
+          <Button>
             Add New Artwork
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
 
       {isEmergingArtist && (
@@ -174,49 +200,34 @@ export default function ArtworksClient({ artworks: initialArtworks }: ArtworksCl
         </Alert>
       )}
 
-      {artworks?.length === 0 ? (
-        <div className="text-center py-12" role="status" aria-label="No artworks found">
-          <p className="text-muted-foreground">
-            You haven't added any artworks yet.
-          </p>
-          <Button 
-            asChild 
-            className="mt-4"
-            disabled={isAtPublishLimit}
-            title={isAtPublishLimit ? "Emerging artists can only publish 10 artworks" : undefined}
-          >
-            <Link 
-              href="/artist/artworks/new"
-              role="button"
-              aria-label="Add Your First Artwork"
-              tabIndex={0}
-              onKeyDown={handleKeyDown}
-            >
-              Add Your First Artwork
+      {artworks.length === 0 ? (
+        <div className="text-center py-12" role="status">
+          <h2 className="text-lg font-semibold text-primary">No artworks yet</h2>
+          <p className="text-muted-foreground mt-2">Start by adding your first artwork</p>
+          <div className="mt-4">
+            <Link href="/artist/artworks/new" passHref>
+              <Button>Add New Artwork</Button>
             </Link>
-          </Button>
+          </div>
         </div>
       ) : (
-        <div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          role="list"
-          aria-label="Artwork Gallery"
-        >
-          {artworks?.map((artwork) => (
-            <div key={artwork.id} role="listitem">
-              <ArtworkCard
-                artwork={artwork}
-                showStatus
-                showEdit
-                onPublish={handlePublish}
-                onUnpublish={handleUnpublish}
-                isLoading={isLoading === artwork.id}
-                isEmergingArtist={isEmergingArtist}
-                isAtPublishLimit={isAtPublishLimit}
-              />
-            </div>
-          ))}
-        </div>
+        <SortableArtworkGrid
+          artworks={artworks}
+          onReorder={handleReorder}
+          showStatus
+          showEdit
+          onPublish={(id) => {
+            console.log('Publish clicked for artwork:', id);
+            handlePublish(id);
+          }}
+          onUnpublish={(id) => {
+            console.log('Unpublish clicked for artwork:', id);
+            handleUnpublish(id);
+          }}
+          isLoading={isLoading}
+          isEmergingArtist={isEmergingArtist}
+          isAtPublishLimit={isAtPublishLimit}
+        />
       )}
     </div>
   );

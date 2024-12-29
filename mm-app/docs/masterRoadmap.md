@@ -308,10 +308,20 @@ graph TD
 1. **Artwork Management**
    - [x] Publishing workflow
    - [x] Gallery view
+     - [x] Individual artist profile gallery
+     - [x] Main marketplace gallery
+     - [x] Artwork reordering with drag-and-drop
+     - [ ] Advanced filtering/sorting
+     - [ ] Grid/List view toggle
+     - [ ] Enhanced responsive design
    - [x] Basic artwork metadata
    - [x] Portfolio management
-   - [⚠️] Multi-image upload system (needs enhancement)
-   - [⚠️] Image preview and reordering (basic implementation)
+     - [x] Basic CRUD operations
+     - [x] Image preview and reordering
+     - [x] Drag-and-drop functionality
+     - [x] Optimistic updates
+     - [x] Order persistence
+   - [Deferred] Multi-image upload system (Deferred for future implementation)
 
 2. **Payment & Sales**
    - [x] Stripe Connect Express integration
@@ -347,8 +357,9 @@ graph TD
 
 ### Partially Implemented ⚠️
 1. **Artwork Management** *(see [Core Features > Artwork Management](#core-features))*
-   - [⚠️] Multi-image upload system (Basic upload works, needs multi-file enhancement)
-   - [⚠️] Image preview and reordering (Preview implemented, reordering needs work)
+   - [⚠️] Advanced filtering/sorting (Basic filters implemented, needs enhancement)
+   - [⚠️] Grid/List view toggle (UI components ready, needs implementation)
+   - [⚠️] Enhanced responsive design (Basic responsiveness works, needs refinement)
 
 2. **Artist Directory** *(see [Artist Browse System](#artist-browse-system))*
    - [⚠️] Filter by artist status (Backend implemented, UI needs enhancement)
@@ -527,3 +538,36 @@ graph TD
 - [ ] Role transition automation
 - [ ] Feature access marketplace
 - [ ] Role-specific AI features 
+
+# Artist Content Management
+
+### Artwork Management vs Portfolio Display
+1. **Artwork Management** (`/artist/artworks`)
+   - Private management interface for artists
+   - Features:
+     - [x] Upload and manage artworks
+     - [x] Publish/unpublish control
+     - [x] Drag-and-drop reordering
+     - [x] Image management
+       - [x] Multiple images per artwork
+       - [x] Primary image selection
+       - [x] Image order control
+     - [x] Edit artwork details
+     - [x] Preview portfolio changes
+   - Purpose: Backend control center for artists to manage their content
+
+2. **Portfolio Display** (`/artist/portfolio`)
+   - Public-facing presentation layer
+   - Features:
+     - [x] Professional, curated display
+     - [x] Published works only
+     - [x] Optimized for viewing
+     - [x] Artist brand presentation
+     - [x] Custom layout and ordering
+   - Purpose: Public storefront for artist's work
+
+### Workflow Integration
+- Changes in Artwork Management reflect in Portfolio Display
+- Portfolio serves as live preview of public presence
+- Clear separation between management and presentation
+- Consistent experience across artist types (emerging/verified) 

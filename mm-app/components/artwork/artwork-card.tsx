@@ -92,7 +92,11 @@ export function ArtworkCard({
         "overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300",
         onSelect && "cursor-pointer"
       )}
-      onClick={onSelect}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onSelect?.();
+        }
+      }}
     >
       <div className="relative aspect-square">
         {imageError ? (
@@ -168,7 +172,10 @@ export function ArtworkCard({
           artwork.status === 'published' ? (
             <Button
               variant="secondary"
-              onClick={() => onUnpublish?.(artwork.id)}
+              onClick={() => {
+                console.log('Unpublish button clicked for artwork:', artwork.id);
+                onUnpublish?.(artwork.id);
+              }}
               disabled={isLoading}
               className="w-full ml-2"
             >
@@ -177,7 +184,10 @@ export function ArtworkCard({
           ) : (
             <Button
               variant="default"
-              onClick={() => onPublish?.(artwork.id)}
+              onClick={() => {
+                console.log('Publish button clicked for artwork:', artwork.id);
+                onPublish?.(artwork.id);
+              }}
               disabled={isLoading || (isEmergingArtist && isAtPublishLimit)}
               className="w-full ml-2"
               title={isAtPublishLimit ? "Emerging artists can only publish 10 artworks" : undefined}

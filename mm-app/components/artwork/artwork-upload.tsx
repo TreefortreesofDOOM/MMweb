@@ -4,9 +4,9 @@ import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
 import { uploadArtworkImage } from '@/lib/actions';
-import { Loader2, X, ImageIcon } from 'lucide-react';
-import Image from 'next/image';
+import { Loader2, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SortableImageGrid } from './sortable-image-grid';
 
 export interface ArtworkImage {
   url: string;
@@ -115,6 +115,11 @@ export function ArtworkUpload({ userId, onImagesChange, onError, existingImages 
     onImagesChange(updatedImages);
   }
 
+  function handleReorder(reorderedImages: ArtworkImage[]) {
+    setImages(reorderedImages);
+    onImagesChange(reorderedImages);
+  }
+
   return (
     <div className="space-y-4">
       <div
@@ -155,41 +160,14 @@ export function ArtworkUpload({ userId, onImagesChange, onError, existingImages 
         <p className="text-sm text-destructive">{uploadProgress.error}</p>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {images.map((image, index) => (
-          <div key={image.url} className="relative group">
-            <Image
-              src={image.url}
-              alt={`Uploaded image ${index + 1}`}
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full h-40 transition-transform duration-300 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg">
-              <Button
-                variant={image.isPrimary ? "secondary" : "outline"}
-                size="sm"
-                onClick={() => handleMakePrimary(image.url)}
-                className={cn(
-                  "mr-2 bg-white/10 hover:bg-white/20",
-                  image.isPrimary && "border-primary"
-                )}
-                disabled={image.isPrimary}
-              >
-                {image.isPrimary ? 'Primary' : 'Make Primary'}
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => handleRemoveImage(image.url)}
-                className="bg-white/10 hover:bg-white/20"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {images.length > 0 && (
+        <SortableImageGrid
+          images={images}
+          onReorder={handleReorder}
+          onMakePrimary={handleMakePrimary}
+          onRemove={handleRemoveImage}
+        />
+      )}
     </div>
   );
 } 

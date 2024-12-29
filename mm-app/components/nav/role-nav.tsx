@@ -1,35 +1,49 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { navigationConfig } from '@/lib/navigation/config';
 import { SideNav } from './side-nav';
 import { MobileNav } from './mobile-nav';
 import { useArtist } from '@/hooks/use-artist';
+import { useNavigation } from '@/hooks/use-navigation';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 import type { UserRole } from '@/lib/navigation/types';
 
 interface RoleNavProps {
-  role: UserRole;
+  role: unknown;
   children: React.ReactNode;
 }
 
 export function RoleNav({ role, children }: RoleNavProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { isVerifiedArtist, isEmergingArtist, getVerificationStatus, getVerificationPercentage } = useArtist();
   
   const handleMobileNavToggle = useCallback((open: boolean) => {
     setIsMobileNavOpen(open);
   }, []);
 
-  // Get the correct navigation config based on role and artist type
-  const getNavConfig = () => {
-    if (role === 'admin') return navigationConfig.admin;
-    if (role === 'verified_artist') return navigationConfig.verified_artist;
-    return navigationConfig.emerging_artist;
-  };
+  // Get navigation config with error handling
+  const { config } = useNavigation(role);
 
-  const config = getNavConfig();
+  // If there's no navigation for the role, show a fallback UI
+  if (config.navigation.length === 0 && role !== 'user') {
+    return (
+      <div className="flex min-h-screen">
+        <Alert variant="destructive" className="m-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Navigation not available. Please contact support if this persists.
+          </AlertDescription>
+        </Alert>
+        <main className="flex-1 p-4 md:p-6" role="main">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   const renderVerificationStatus = () => {
     if (!isEmergingArtist) return null;

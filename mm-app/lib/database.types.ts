@@ -164,6 +164,7 @@ export type Database = {
           techniques: string[] | null
           title: string
           updated_at: string | null
+          display_order: number
         }
         Insert: {
           artist_id: string
@@ -178,6 +179,7 @@ export type Database = {
           techniques?: string[] | null
           title: string
           updated_at?: string | null
+          display_order?: number
         }
         Update: {
           artist_id?: string
@@ -192,6 +194,7 @@ export type Database = {
           techniques?: string[] | null
           title?: string
           updated_at?: string | null
+          display_order?: number
         }
         Relationships: [
           {
