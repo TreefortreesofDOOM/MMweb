@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageViewTracker } from '@/components/analytics/page-view-tracker';
+import { ARTIST_ROLES } from '@/lib/types/custom-types';
 
 interface PageProps {
   params: Promise<{ id: string }> | { id: string };
@@ -18,7 +20,7 @@ export default async function ArtistPage({ params }: PageProps) {
     .from('profiles')
     .select('*')
     .eq('id', id)
-    .eq('role', 'artist')
+    .in('artist_type', [ARTIST_ROLES.VERIFIED, ARTIST_ROLES.EMERGING])
     .single();
 
   if (!profile) {
@@ -52,6 +54,7 @@ export default async function ArtistPage({ params }: PageProps) {
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-8">
+      <PageViewTracker pathname={`/artists/${id}`} />
       <div className="space-y-8">
         {/* Artist Profile */}
         <Card>
@@ -97,10 +100,12 @@ export default async function ArtistPage({ params }: PageProps) {
         </Card>
 
         {/* Artist's Artworks */}
-        <div>
-          <h2 className="text-2xl font-bold mb-6">Artworks by {profile.name}</h2>
-          <ArtworkGallery artworks={transformedArtworks} />
-        </div>
+        {transformedArtworks.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-bold mb-6">Artworks</h2>
+            <ArtworkGallery artworks={transformedArtworks} />
+          </div>
+        )}
       </div>
     </div>
   );

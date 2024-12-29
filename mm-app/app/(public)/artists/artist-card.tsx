@@ -1,16 +1,17 @@
 'use client'
 
+import { useCallback, KeyboardEvent, useMemo } from 'react'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { MapPin, ImageIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, KeyboardEvent, useMemo } from 'react'
 import { ArtistBadge } from '@/components/ui/artist-badge'
 import { ExhibitionBadge } from '@/components/ui/exhibition-badge'
 import { cn } from '@/lib/utils'
 import { type ArtistRole, ARTIST_ROLES } from '@/lib/types/custom-types'
 import type { ArtistWithCount } from './artists-client'
+import { trackArtistView } from '@/lib/actions/analytics'
 
 interface ArtistCardProps {
   artist: ArtistWithCount;
@@ -29,9 +30,16 @@ export function ArtistCard({ artist, index, totalArtists }: ArtistCardProps) {
       .toUpperCase() || '';
   }, [artist.full_name]);
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+  const handleKeyDown = useCallback(async (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
+      await trackArtistView({
+        artistId: artist.id,
+        artistType: artist.artist_type || '',
+        position: index,
+        totalArtists,
+        interactionType: 'keyboard'
+      });
       router.push(`/artists/${artist.id}`);
     } else if (e.key === 'ArrowRight' && index < totalArtists - 1) {
       e.preventDefault();
@@ -42,7 +50,17 @@ export function ArtistCard({ artist, index, totalArtists }: ArtistCardProps) {
       const prevCard = document.querySelector(`[data-index="${index - 1}"]`) as HTMLElement;
       prevCard?.focus();
     }
-  }, [artist.id, index, totalArtists, router]);
+  }, [artist.id, artist.artist_type, index, totalArtists, router]);
+
+  const handleClick = useCallback(async () => {
+    await trackArtistView({
+      artistId: artist.id,
+      artistType: artist.artist_type || '',
+      position: index,
+      totalArtists,
+      interactionType: 'click'
+    });
+  }, [artist.id, artist.artist_type, index, totalArtists]);
 
   const artistType = artist.artist_type || ARTIST_ROLES.EMERGING;
   const artworkCount = artist.artworks[0]?.count || 0;
@@ -56,7 +74,7 @@ export function ArtistCard({ artist, index, totalArtists }: ArtistCardProps) {
       aria-label={`${artist.full_name}'s profile - ${isVerified ? 'Verified' : 'Emerging'} Artist with ${artworkCount} artworks${artist.location ? ` from ${artist.location}` : ''}`}
       className="outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
     >
-      <Link href={`/artists/${artist.id}`}>
+      <Link href={`/artists/${artist.id}`} onClick={handleClick}>
         <Card className={cn(
           "group h-full overflow-hidden transition-colors hover:bg-muted/50",
           isVerified && "border-primary/20",

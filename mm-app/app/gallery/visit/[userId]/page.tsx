@@ -1,5 +1,4 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { GalleryVisitClient } from './gallery-visit-client';
 
@@ -10,7 +9,7 @@ interface GalleryVisitPageProps {
 }
 
 export default async function GalleryVisitPage({ params }: GalleryVisitPageProps) {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
   const { userId } = params;
 
   // Get the current user's session

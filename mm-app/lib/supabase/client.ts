@@ -1,16 +1,14 @@
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient as createSupabaseBrowserClient } from '@supabase/ssr'
+import type { Database } from '@/lib/database.types'
 
-const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-      flowType: 'pkce'
-    }
+let supabaseClient: ReturnType<typeof createSupabaseBrowserClient> | null = null
+
+export function createBrowserClient() {
+  if (!supabaseClient) {
+    supabaseClient = createSupabaseBrowserClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
   }
-)
-
-export default supabase
+  return supabaseClient
+}

@@ -4,6 +4,7 @@ import { createActionClient } from '@/lib/supabase/action';
 import { encodedRedirect } from "@/lib/utils";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { trackOnboardingStep } from '@/lib/actions/analytics';
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -23,9 +24,6 @@ export const signUpAction = async (formData: FormData) => {
   const { data, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
-    options: {
-      emailRedirectTo: `${origin}/callback`
-    }
   });
 
   if (signUpError) {
@@ -33,12 +31,22 @@ export const signUpAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-up", signUpError.message);
   }
 
-  if (!data?.session) {
-    console.error("No session returned from signUp");
+  if (!data?.session || !data.user) {
+    console.error("No session or user returned from signUp");
     return encodedRedirect("error", "/sign-up", "Failed to create account");
   }
 
-  return redirect("/profile?verification=pending");
+  // Track successful signup
+  await trackOnboardingStep({
+    step: 'signup',
+    completed: true,
+    metadata: {
+      userId: data.user.id,
+      email: data.user.email,
+    }
+  });
+
+  return redirect("/role-selection");
 };
 
 export const signInAction = async (formData: FormData) => {

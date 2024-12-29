@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
 import { GalleryAssistant } from '@/components/ai/gallery-assistant';
+import { PageViewTracker } from '@/components/analytics/page-view-tracker';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -33,6 +34,7 @@ export default async function GalleryPage() {
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-8">
+      <PageViewTracker pathname="/gallery" />
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Gallery</h1>

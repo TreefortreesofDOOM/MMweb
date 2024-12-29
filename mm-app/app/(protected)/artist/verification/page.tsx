@@ -7,6 +7,8 @@ import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { checkVerificationRequirements } from '@/lib/actions/verification';
 import type { Database } from '@/lib/database.types';
+import { ValidationTracker } from '@/components/validation/validation-tracker';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 type UserRole = Database['public']['Enums']['user_role'];
 
@@ -30,82 +32,83 @@ export default async function VerificationPage() {
   }
 
   // Check verification requirements
-  const { verified, progress, error } = await checkVerificationRequirements(user.id);
+  const { isVerified, progress, requirements } = await checkVerificationRequirements(user.id);
 
-  const isVerifiedArtist = profile.artist_type === 'verified_artist' || verified;
-  const isEmergingArtist = profile.artist_type === 'emerging_artist' && !verified;
+  const isVerifiedArtist = profile.artist_type === 'verified_artist' || isVerified;
+  const isEmergingArtist = profile.artist_type === 'emerging_artist' && !isVerified;
   const hasExhibitionBadge = profile.exhibition_badge;
 
   return (
-    <div className="container max-w-2xl mx-auto py-8">
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold">Artist Verification</h1>
+    <TooltipProvider>
+      <div className="container max-w-2xl mx-auto py-8">
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">Artist Verification</h1>
+            {isVerifiedArtist ? (
+              <Badge variant="outline" className="gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                Verified Artist
+              </Badge>
+            ) : isEmergingArtist ? (
+              <Badge variant="secondary" className="gap-1">
+                <AlertCircle className="h-3 w-3" />
+                Emerging Artist
+              </Badge>
+            ) : null}
+          </div>
+
+          {!isVerifiedArtist && (
+            <ValidationTracker 
+              requirements={requirements}
+              progress={progress}
+              isVerified={isVerified}
+            />
+          )}
+
           {isVerifiedArtist ? (
-            <Badge variant="outline" className="gap-1">
-              <CheckCircle2 className="h-3 w-3" />
-              Verified Artist
-            </Badge>
-          ) : isEmergingArtist ? (
-            <Badge variant="secondary" className="gap-1">
-              <AlertCircle className="h-3 w-3" />
-              Emerging Artist
-            </Badge>
-          ) : null}
-        </div>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {error}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {isVerifiedArtist ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Verification Complete</CardTitle>
-              <CardDescription>
-                You are now a verified artist on our platform
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Alert>
-                <CheckCircle2 className="h-4 w-4" />
-                <AlertDescription>
-                  Congratulations! You have full access to all artist features.
-                  {hasExhibitionBadge && (
-                    <p className="mt-2">
-                      You have also been selected for exhibition in our physical gallery.
-                    </p>
-                  )}
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
-        ) : (
-          <>
             <Card>
               <CardHeader>
-                <CardTitle>Verification Journey</CardTitle>
+                <CardTitle>Verification Complete</CardTitle>
                 <CardDescription>
-                  Complete the requirements below to become a verified artist
+                  You are now a verified artist on our platform
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  As an emerging artist, you can publish up to 10 artworks. Complete the verification
-                  requirements to unlock unlimited uploads and additional features.
-                </p>
+              <CardContent className="space-y-4">
+                <Alert>
+                  <CheckCircle2 className="h-4 w-4" />
+                  <AlertDescription>
+                    Congratulations! You have full access to all artist features.
+                    {hasExhibitionBadge && (
+                      <p className="mt-2">
+                        You have also been selected for exhibition in our physical gallery.
+                      </p>
+                    )}
+                  </AlertDescription>
+                </Alert>
               </CardContent>
             </Card>
+          ) : (
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Verification Journey</CardTitle>
+                  <CardDescription>
+                    Complete the requirements below to become a verified artist
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    As an emerging artist, you can publish up to 10 artworks. Complete the verification
+                    requirements to unlock unlimited uploads and additional features.
+                  </p>
+                </CardContent>
+              </Card>
 
-            <RequirementsList />
-          </>
-        )}
+              <RequirementsList />
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   )
 } 

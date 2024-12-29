@@ -1,74 +1,76 @@
 'use server';
 
 import { createActionClient } from '@/lib/supabase/action';
-import { encodedRedirect } from "@/lib/utils";
-import { redirect } from "next/navigation";
-import { sendArtistApplicationEmail } from "@/lib/emails/artist-notifications";
+import { encodedRedirect } from '@/lib/utils';
+import { trackOnboardingStep } from '@/lib/actions/analytics';
 
 export async function submitArtistApplication(formData: FormData) {
-  const supabase = await createActionClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return redirect('/sign-in')
-  }
-
-  const artistStatement = formData.get('artistStatement') as string
-  const portfolioUrl = formData.get('portfolioUrl') as string
-  const instagram = formData.get('instagram') as string
-  const termsAccepted = formData.get('termsAccepted') === 'true'
-
-  if (!artistStatement || !termsAccepted) {
-    return encodedRedirect(
-      'error',
-      '/profile/application',
-      'Artist statement and terms acceptance are required'
-    )
-  }
-
   try {
-    // Get user's email
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', user.id)
-      .single()
+    const supabase = await createActionClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (!profile?.email) {
-      throw new Error('User email not found')
+    if (authError || !user) {
+      return encodedRedirect(
+        'error',
+        '/profile/application',
+        'Not authenticated'
+      );
     }
 
-    // Update profile with application data
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({
-        artist_application: {
-          artistStatement,
-          portfolioUrl,
-          instagram,
-          termsAccepted,
-          submittedAt: new Date().toISOString()
-        },
-        artist_status: 'pending'
-      })
-      .eq('id', user.id)
+    const termsAccepted = formData.get('termsAccepted') === 'true';
+    if (!termsAccepted) {
+      return encodedRedirect(
+        'error',
+        '/profile/application',
+        'You must accept the terms and conditions'
+      );
+    }
 
-    if (updateError) throw updateError
+    const applicationData = {
+      user_id: user.id,
+      status: 'pending',
+      bio: formData.get('bio')?.toString() || '',
+      portfolioUrl: formData.get('portfolioUrl')?.toString() || '',
+      instagram: formData.get('instagram')?.toString() || '',
+      termsAccepted,
+    };
 
-    // Send confirmation email
-    await sendArtistApplicationEmail({
-      userId: user.id,
-      email: profile.email,
-      type: 'submission'
-    })
+    const { error: insertError } = await supabase
+      .from('artist_applications')
+      .insert(applicationData);
 
-    return redirect('/profile')
+    if (insertError) {
+      console.error('Error submitting application:', insertError);
+      return encodedRedirect(
+        'error',
+        '/profile/application',
+        'Failed to submit application'
+      );
+    }
+
+    // Track application submission
+    await trackOnboardingStep({
+      step: 'artist_application',
+      completed: true,
+      metadata: {
+        userId: user.id,
+        hasPortfolio: !!applicationData.portfolioUrl,
+        hasInstagram: !!applicationData.instagram,
+        hasBio: !!applicationData.bio
+      }
+    });
+
+    return encodedRedirect(
+      'success',
+      '/profile',
+      'Application submitted successfully'
+    );
   } catch (error) {
-    console.error('Error submitting artist application:', error)
+    console.error('Error in submitArtistApplication:', error);
     return encodedRedirect(
       'error',
       '/profile/application',
       'Failed to submit application'
-    )
+    );
   }
 } 

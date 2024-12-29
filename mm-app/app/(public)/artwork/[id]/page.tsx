@@ -4,6 +4,7 @@ import { PatronAssistant } from '@/components/ai/patron-assistant';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils';
+import { PageViewTracker } from '@/components/analytics/page-view-tracker';
 
 export default async function ArtworkPage({ params }: { params: { id: string } }) {
   const supabase = await createClient();
@@ -30,6 +31,7 @@ export default async function ArtworkPage({ params }: { params: { id: string } }
 
   return (
     <div className="container max-w-7xl mx-auto py-8 px-4">
+      <PageViewTracker pathname={`/artwork/${params.id}`} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Left Column - Artwork Image */}
         <div className="relative aspect-square rounded-lg overflow-hidden">

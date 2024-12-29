@@ -1,9 +1,8 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { Database } from '../database.types';
 
 export async function getProfile() {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
   
   if (!session?.user) {

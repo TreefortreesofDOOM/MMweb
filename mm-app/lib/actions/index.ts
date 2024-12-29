@@ -1,7 +1,11 @@
 // Re-export all actions by category
-export * from './auth';
-export * from './profile';
+export * from './admin';
 export * from './artist';
 export * from './artwork';
-export * from './admin';
+export * from './auth';
+export * from './profile';
+export * from './role';
+export * from './verification';
+export * from './featured-artist';
+export * from './analytics';
 export * from './ai'; 

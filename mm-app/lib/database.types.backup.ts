@@ -355,6 +355,7 @@ export type Database = {
           last_name: string | null
           last_notification_sent: string | null
           last_notification_type: string | null
+          location: string | null
           name: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           stripe_account_id: string | null
@@ -386,6 +387,7 @@ export type Database = {
           last_name?: string | null
           last_notification_sent?: string | null
           last_notification_type?: string | null
+          location?: string | null
           name?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           stripe_account_id?: string | null
@@ -417,6 +419,7 @@ export type Database = {
           last_name?: string | null
           last_notification_sent?: string | null
           last_notification_type?: string | null
+          location?: string | null
           name?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           stripe_account_id?: string | null
@@ -576,6 +579,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      partial_registrations: {
+        Row: {
+          id: string
+          email: string
+          data: Json
+          created_at: string
+          updated_at: string
+          expires_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          data?: Json
+          created_at?: string
+          updated_at?: string
+          expires_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          data?: Json
+          created_at?: string
+          updated_at?: string
+          expires_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

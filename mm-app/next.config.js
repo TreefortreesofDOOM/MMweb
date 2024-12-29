@@ -21,13 +21,23 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'files.stripe.com',
         port: '',
+      },
+      {
+        protocol: 'http',
+        hostname: '192.168.86.29',
+        port: '54321',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '54321',
+      },
+      {
+        protocol: 'https',
+        hostname: 'yjdrcbrkbqlslsdzquwv.supabase.co',
+        port: '',
       }
-    ],
-    domains: [
-      '192.168.86.29', // Local Supabase storage
-      'localhost',     // For local development
-      'yjdrcbrkbqlslsdzquwv.supabase.co' // Production Supabase storage
-    ],
+    ]
   },
 }
 

@@ -1,52 +1,66 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/lib/database.types';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Initialize OpenAI client (we'll need to add OpenAI API key to env variables)
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-if (!OPENAI_API_KEY) {
-  throw new Error('OPENAI_API_KEY is not defined in environment variables');
+// Initialize clients lazily
+let genAI: GoogleGenerativeAI | null = null;
+let supabase: ReturnType<typeof createClient<Database>> | null = null;
+
+// Initialize Gemini AI with more detailed error handling
+function getGeminiClient() {
+  if (!genAI) {
+    const apiKey = process.env.GOOGLE_AI_API_KEY;
+    if (!apiKey) {
+      throw new Error('Missing Gemini API key in environment variables (GOOGLE_AI_API_KEY)');
+    }
+    genAI = new GoogleGenerativeAI(apiKey);
+  }
+  return genAI;
 }
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error('Supabase credentials not found in environment variables');
-}
-
-const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey);
-
-interface EmbeddingInput {
-  input: string | string[];
-}
-
-interface EmbeddingResponse {
-  data: Array<{
-    embedding: number[];
-    index: number;
-  }>;
+// Initialize Supabase with more detailed error handling
+function getSupabaseClient() {
+  if (!supabase) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!url || !key) {
+      throw new Error('Missing Supabase credentials in environment variables');
+    }
+    
+    supabase = createClient<Database>(url, key);
+  }
+  return supabase;
 }
 
 export async function generateEmbedding(text: string | string[]): Promise<number[][]> {
   try {
-    const response = await fetch('https://api.openai.com/v1/embeddings', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        input: text,
-        model: 'text-embedding-ada-002',
-      } as EmbeddingInput),
-    });
+    console.log('Generating embedding for:', typeof text === 'string' ? text.substring(0, 50) + '...' : 'array of texts');
+    
+    // Convert input to array if it's a string
+    const textArray = Array.isArray(text) ? text : [text];
+    
+    // Get Gemini client and generate embeddings
+    const client = getGeminiClient();
+    const model = client.getGenerativeModel({ model: "text-embedding-004" });
+    
+    // Process each text input sequentially to get embeddings
+    const embeddings = await Promise.all(
+      textArray.map(async (t) => {
+        const embeddingResult = await model.embedContent(t);
+        
+        // Access the values array from the embedding result
+        const values = embeddingResult.embedding?.values;
+        if (!Array.isArray(values)) {
+          console.error('Unexpected embedding structure:', embeddingResult);
+          throw new Error('Embedding result values is not an array');
+        }
+        
+        return values;
+      })
+    );
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`);
-    }
-
-    const result = (await response.json()) as EmbeddingResponse;
-    return result.data.map(item => item.embedding);
+    return embeddings;
   } catch (error) {
     console.error('Error generating embedding:', error);
     throw error;
@@ -68,18 +82,18 @@ export async function storeArtworkEmbedding({
 }: ArtworkEmbedding) {
   try {
     const [embedding] = await generateEmbedding(content);
-    
-    const { data, error } = await supabase
-      .from('artwork_embeddings')
+    const client = getSupabaseClient();
+    const { data, error } = await client
+      .from("artwork_embeddings_gemini")
       .insert({
         artwork_id,
         embedding_type,
-        embedding,
-        metadata,
+        embedding: embedding,
+        metadata
       })
       .select()
       .single();
-
+    
     if (error) throw error;
     return data;
   } catch (error) {
@@ -103,18 +117,18 @@ export async function storeTextEmbedding({
 }: TextEmbedding) {
   try {
     const [embedding] = await generateEmbedding(content);
-    
-    const { data, error } = await supabase
-      .from('text_embeddings')
+    const client = getSupabaseClient();
+    const { data, error } = await client
+      .from("text_embeddings")
       .insert({
         content_type,
         content_id,
-        embedding,
-        metadata,
+        embedding: JSON.stringify(embedding),
+        metadata
       })
       .select()
       .single();
-
+    
     if (error) throw error;
     return data;
   } catch (error) {
@@ -138,14 +152,13 @@ export async function findSimilarArtworks(
       match_threshold = 0.7,
       match_count = 10,
     } = options;
-
-    const { data, error } = await supabase
-      .rpc('match_artworks', {
-        query_embedding: queryEmbedding,
-        match_threshold,
-        match_count,
-      });
-
+    const client = getSupabaseClient();
+    const { data, error } = await client.rpc("match_artworks_gemini", {
+      query_embedding: `[${queryEmbedding.join(',')}]`,
+      match_threshold,
+      match_count
+    });
+    
     if (error) throw error;
     return data;
   } catch (error) {

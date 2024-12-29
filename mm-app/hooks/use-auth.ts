@@ -1,8 +1,8 @@
 'use client';
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
-import type { User } from '@supabase/auth-helpers-nextjs';
+import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import type { Database } from '@/lib/database.types';
 import { 
   ARTIST_ROLES, 
@@ -28,17 +28,16 @@ export function useAuth(): AuthState {
   const [profile, setProfile] = useState<ArtistProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createBrowserClient();
 
   const fetchProfile = async (userId: string) => {
     try {
+      // Get the profile
       const { data: dbProfile, error: profileError } = await supabase
         .from('profiles')
         .select(`
           *,
-          artworks: artworks_aggregate (
-            count
-          )
+          artworks:artworks(count)
         `)
         .eq('id', userId)
         .single();
@@ -48,7 +47,7 @@ export function useAuth(): AuthState {
           // Profile not found - this is expected for new users
           return null;
         }
-        throw profileError;
+        throw new Error(profileError.message);
       }
 
       if (!dbProfile) {
@@ -66,8 +65,7 @@ export function useAuth(): AuthState {
       return artistProfile;
     } catch (error) {
       console.error('Error fetching profile:', error);
-      // Don't throw the error, just return null
-      return null;
+      throw error instanceof Error ? error : new Error('Failed to fetch profile');
     }
   };
 
@@ -85,8 +83,14 @@ export function useAuth(): AuthState {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          const profile = await fetchProfile(session.user.id);
-          setProfile(profile); // profile may be null for new users
+          try {
+            const profile = await fetchProfile(session.user.id);
+            setProfile(profile); // profile may be null for new users
+          } catch (error) {
+            console.error('Error fetching profile:', error);
+            setError(error instanceof Error ? error.message : 'Failed to fetch profile');
+            setProfile(null);
+          }
         }
 
         setIsLoading(false);
@@ -102,27 +106,28 @@ export function useAuth(): AuthState {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       try {
         setError(null);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          const profile = await fetchProfile(session.user.id);
-          setProfile(profile); // profile may be null for new users
+          try {
+            const profile = await fetchProfile(session.user.id);
+            setProfile(profile); // profile may be null for new users
+          } catch (error) {
+            console.error('Error fetching profile:', error);
+            setError(error instanceof Error ? error.message : 'Failed to fetch profile');
+            setProfile(null);
+          }
         } else {
           setProfile(null);
         }
 
         setIsLoading(false);
       } catch (error) {
-        if (error instanceof Error) {
-          console.error('Error updating auth state:', error.message);
-          setError(error.message);
-        } else {
-          console.error('Error updating auth state:', error);
-          setError('Failed to update auth state');
-        }
+        console.error('Error updating auth state:', error);
+        setError(error instanceof Error ? error.message : 'Failed to update auth state');
         setIsLoading(false);
       }
     });

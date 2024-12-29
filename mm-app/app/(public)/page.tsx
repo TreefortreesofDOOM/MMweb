@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
 import { GalleryAssistant } from '@/components/ai/gallery-assistant';
 import { FeaturedArtist } from '@/components/featured-artist';
+import { PageViewTracker } from '@/components/analytics/page-view-tracker';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,6 +86,7 @@ export default async function Home() {
 
   return (
     <>
+      <PageViewTracker pathname="/" />
       <Hero />
       <main className="flex-1 flex flex-col gap-12 max-w-7xl mx-auto px-4 py-8">
         {featuredArtist && (

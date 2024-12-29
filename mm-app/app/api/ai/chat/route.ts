@@ -2,6 +2,13 @@ import { createClient } from '@/lib/supabase/server';
 import { getGeminiResponse } from '@/lib/ai/gemini';
 import { NextResponse } from 'next/server';
 import { AI_ROLES } from '@/lib/ai/prompts';
+import { generateEmbedding } from '@/lib/ai/embeddings';
+
+interface SimilarityMatch {
+  id: string;
+  artwork_id: string;
+  similarity: number;
+}
 
 export async function POST(request: Request) {
   try {
@@ -45,17 +52,44 @@ export async function POST(request: Request) {
     let similarArtworksContext = '';
     if (artworkId) {
       const supabase = await createClient();
-      const { data: similarArtworks } = await supabase.rpc('match_artworks', {
-        artwork_id: artworkId,
-        match_threshold: 0.7,
+      
+      // Get the artwork details
+      const { data: artworks, error: artworksError } = await supabase
+        .from('artworks')
+        .select('id, title, description, artist_name')
+        .eq('id', artworkId);
+
+      if (artworksError) throw artworksError;
+      
+      const artwork = artworks?.[0];
+      if (!artwork) throw new Error('Artwork not found');
+      if (!artwork.title || !artwork.description) throw new Error('Artwork missing title or description');
+
+      // Generate embedding for the artwork
+      const content = `${artwork.title} ${artwork.description}`;
+      const [embedding] = await generateEmbedding(content);
+      const formattedEmbedding = `[${embedding.join(',')}]`;
+
+      const { data: similarArtworks } = await supabase.rpc('match_artworks_gemini', {
+        query_embedding: formattedEmbedding,
+        match_threshold: 0.1,
         match_count: 5
       });
 
       if (similarArtworks && similarArtworks.length > 0) {
-        similarArtworksContext = `
-          Similar artworks:
-          ${similarArtworks.map((art: any) => `- ${art.title} by ${art.artist_name}`).join('\n')}
-        `;
+        // Get details for similar artworks
+        const similarArtworkIds = (similarArtworks as SimilarityMatch[]).map(a => a.artwork_id);
+        const { data: similarArtworkDetails } = await supabase
+          .from('artworks')
+          .select('id, title, artist_name')
+          .in('id', similarArtworkIds);
+
+        if (similarArtworkDetails) {
+          similarArtworksContext = `
+            Similar artworks:
+            ${similarArtworkDetails.map(art => `- ${art.title} by ${art.artist_name}`).join('\n')}
+          `;
+        }
       }
     }
 

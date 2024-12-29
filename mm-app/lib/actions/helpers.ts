@@ -23,7 +23,10 @@ export async function getArtist() {
     .eq('id', user.id)
     .single();
 
-  if (profile?.role !== 'artist') return null;
+  // Check for either emerging_artist or verified_artist role
+  if (!profile?.role || !['emerging_artist', 'verified_artist'].includes(profile.role)) {
+    return null;
+  }
 
   return user;
 }

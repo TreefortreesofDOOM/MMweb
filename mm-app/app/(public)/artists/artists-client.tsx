@@ -1,15 +1,18 @@
 'use client'
 
 import { useCallback, useEffect, useState, useMemo } from 'react'
-import supabaseClient from '@/lib/supabase/client'
 import { ArtistCard } from './artist-card'
 import { useInView } from 'react-intersection-observer'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
-import { ARTIST_ROLES, type ArtistRole, type Profile } from '@/lib/types/custom-types'
-import type { Database } from '@/lib/database.types'
+import { ARTIST_ROLES, type ArtistRole } from '@/lib/types/custom-types'
+import { searchArtists } from '@/lib/utils/search'
+import { trackArtistDirectoryView } from '@/lib/actions/analytics'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useDebounce } from '@/lib/hooks/use-debounce'
 
 const ARTISTS_PER_PAGE = 12
 
@@ -51,6 +54,10 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState(2) // Start from page 2 since we have initial data
   const [hasMore, setHasMore] = useState(initialArtists.length === ARTISTS_PER_PAGE)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [artistType, setArtistType] = useState<string>('')
+  const [sortBy, setSortBy] = useState<'created_at' | 'view_count' | 'name'>('created_at')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const { toast } = useToast()
   
   const { ref, inView } = useInView({
@@ -58,50 +65,23 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
     rootMargin: '100px',
   })
 
+  const debouncedSearch = useDebounce(searchQuery, 300)
+
   const fetchArtists = useCallback(async () => {
     try {
       setIsLoading(true)
       setError(null)
-      const from = (page - 1) * ARTISTS_PER_PAGE
-      const to = from + ARTISTS_PER_PAGE - 1
 
-      const { data, error } = await supabaseClient
-        .from('profiles')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          full_name,
-          avatar_url,
-          bio,
-          instagram,
-          website,
-          created_at,
-          exhibition_badge,
-          view_count,
-          artist_type,
-          location,
-          artworks:artworks(count)
-        `)
-        .in('artist_type', [ARTIST_ROLES.VERIFIED, ARTIST_ROLES.EMERGING])
-        .order('exhibition_badge', { ascending: false, nullsFirst: false })
-        .order('artist_type', { ascending: false, nullsFirst: false })
-        .order('created_at', { ascending: false })
-        .range(from, to)
+      const { artists: newArtists, hasMore: moreResults } = await searchArtists({
+        query: debouncedSearch,
+        artistType: artistType === 'all' ? undefined : artistType,
+        sortBy,
+        sortOrder,
+        page
+      })
 
-      if (error) {
-        throw new Error('Failed to fetch artists')
-      }
-
-      if (data) {
-        const artistsWithCount = data.map(artist => ({
-          ...artist,
-          artworks: [{ count: artist.artworks?.[0]?.count || 0 }]
-        })) as ArtistWithCount[]
-
-        setArtists(prev => [...prev, ...artistsWithCount])
-        setHasMore(data.length === ARTISTS_PER_PAGE)
-      }
+      setArtists(prev => page === 1 ? newArtists : [...prev, ...newArtists])
+      setHasMore(moreResults)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An unexpected error occurred'
       console.error('Error fetching artists:', error)
@@ -114,15 +94,24 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
     } finally {
       setIsLoading(false)
     }
-  }, [supabaseClient, page, toast])
+  }, [debouncedSearch, artistType, sortBy, sortOrder, page, toast])
 
   const handleRetry = useCallback(() => {
-    setPage(2) // Reset to page 2 since we have initial data
-    setArtists(initialArtists)
-    setHasMore(initialArtists.length === ARTISTS_PER_PAGE)
+    setPage(1)
+    setArtists([])
+    setHasMore(true)
     fetchArtists()
-  }, [fetchArtists, initialArtists])
+  }, [fetchArtists])
 
+  // Handle search and filter changes
+  useEffect(() => {
+    setPage(1)
+    setArtists([])
+    setHasMore(true)
+    fetchArtists()
+  }, [debouncedSearch, artistType, sortBy, sortOrder, fetchArtists])
+
+  // Handle infinite scroll
   useEffect(() => {
     if (inView && hasMore && !isLoading) {
       fetchArtists().then(() => {
@@ -130,6 +119,14 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
       })
     }
   }, [inView, hasMore, isLoading, fetchArtists])
+
+  // Track initial artists view
+  useEffect(() => {
+    trackArtistDirectoryView({
+      initialCount: initialArtists.length,
+      hasMore
+    })
+  }, [initialArtists.length, hasMore])
 
   const artistGrid = useMemo(() => (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -170,32 +167,75 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
         <AlertCircle className="h-4 w-4" aria-hidden="true" />
         <AlertTitle>No Artists Found</AlertTitle>
         <AlertDescription>
-          There are no approved artists to display at this time.
+          {searchQuery ? 'No artists match your search criteria.' : 'There are no approved artists to display at this time.'}
         </AlertDescription>
       </Alert>
     )
   }
 
   return (
-    <div 
-      role="feed" 
-      aria-busy={isLoading} 
-      aria-label="Artist directory"
-      className="space-y-8"
-    >
-      {artistGrid}
-      
-      {hasMore && !error && (
-        <div 
-          ref={ref} 
-          className="flex justify-center p-4" 
-          aria-label={isLoading ? "Loading more artists" : "Load more artists when scrolled into view"}
-        >
-          {isLoading && (
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
-          )}
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <Input
+          type="search"
+          placeholder="Search artists..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="sm:max-w-xs"
+        />
+        <div className="flex gap-2">
+          <Select value={artistType} onValueChange={setArtistType}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Artist type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All types</SelectItem>
+              <SelectItem value={ARTIST_ROLES.VERIFIED}>Verified</SelectItem>
+              <SelectItem value={ARTIST_ROLES.EMERGING}>Emerging</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="created_at">Date joined</SelectItem>
+              <SelectItem value="view_count">Popularity</SelectItem>
+              <SelectItem value="name">Name</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as typeof sortOrder)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort order" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="desc">Descending</SelectItem>
+              <SelectItem value="asc">Ascending</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      )}
+      </div>
+
+      <div 
+        role="feed" 
+        aria-busy={isLoading} 
+        aria-label="Artist directory"
+        className="space-y-8"
+      >
+        {artistGrid}
+        
+        {hasMore && !error && (
+          <div 
+            ref={ref} 
+            className="flex justify-center p-4" 
+            aria-label={isLoading ? "Loading more artists" : "Load more artists when scrolled into view"}
+          >
+            {isLoading && (
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 } 

@@ -138,8 +138,8 @@ export const useVerification = () => {
   // Check verification requirements on the server when status changes
   useEffect(() => {
     if (profile && !profile.artist_type) {
-      checkVerificationRequirements(profile.id).then(({ verified }) => {
-        if (verified) {
+      checkVerificationRequirements(profile.id).then(({ isVerified }) => {
+        if (isVerified) {
           router.refresh();
         }
       });

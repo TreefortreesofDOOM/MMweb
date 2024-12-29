@@ -67,6 +67,29 @@ export async function createArtwork(formData: FormData) {
     return { error: 'Not authenticated' };
   }
 
+  // Get user's role from profiles
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile) {
+    return { error: 'Profile not found' };
+  }
+
+  // Check artwork count limit for emerging artists
+  if (profile.role === 'emerging_artist') {
+    const { count } = await supabase
+      .from('artworks')
+      .select('*', { count: 'exact', head: true })
+      .eq('artist_id', user.id);
+
+    if (count && count >= 10) {
+      return { error: 'Emerging artists are limited to 10 artworks. Please apply for verification to upload more.' };
+    }
+  }
+
   const title = formData.get('title') as string;
   const description = formData.get('description') as string;
   const price = parseFloat(formData.get('price') as string);

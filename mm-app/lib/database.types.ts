@@ -64,6 +64,13 @@ export type Database = {
             foreignKeyName: "artist_features_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "artist_features_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profile_roles"
             referencedColumns: ["id"]
           },
@@ -191,6 +198,13 @@ export type Database = {
             foreignKeyName: "artworks_artist_id_fkey"
             columns: ["artist_id"]
             isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "artworks_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
             referencedRelation: "profile_roles"
             referencedColumns: ["id"]
           },
@@ -253,6 +267,131 @@ export type Database = {
           },
         ]
       }
+      feature_usage: {
+        Row: {
+          created_at: string
+          feature_name: string
+          id: string
+          last_used_at: string | null
+          metadata: Json | null
+          updated_at: string
+          usage_count: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          feature_name: string
+          id?: string
+          last_used_at?: string | null
+          metadata?: Json | null
+          updated_at?: string
+          usage_count?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          feature_name?: string
+          id?: string
+          last_used_at?: string | null
+          metadata?: Json | null
+          updated_at?: string
+          usage_count?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_usage_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "feature_usage_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_usage_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      featured_artist: {
+        Row: {
+          active: boolean | null
+          artist_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          artist_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          artist_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "featured_artist_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "featured_artist_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "featured_artist_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "featured_artist_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "featured_artist_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "featured_artist_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           created_at: string
@@ -307,6 +446,13 @@ export type Database = {
             foreignKeyName: "gallery_visits_scanned_by_fkey"
             columns: ["scanned_by"]
             isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "gallery_visits_scanned_by_fkey"
+            columns: ["scanned_by"]
+            isOneToOne: false
             referencedRelation: "profile_roles"
             referencedColumns: ["id"]
           },
@@ -316,6 +462,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_visits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
           },
           {
             foreignKeyName: "gallery_visits_user_id_fkey"
@@ -332,6 +485,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      partial_registrations: {
+        Row: {
+          created_at: string
+          data: Json
+          email: string
+          expires_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          email: string
+          expires_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          email?: string
+          expires_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -432,6 +612,58 @@ export type Database = {
         }
         Relationships: []
       }
+      role_conversions: {
+        Row: {
+          conversion_type: string
+          created_at: string
+          from_role: Database["public"]["Enums"]["user_role"] | null
+          id: string
+          metadata: Json | null
+          to_role: Database["public"]["Enums"]["user_role"] | null
+          user_id: string | null
+        }
+        Insert: {
+          conversion_type: string
+          created_at?: string
+          from_role?: Database["public"]["Enums"]["user_role"] | null
+          id?: string
+          metadata?: Json | null
+          to_role?: Database["public"]["Enums"]["user_role"] | null
+          user_id?: string | null
+        }
+        Update: {
+          conversion_type?: string
+          created_at?: string
+          from_role?: Database["public"]["Enums"]["user_role"] | null
+          id?: string
+          metadata?: Json | null
+          to_role?: Database["public"]["Enums"]["user_role"] | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_conversions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "role_conversions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_conversions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       text_embeddings: {
         Row: {
           content_id: string
@@ -512,6 +744,120 @@ export type Database = {
           },
         ]
       }
+      user_events: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_name: string
+          event_type: string
+          id: string
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_name: string
+          event_type: string
+          id?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_name?: string
+          event_type?: string
+          id?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "user_sessions"
+            referencedColumns: ["session_id"]
+          },
+          {
+            foreignKeyName: "user_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "user_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_sessions: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          metadata: Json | null
+          session_id: string
+          started_at: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          session_id: string
+          started_at?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          session_id?: string
+          started_at?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "user_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       verification_progress: {
         Row: {
           created_at: string
@@ -554,6 +900,13 @@ export type Database = {
             foreignKeyName: "verification_progress_reviewer_id_fkey"
             columns: ["reviewer_id"]
             isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "verification_progress_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
             referencedRelation: "profile_roles"
             referencedColumns: ["id"]
           },
@@ -563,6 +916,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
           },
           {
             foreignKeyName: "verification_progress_user_id_fkey"
@@ -580,35 +940,112 @@ export type Database = {
           },
         ]
       }
-      partial_registrations: {
+      match_artworks: {
         Row: {
           id: string
-          email: string
-          data: Json
-          created_at: string
-          updated_at: string
-          expires_at: string
+          artwork_id: string
+          similarity: number
         }
         Insert: {
           id?: string
-          email: string
-          data?: Json
-          created_at?: string
-          updated_at?: string
-          expires_at?: string
+          artwork_id?: string
+          similarity?: number
         }
         Update: {
           id?: string
-          email?: string
-          data?: Json
-          created_at?: string
-          updated_at?: string
-          expires_at?: string
+          artwork_id?: string
+          similarity?: number
         }
         Relationships: []
       }
+      match_artworks_gemini: {
+        Row: {
+          id: string
+          artwork_id: string
+          similarity: number
+        }
+        Insert: {
+          id?: string
+          artwork_id?: string
+          similarity?: number
+        }
+        Update: {
+          id?: string
+          artwork_id?: string
+          similarity?: number
+        }
+        Relationships: []
+      }
+      match_conversations: {
+        Row: {
+          id: string
+          message: string
+          response: string
+          created_at: string
+          metadata: Json
+          context: Json
+        }
+        Insert: {
+          id?: string
+          message?: string
+          response?: string
+          created_at?: string
+          metadata?: Json
+          context?: Json
+        }
+        Update: {
+          id?: string
+          message?: string
+          response?: string
+          created_at?: string
+          metadata?: Json
+          context?: Json
+        }
+        Relationships: []
+      }
+      artwork_embeddings_gemini: {
+        Row: {
+          id: string
+          artwork_id: string
+          embedding: number[]
+          embedding_type: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          artwork_id: string
+          embedding: number[]
+          embedding_type: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          artwork_id?: string
+          embedding?: number[]
+          embedding_type?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artwork_embeddings_gemini_artwork_id_fkey"
+            columns: ["artwork_id"]
+            referencedRelation: "artworks"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
+      artwork_counts: {
+        Row: {
+          artwork_count: number | null
+          profile_id: string | null
+        }
+        Relationships: []
+      }
       profile_roles: {
         Row: {
           id: string | null
@@ -642,6 +1079,10 @@ export type Database = {
             }
             Returns: unknown
           }
+      cleanup_expired_registrations: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       find_artwork_conversations: {
         Args: {
           p_user_id: string
@@ -788,6 +1229,30 @@ export type Database = {
           similarity: number
         }[]
       }
+      match_artworks_gemini: {
+        Args: {
+          query_embedding: string
+          match_threshold: number
+          match_count: number
+        }
+        Returns: {
+          id: string
+          artwork_id: string
+          similarity: number
+        }[]
+      }
+      search_profiles: {
+        Args: {
+          search_query: string
+        }
+        Returns: {
+          id: string
+          rank: number
+          full_name: string
+          bio: string
+          location: string
+        }[]
+      }
       send_email: {
         Args: {
           recipient: string
@@ -796,6 +1261,12 @@ export type Database = {
           sender?: string
         }
         Returns: Json
+      }
+      set_featured_artist: {
+        Args: {
+          artist_id: string
+        }
+        Returns: string
       }
       sparsevec_out: {
         Args: {

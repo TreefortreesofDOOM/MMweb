@@ -2,7 +2,7 @@
 
 import { createContext, useContext, ReactNode } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import type { User } from '@supabase/auth-helpers-nextjs';
+import type { User } from '@supabase/supabase-js';
 import type { ArtistProfile } from '@/lib/types/custom-types';
 
 interface AuthContextType {

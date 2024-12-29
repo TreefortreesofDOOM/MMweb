@@ -1,9 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
+import { type SupabaseClient } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
+import { Database } from "@/lib/database.types";
 
-export const updateSession = async (request: NextRequest) => {
-  // This `try/catch` block is only here for the interactive tutorial.
-  // Feel free to remove once you have Supabase connected.
+type UpdateSessionResult = {
+  response: NextResponse;
+  supabase?: SupabaseClient<Database>;
+  error?: unknown;
+};
+
+export const updateSession = async (request: NextRequest): Promise<UpdateSessionResult> => {
   try {
     // Create an unmodified response
     let response = NextResponse.next({
@@ -12,7 +18,7 @@ export const updateSession = async (request: NextRequest) => {
       },
     });
 
-    const supabase = createServerClient(
+    const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -37,26 +43,29 @@ export const updateSession = async (request: NextRequest) => {
 
     // This will refresh session if expired - required for Server Components
     // https://supabase.com/docs/guides/auth/server-side/nextjs
-    const user = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     // protected routes
     if ((request.nextUrl.pathname.startsWith("/protected") || 
          request.nextUrl.pathname.startsWith("/profile") ||
          request.nextUrl.pathname.startsWith("/artist") ||
          request.nextUrl.pathname.startsWith("/admin")) && 
-         user.error) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+         (userError || !user)) {
+      return { response: NextResponse.redirect(new URL("/sign-in", request.url)) };
     }
 
-    return response;
+    return { response, supabase };
   } catch (e) {
     // If you are here, a Supabase client could not be created!
     // This is likely because you have not set up environment variables.
-    // Check out http://localhost:3000 for Next Steps.
-    return NextResponse.next({
-      request: {
-        headers: request.headers,
-      },
-    });
+    console.error('Error in updateSession:', e);
+    return {
+      response: NextResponse.next({
+        request: {
+          headers: request.headers,
+        },
+      }),
+      error: e,
+    };
   }
 };

@@ -5,6 +5,7 @@ import { Content } from '@google/generative-ai';
 import { buildSystemInstruction } from '@/lib/ai/instructions';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { env } from '@/lib/env';
+import { generateEmbedding } from '@/lib/ai/embeddings';
 
 interface AssistantRequest {
   message: string;
@@ -122,20 +123,23 @@ export async function POST(req: Request) {
 
       if (artworkError) {
         console.error('Error fetching artwork:', artworkError);
-      }
+      } else if (artwork) {
+        // Generate embedding for the artwork
+        const content = `${artwork.title} ${artwork.description}`;
+        const [embedding] = await generateEmbedding(content);
+        const formattedEmbedding = `[${embedding.join(',')}]`;
 
-      // Get similar artworks
-      const { data: similarArtworks, error: similarError } = await supabase.rpc('match_artworks', {
-        artwork_id: artworkId,
-        match_threshold: 0.7,
-        match_count: 5
-      });
+        // Get similar artworks
+        const { data: similarArtworks, error: similarError } = await supabase.rpc('match_artworks_gemini', {
+          query_embedding: formattedEmbedding,
+          match_threshold: 0.1,
+          match_count: 5
+        });
 
-      if (similarError) {
-        console.error('Error fetching similar artworks:', similarError);
-      }
+        if (similarError) {
+          console.error('Error fetching similar artworks:', similarError);
+        }
 
-      if (artwork) {
         artworkContext = {
           artwork: {
             title: artwork.title,

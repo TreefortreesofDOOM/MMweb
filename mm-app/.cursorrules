@@ -4,6 +4,29 @@ Every time you choose to apply a rule(s), explicitly state the rule(s) in the ou
 
 - Do not over engineer.
 
+## Supabase Client Patterns
+Use the following patterns consistently for Supabase client initialization:
+
+1. **Server Components & API Routes**
+```typescript
+import { createClient } from '@/lib/supabase/server'
+const supabase = await createClient()
+```
+
+2. **Server Actions**
+```typescript
+import { createActionClient } from '@/lib/supabase/action'
+const supabase = await createActionClient()
+```
+
+3. **Client Components**
+```typescript
+import { createBrowserClient } from '@/lib/supabase/client'
+const supabase = createBrowserClient()
+```
+
+> **Note:** All patterns use `@supabase/ssr` under the hood but with different cookie handling strategies appropriate for their context. Do not use the older `auth-helpers-nextjs` package.
+
 - 'gemini-1.5-flash' is the correct model for image analysis.
 
 ## Project Context

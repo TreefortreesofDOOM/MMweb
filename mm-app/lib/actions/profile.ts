@@ -4,6 +4,7 @@ import { createActionClient } from '@/lib/supabase/action';
 import { redirect } from "next/navigation";
 import { encodedRedirect } from "@/lib/utils";
 import { Database } from "@/lib/database.types";
+import { trackProfileCompletion } from '@/lib/actions/analytics';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -60,119 +61,178 @@ export async function getProfileAction() {
 }
 
 export const updateProfileAction = async (formData: FormData) => {
-  const supabase = await createActionClient();
-  
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return redirect('/sign-in');
-  }
+  try {
+    const supabase = await createActionClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-  // Get current profile to check artist status
-  const { data: currentProfile } = await supabase
-    .from('profiles')
-    .select('role, artist_type, verification_progress')
-    .eq('id', user.id)
-    .single();
-
-  const isArtist = currentProfile?.role === 'artist';
-  const isVerifiedArtist = isArtist && currentProfile?.artist_type === 'verified';
-
-  // Build update data, filtering out null/empty values
-  const updateData: Partial<Profile> = {};
-  const fields = ['first_name', 'last_name', 'bio', 'website', 'instagram'] as const;
-  
-  // Validate required fields for artists
-  if (isArtist) {
-    const firstName = formData.get('firstName') as string;
-    const lastName = formData.get('lastName') as string;
-    const bio = formData.get('bio') as string;
-
-    if (!firstName?.trim() || !lastName?.trim() || !bio?.trim()) {
+    if (authError || !user) {
       return encodedRedirect(
-        "error",
-        "/profile/edit",
-        "Name and bio are required for artists"
+        'error',
+        '/profile/edit',
+        'Not authenticated'
       );
     }
 
-    // Additional validation for verified artists
-    if (isVerifiedArtist) {
-      const website = formData.get('website') as string;
-      const instagram = formData.get('instagram') as string;
+    const firstName = formData.get('firstName')?.toString();
+    const lastName = formData.get('lastName')?.toString();
+    const bio = formData.get('bio')?.toString();
+    const location = formData.get('location')?.toString();
+    const website = formData.get('website')?.toString();
+    const instagram = formData.get('instagram')?.toString();
 
-      if (!website?.trim() || !instagram?.trim()) {
-        return encodedRedirect(
-          "error",
-          "/profile/edit",
-          "Website and Instagram are required for verified artists"
-        );
-      }
+    const updateData = {
+      first_name: firstName || null,
+      last_name: lastName || null,
+      bio: bio || null,
+      location: location || null,
+      website: website || null,
+      instagram: instagram || null,
+      full_name: firstName && lastName ? `${firstName} ${lastName}` : null,
+      updated_at: new Date().toISOString()
+    };
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update(updateData)
+      .eq('id', user.id);
+
+    if (updateError) {
+      console.error('Error updating profile:', updateError);
+      return encodedRedirect(
+        'error',
+        '/profile/edit',
+        'Failed to update profile'
+      );
     }
-  }
 
-  fields.forEach(field => {
-    const value = formData.get(field) as string;
-    if (value?.trim()) {
-      updateData[field] = value.trim();
-    }
-  });
-
-  // Construct full_name from first_name and last_name for backward compatibility
-  if (updateData.first_name || updateData.last_name) {
-    updateData.full_name = [updateData.first_name, updateData.last_name]
-      .filter(Boolean)
-      .join(' ');
-  }
-
-  // Update verification progress for emerging artists
-  if (isArtist && currentProfile?.artist_type === 'emerging') {
-    const progress = calculateVerificationProgress({
-      hasName: Boolean(updateData.first_name && updateData.last_name),
-      hasBio: Boolean(updateData.bio),
-      hasWebsite: Boolean(updateData.website),
-      hasInstagram: Boolean(updateData.instagram)
+    // Track profile field completions
+    await trackProfileCompletion({
+      fieldName: 'name',
+      completed: !!(firstName && lastName),
+      metadata: { userId: user.id }
     });
-    updateData.verification_progress = progress;
-  }
 
-  console.log('Updating profile with data:', updateData);
-  const { error } = await supabase
-    .from('profiles')
-    .update(updateData)
-    .eq('id', user.id);
+    await trackProfileCompletion({
+      fieldName: 'bio',
+      completed: !!bio,
+      metadata: { userId: user.id }
+    });
 
-  if (error) {
-    console.error('Profile update error:', error);
+    await trackProfileCompletion({
+      fieldName: 'location',
+      completed: !!location,
+      metadata: { userId: user.id }
+    });
+
+    await trackProfileCompletion({
+      fieldName: 'website',
+      completed: !!website,
+      metadata: { userId: user.id }
+    });
+
+    await trackProfileCompletion({
+      fieldName: 'instagram',
+      completed: !!instagram,
+      metadata: { userId: user.id }
+    });
+
     return encodedRedirect(
-      "error",
-      "/profile/edit",
-      "Failed to update profile"
+      'success',
+      '/profile/edit',
+      'Profile updated successfully'
+    );
+  } catch (error) {
+    console.error('Error in updateProfileAction:', error);
+    return encodedRedirect(
+      'error',
+      '/profile/edit',
+      'Failed to update profile'
     );
   }
-
-  return redirect('/profile');
 };
 
-interface VerificationProgress {
-  hasName: boolean;
-  hasBio: boolean;
-  hasWebsite: boolean;
-  hasInstagram: boolean;
-}
+export async function updateAvatarAction(formData: FormData) {
+  try {
+    const supabase = await createActionClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-function calculateVerificationProgress(progress: VerificationProgress): number {
-  const weights = {
-    hasName: 25,
-    hasBio: 25,
-    hasWebsite: 25,
-    hasInstagram: 25
-  };
+    if (authError || !user) {
+      return encodedRedirect(
+        'error',
+        '/profile/edit',
+        'Not authenticated'
+      );
+    }
 
-  let total = 0;
-  if (progress.hasName) total += weights.hasName;
-  if (progress.hasBio) total += weights.hasBio;
-  if (progress.hasWebsite) total += weights.hasWebsite;
-  if (progress.hasInstagram) total += weights.hasInstagram;
+    const avatarFile = formData.get('avatar') as File;
+    if (!avatarFile) {
+      return encodedRedirect(
+        'error',
+        '/profile/edit',
+        'No avatar file provided'
+      );
+    }
 
-  return total;
+    // Upload avatar to storage
+    const { data: uploadData, error: uploadError } = await supabase
+      .storage
+      .from('avatars')
+      .upload(`${user.id}/${avatarFile.name}`, avatarFile, {
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error('Error uploading avatar:', uploadError);
+      return encodedRedirect(
+        'error',
+        '/profile/edit',
+        'Failed to upload avatar'
+      );
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase
+      .storage
+      .from('avatars')
+      .getPublicUrl(uploadData.path);
+
+    // Update profile with avatar URL
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({
+        avatar_url: publicUrl,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', user.id);
+
+    if (updateError) {
+      console.error('Error updating profile with avatar:', updateError);
+      return encodedRedirect(
+        'error',
+        '/profile/edit',
+        'Failed to update profile with avatar'
+      );
+    }
+
+    // Track avatar completion
+    await trackProfileCompletion({
+      fieldName: 'avatar',
+      completed: true,
+      metadata: { userId: user.id }
+    });
+
+    return encodedRedirect(
+      'success',
+      '/profile/edit',
+      'Avatar updated successfully'
+    );
+  } catch (error) {
+    console.error('Error in updateAvatarAction:', error);
+    return encodedRedirect(
+      'error',
+      '/profile/edit',
+      'Failed to update avatar'
+    );
+  }
 } 

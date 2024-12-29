@@ -1,22 +1,24 @@
-import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { ArtistsClient } from './artists-client'
-import Loading from './loading'
+import { Suspense } from 'react'
 import { ErrorBoundary } from './error-boundary'
+import Loading from './loading'
+import { PageViewTracker } from '@/components/analytics/page-view-tracker'
 import { ARTIST_ROLES, type ArtistRole } from '@/lib/types/custom-types'
-import type { Metadata } from 'next'
 import type { ArtistWithCount } from './artists-client'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Artists | Meaning Machine',
   description: 'Browse our curated artists.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function ArtistsPage(): Promise<React.ReactElement> {
   const supabase = await createClient()
 
-  // Fetch initial artists data
-  const { data: initialArtists, error } = await supabase
+  const { data: artists } = await supabase
     .from('profiles')
     .select(`
       id,
@@ -32,7 +34,7 @@ export default async function ArtistsPage(): Promise<React.ReactElement> {
       view_count,
       artist_type,
       location,
-      artworks:artworks(count)
+      artworks (count)
     `)
     .in('artist_type', [ARTIST_ROLES.VERIFIED, ARTIST_ROLES.EMERGING])
     .order('exhibition_badge', { ascending: false, nullsFirst: false })
@@ -40,20 +42,16 @@ export default async function ArtistsPage(): Promise<React.ReactElement> {
     .order('created_at', { ascending: false })
     .range(0, 11)
 
-  // Debug logs
-  console.log('Query error:', error)
-  console.log('Found artists:', initialArtists?.length)
-  console.log('Artist types:', initialArtists?.map(a => ({ id: a.id, type: a.artist_type })))
-
-  // Transform the data to match ArtistWithCount type
-  const transformedArtists = initialArtists?.map(artist => ({
+  // Transform the data to include artwork counts
+  const transformedArtists: ArtistWithCount[] = artists?.map(artist => ({
     ...artist,
     artist_type: artist.artist_type as ArtistRole,
     artworks: [{ count: artist.artworks?.[0]?.count || 0 }] as [{ count: number }]
-  })) as ArtistWithCount[]
+  })) || []
 
   return (
     <main className="container mx-auto px-4 py-6">
+      <PageViewTracker pathname="/artists" />
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight">Artists</h1>
@@ -64,7 +62,7 @@ export default async function ArtistsPage(): Promise<React.ReactElement> {
         
         <ErrorBoundary>
           <Suspense fallback={<Loading />}>
-            <ArtistsClient initialArtists={transformedArtists || []} />
+            <ArtistsClient initialArtists={transformedArtists} />
           </Suspense>
         </ErrorBoundary>
       </div>

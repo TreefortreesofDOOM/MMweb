@@ -58,13 +58,6 @@ export default async function ProfilePage({
   // Show verification banner only if email is not confirmed
   const showVerificationBanner = !user?.email_confirmed_at;
   
-  // Debug logs
-  console.log('Auth User:', {
-    email: user?.email,
-    email_confirmed_at: user?.email_confirmed_at,
-    showBanner: showVerificationBanner
-  });
-  
   return (
     <div className="container max-w-2xl mx-auto py-8">
       {showVerificationBanner && (
