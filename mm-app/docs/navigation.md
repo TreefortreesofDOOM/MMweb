@@ -4,15 +4,33 @@ The navigation system provides a role-based, accessible, and responsive navigati
 
 ## Components
 
-### RoleNav
-The main wrapper component that handles both desktop and mobile navigation states.
+### MainNav
+The top navigation bar component that handles user role-based navigation items.
 
 ```typescript
-import { RoleNav } from '@/components/nav/role-nav';
+import { MainNav } from '@/components/nav/main-nav';
 
 // Usage in layouts
-<RoleNav role="admin">{children}</RoleNav>
-<RoleNav role="artist">{children}</RoleNav>
+<MainNav userRole={userRole} />
+```
+
+### SidebarNav
+The sidebar navigation component that provides role-specific navigation items with collapsible functionality.
+
+```typescript
+import { SidebarNav } from '@/components/layout/sidebar-nav';
+
+// Usage in layouts
+<SidebarNav
+  items={navItems}
+  title="Optional Title"
+  description="Optional description"
+  isOpen={isOpen}
+  onOpenChange={setIsOpen}
+/>
+
+// Trigger component
+<SidebarNav.Trigger isOpen={isOpen} onOpenChange={setIsOpen} />
 ```
 
 ### Navigation Configuration
@@ -20,9 +38,8 @@ import { RoleNav } from '@/components/nav/role-nav';
 Navigation is configured in `lib/navigation/config.ts`. Each role has its own navigation structure:
 
 ```typescript
-const navigationConfig = {
+export const navigationConfig: Record<UserRole, RoleNavigation> = {
   admin: {
-    role: 'admin',
     navigation: [
       {
         title: 'Section Title',
@@ -36,7 +53,9 @@ const navigationConfig = {
         ]
       }
     ]
-  }
+  },
+  verified_artist: { ... },
+  emerging_artist: { ... }
 };
 ```
 
@@ -50,43 +69,16 @@ const navigationConfig = {
 - External link indicators
 
 ### Responsive Design
-- Desktop: Persistent sidebar
+- Desktop: Persistent sidebar with collapsible option
 - Mobile: Sheet/drawer navigation
 - Breakpoint: md (768px)
+- Collapsible sidebar with smooth transitions
 
 ### Keyboard Navigation
 - Tab: Navigate between items
 - Enter/Space: Activate item
-- Escape: Close mobile menu
+- Escape: Close mobile menu or collapse sidebar
 - Auto-focus on active items
-
-## Adding New Navigation Items
-
-1. Update the configuration in `lib/navigation/config.ts`:
-
-```typescript
-export const navigationConfig = {
-  role: {
-    navigation: [
-      {
-        title: 'Section Name',
-        items: [
-          { 
-            title: 'Item Name',
-            href: '/path',
-            icon: IconComponent // from lucide-react
-          }
-        ]
-      }
-    ]
-  }
-};
-```
-
-2. Icons should be imported from lucide-react:
-```typescript
-import { Icon } from 'lucide-react';
-```
 
 ## Types
 
@@ -97,6 +89,7 @@ interface NavItem {
   href: string;       // URL path
   icon?: LucideIcon;  // Optional icon
   isExternal?: boolean; // External link flag
+  disabled?: boolean;   // Disabled state
 }
 ```
 
@@ -110,10 +103,43 @@ interface NavSection {
 
 ### RoleNavigation
 ```typescript
+type UserRole = 'admin' | 'verified_artist' | 'emerging_artist';
+
 interface RoleNavigation {
-  role: 'user' | 'artist' | 'admin';
   navigation: NavSection[];
 }
+```
+
+## Layout Integration
+
+### Admin Layout
+```typescript
+// components/layout/admin-layout.tsx
+const adminNavItems = [
+  {
+    title: "Dashboard",
+    href: "/admin",
+    icon: LayoutDashboard
+  },
+  // ... other admin items
+];
+
+<SidebarNav items={adminNavItems} />
+```
+
+### Artist Layout
+```typescript
+// components/layout/artist-layout.tsx
+const artistNavItems = [
+  {
+    title: "Portfolio",
+    href: "/artist/portfolio",
+    icon: Image
+  },
+  // ... other artist items
+];
+
+<SidebarNav items={artistNavItems} />
 ```
 
 ## Best Practices
