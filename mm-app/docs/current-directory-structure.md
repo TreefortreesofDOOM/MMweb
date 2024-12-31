@@ -1,9 +1,12 @@
-# Complete Directory Structure (as of March 2024)
+# Project Directory Structure (March 2024)
 
+## Overview
+
+This document outlines the current directory structure and organization standards for the MM Web application. The project follows Next.js 13+ App Router conventions and modern React best practices.
+
+## Complete Directory Tree
 ```
 mm-app/
-├── .google/
-├── .next/
 ├── app/
 │   ├── (admin)/
 │   │   ├── admin-dashboard/
@@ -208,7 +211,7 @@ mm-app/
 │   │   ├── analytics.ts
 │   │   └── track.ts
 │   ├── auth/
-│   │   └── utils.ts
+│   │   └── auth-utils.ts
 │   ├── constants/
 │   │   └── mediums.ts
 │   ├── emails/
@@ -216,33 +219,32 @@ mm-app/
 │   ├── navigation/
 │   │   ├── config.ts
 │   │   ├── types.ts
-│   │   └── utils.ts
+│   │   └── navigation-utils.ts
 │   ├── stripe/
-│   │   ├── stripe-client.ts
+│   │   ├── stripe-client-utils.ts
 │   │   ├── stripe-products.ts
-│   │   └── stripe-server.ts
+│   │   └── stripe-server-utils.ts
 │   ├── supabase/
-│   │   ├── action.ts
+│   │   ├── supabase-action-utils.ts
 │   │   ├── check-env-vars.ts
-│   │   ├── client.ts
+│   │   ├── supabase-client.ts
 │   │   ├── middleware.ts
-│   │   ├── server.ts
+│   │   ├── supabase-server.ts
 │   │   └── service-role.ts
 │   ├── types/
 │   │   ├── database.types.ts
 │   │   └── custom-types.ts
 │   ├── utils/
-│   │   ├── search.ts
-│   │   └── utils.ts
+│   │   ├── search-utils.ts
+│   │   └── common-utils.ts
 │   ├── vertex-ai/
 │   │   ├── bigquery-setup.ts
-│   │   ├── client.ts
-│   │   ├── extract-data.ts
-│   │   ├── format.ts
+│   │   ├── vertex-client.ts
+│   │   ├── data-extraction-utils.ts
+│   │   ├── format-utils.ts
 │   │   ├── test-extraction.ts
 │   │   └── types.ts
 │   └── env.ts
-├── migrations/
 ├── node_modules/
 ├── public/
 │   └── images/
@@ -259,11 +261,9 @@ mm-app/
 ├── .env.local
 ├── .gitignore
 ├── components.json
-├── config-overrides.js
 ├── middleware.ts
 ├── next-env.d.ts
 ├── next.config.js
-├── next.config.ts
 ├── package-lock.json
 ├── package.json
 ├── postcss.config.js
@@ -272,282 +272,112 @@ mm-app/
 └── tsconfig.json
 ```
 
-## Notable Differences from Spec
+## Core Directories
 
-1. **App Directory Structure:**
-   - Uses Next.js 13+ app router conventions with route groups (parentheses folders)
-   - Route groups are well-organized:
-     - `(admin)`: Protected admin routes with dedicated layout
-     - `(auth)`: Complete authentication flow
-     - `(protected)`: Protected routes requiring authentication
-     - `(public)`: Public-facing pages
-   - Missing some specified directories like `artist-application/`
-   - Has additional directories not in spec like `vertex-test/`
+### `app/` - Next.js App Router
+- `(admin)/` - Protected admin routes and dashboard
+- `(auth)/` - Authentication flow and user onboarding
+- `(protected)/` - Protected user features and profile
+- `(public)/` - Public pages and gallery
+- `api/` - API routes and endpoints
 
-2. **Components Directory Structure:**
-   - More granular organization than spec with additional directories
-   - Comprehensive `ui/` directory with shadcn components
-   - Feature-specific directories:
-     - `admin/`: Admin-specific components (application review, featured artist management)
-     - `ai/`: AI-related components (chat interfaces, assistants)
-     - `analytics/`: Analytics and tracking components
-     - `artist/`: Artist-specific components (profile, featured artist)
-     - `artwork/`: Artwork management and display
-     - `auth/`: Authentication forms and submit button
-     - `layout/`: Layout components
-     - `nav/`: Navigation components (main nav, logo, theme switcher)
-     - `portfolio/`: Portfolio management
-     - `profile/`: Profile management (avatar upload, forms)
-     - `providers/`: Context providers
-     - `role/`: Role selection
-     - `social/`: Social features
-     - `typography/`: Typography components
-     - `ui/`: Shared UI components (form message, hero)
-     - `validation/`: Validation components
-     - `verification/`: Verification components and banner
-   - All components properly organized into feature-specific directories
-   - No loose components at root level
+### `components/` - React Components
+- Feature-specific directories (admin, ai, artist, etc.)
+- Shared UI components in `ui/`
+- No loose components at root level
+- Follows consistent naming patterns
 
-3. **Lib Directory Structure:**
-   - Contains most of the application's core logic and utilities
-   - Has its own `utils/` directory (not at root level as specified)
-   - Contains multiple feature-specific directories:
-     - `actions/`: Server actions
-     - `ai/`, `analytics/`: Feature-specific logic
-     - `auth/`: Authentication utilities
-     - `stripe/`: Payment integration
-     - `supabase/`: Database utilities
-     - `vertex-ai/`: AI integration
-   - Contains type definitions and database types
-   - Has some potential duplication with root directories (hooks, analytics)
+### `lib/` - Core Business Logic
+- `actions/` - Server actions for all features
+- `ai/` - AI implementation (Gemini, embeddings)
+- `analytics/` - Tracking and reporting
+- `auth/` - Authentication utilities
+- `stripe/` - Payment integration
+- `supabase/` - Database client
+- `utils/` - Common utilities
+- `vertex-ai/` - AI integration
 
-4. **Additional Top-Level Directories:**
-   - `hooks/`: Custom React hooks (some duplication with lib/hooks)
-   - `context/`: React context providers (single auth context)
-   - `.google/`: Google Cloud/API related configurations
-   - `migrations/` (should be under supabase/)
+### Supporting Directories
+- `hooks/` - Custom React hooks
+- `context/` - React contexts
+- `public/` - Static assets
+- `supabase/` - Database migrations and config
 
-5. **Supabase Structure:**
-   - Has proper migrations directory
-   - Includes seed data
-   - Contains configuration
-   - Has temporary and branch directories
+## File Naming Standards
 
-6. **Additional Configuration Files:**
-   - `components.json`: Shadcn UI configuration
-   - `config-overrides.js`
-   - `next.config.ts` (duplicate with next.config.js)
-   - `postcss.config.js`: PostCSS configuration for Tailwind
-   - `tailwind.config.ts`: Tailwind configuration
+### Utility Files
+- Use kebab-case with `-utils` suffix
+- Examples:
+  - `common-utils.ts`
+  - `search-utils.ts`
+  - `auth-utils.ts`
+  - `navigation-utils.ts`
 
-7. **Component Organization Details:**
-   - `admin/`: Admin-specific components for application review and artist management
-   - `ai/`: AI-related components including chat interfaces and assistants for different user types
-   - `analytics/`: Analytics and tracking components including dashboard
-   - `artist/`: Artist-specific components including profile and onboarding
+### Domain-Specific Files
+- Add domain prefix for clarity
+- Examples:
+  - `stripe-client-utils.ts`
+  - `stripe-server-utils.ts`
+  - `supabase-client.ts`
+  - `vertex-client.ts`
 
-8. **Component Organization Issues:**
-   - AI-related functionality split between `ai/` components and `lib/ai/`
-   - Analytics split between components, lib, and hooks
-   - Admin functionality spread across multiple directories (components, pages, actions)
-   - Artist-related components split between `artist/`, `artwork/`, and `portfolio/`
-   - Validation components split between components and lib
-   - Empty validation directory in lib
-   - Multiple utility files and directories
+### Component Files
+- Use kebab-case for file names
+- Examples:
+  - `artwork-card.tsx`
+  - `profile-avatar-form.tsx`
+  - `featured-artist-manager.tsx`
+  - `auth-form.tsx`
+- Group by feature
+- Include type definitions
+- Export PascalCase component names
 
-9. **Library Organization Details:**
-   - `ai/`: Comprehensive AI implementation with embeddings, prompts, and types
-   - `analytics/`: Simple tracking implementation
-   - `auth/`: Minimal auth utilities
-   - `constants/`: Application constants (currently only mediums)
-   - `emails/`: Email notification templates
-   - `navigation/`: Navigation configuration and utilities
-   - `stripe/`: Payment integration with client/server separation
-   - `supabase/`: Database client implementations
-   - `vertex-ai/`: Google Vertex AI integration with BigQuery
+## Recent Updates ✅
 
-10. **Library Organization Updates:**
-    - All hooks consolidated in root `/hooks` directory
-    - Removed duplicate hooks from `lib/hooks`
-    - Hooks now properly imported from root `/hooks` directory
-    - Consistent hook organization and naming
-    - Clear separation between hooks and other utilities
+### Removed
+- Root `/migrations/` directory (consolidated in supabase)
+- `next.config.ts` (duplicate config)
+- `config-overrides.js` (unused)
 
-11. **Admin Route Organization:**
-    - Consolidated into single admin area:
-      - `(admin)/`: Protected admin routes with layout
-        - `admin-dashboard/`: Main admin interface
-        - `analytics/`: Combined analytics dashboard and AI chat
-        - `applications/`: Application management
-        - `featured-artist/`: Curator tools
-    - Removed:
-      - Legacy `admin/` directory
-      - Empty `(admin)/verification/` directory
-      - Empty `(protected)/admin/featured-artist/` directory
+### Consolidated
+- All hooks in `/hooks`
+- Types in `/types`
+- Utils in feature directories
+- Analytics in proper directories
 
-12. **Admin Feature Distribution:**
-    - Routes consolidated in `app/(admin)/`
-    - Components: `components/admin/`
-      - `application-list.tsx`
-      - `application-review.tsx`
-      - `featured-artist-manager.tsx`
-    - Actions: `lib/actions/admin.ts`
-    - Analytics: Consolidated in:
-      - `(admin)/analytics/page.tsx`
-      - `components/analytics/`
-      - `lib/analytics/`
-    - Verification:
-      - Components in `components/verification/`
-      - Actions in `lib/actions/verification.ts`
+### Standardized
+- Utility file naming
+- Component organization
+- Route structure
+- Configuration files
 
-13. **Route Organization Status:**
-    - ✅ Profile validation route consolidated:
-      - Moved to `app/(protected)/profile/validation/`
-      - Properly protected with authentication
-      - Grouped with other profile features
-      - Maintains all functionality
+## Configuration
 
-    - ⏳ Gallery visit feature deferred:
-      - Code moved to `reference/gallery-visit/` for future implementation
-      - Feature is in research phase (see masterRoadmap.md)
-      - Will be implemented as protected route when ready
-      - Physical gallery check-in system pending design
+### Core Config Files
+- `next.config.js` - Next.js configuration
+- `tsconfig.json` - TypeScript settings
+- `tailwind.config.ts` - Styling
+- `components.json` - UI components
 
-    - Current structure:
-      - Protected routes under `(protected)/`:
-        - Profile management
-        - Validation tracking
-        - Artist features
-      - Public routes under `(public)/`:
-        - Gallery listing
-        - Artist directory
-        - Public pages
+### Environment
+- `.env` - Base variables
+- `.env.local` - Local overrides
+- `.cursorrules` - Project standards
 
-    Benefits achieved:
-    - ✅ Consistent route organization
-    - ✅ Clear access control through route groups
-    - ✅ Better maintainability
-    - ✅ Follows Next.js app router conventions
-    - ✅ Improved feature cohesion
-    - ✅ Clearer authentication boundaries
-    - ✅ Simplified navigation structure
+## Best Practices
 
-[UPDATED - March 2024]
-13. **Route Organization Status:**
+1. **Component Organization**
+   - Group by feature
+   - Maintain clear boundaries
+   - Follow naming conventions
 
-This document serves as a complete snapshot of the current directory structure for comparison with the specification in `.cursorrules`. 
+2. **Route Structure**
+   - Use route groups
+   - Protect sensitive routes
+   - Maintain layouts
 
-## Library Directory Details
-
-1. **Server Actions (`actions/`):**
-   - Admin functionality (`admin.ts`, `featured-artist.ts`)
-   - Authentication (`auth.ts`, `registration.ts`)
-   - User management (`profile.ts`, `role.ts`, `social.ts`)
-   - Content management (`artwork.ts`, `artist.ts`)
-   - AI/Analytics (`ai.ts`, `ai-search.ts`, `analytics.ts`)
-   - Verification (`verification.ts`)
-   - Utility actions (`helpers.ts`, `update-avatar.ts`)
-
-2. **AI Implementation (`ai/`):**
-   - Core AI functionality (`gemini.ts`, `embeddings.ts`)
-   - Configuration (`instructions.ts`, `prompts.ts`, `personalities.ts`)
-   - Type definitions (`types.ts`)
-
-3. **Analytics (`analytics/`):**
-   - Event tracking (`track.ts`)
-   - Root analytics file needs consolidation
-
-4. **Authentication (`auth/`):**
-   - Authentication utilities (`utils.ts`)
-   - Minimal implementation, could be expanded
-
-5. **Stripe Integration (`stripe/`):**
-   - Client/server separation (`stripe-client.ts`, `stripe-server.ts`)
-   - Product management (`stripe-products.ts`)
-
-6. **Vertex AI (`vertex-ai/`):**
-   - Core functionality (`client.ts`, `extract-data.ts`, `format.ts`)
-   - BigQuery integration (`bigquery-setup.ts`)
-   - Testing utilities (`test-extraction.ts`)
-   - Type definitions (`types.ts`)
-
-7. **Utilities and Types:**
-   - Database types (`database.types.ts`)
-   - Environment variables (`env.ts`)
-   - Search functionality (`utils/search.ts`)
-   - General utilities (`utils/utils.ts`, root `utils.ts`)
-
-## Areas for Improvement
-
-1. **Consolidation Needed:**
-   - ✅ Utils consolidated in `utils/` directory
-   - ✅ Analytics consolidated in `analytics/` directory
-   - ✅ Database types consolidated in `types/` directory
-
-2. **Directory Cleanup:**
-   - ✅ Empty validation directory removed
-   - ✅ Analytics directory properly organized
-   - Thin auth directory
-
-3. **Type Organization:**
-   - ✅ Types consolidated into `types/` directory
-   - ✅ Database types backup removed
-   - ✅ Type files properly organized
-
-4. **Utility Organization:**
-   - ✅ Root utils moved into `utils/` directory
-   - Consider breaking down large utility files
-   - Standardize utility file naming
-
-5. **Action Organization:**
-   - Consider grouping related actions
-   - Split large action files (e.g., `artwork.ts`)
-   - Add index exports for better importing
-
-## Utility File Naming Standardization
-
-✅ All utility files have been renamed following the conventions:
-
-1. **In `/lib/utils/`:**
-   - ✅ `utils.ts` → `common-utils.ts`
-   - ✅ `search.ts` → `search-utils.ts`
-
-2. **In `/lib/auth/`:**
-   - ✅ `utils.ts` → `auth-utils.ts`
-
-3. **In `/lib/navigation/`:**
-   - ✅ `utils.ts` → `navigation-utils.ts`
-
-4. **In `/lib/vertex-ai/`:**
-   - ✅ `format.ts` → `format-utils.ts`
-   - ✅ `client.ts` → `vertex-client.ts`
-   - ✅ `extract-data.ts` → `data-extraction-utils.ts`
-
-5. **In `/lib/stripe/`:**
-   - ✅ `stripe-client.ts` → `stripe-client-utils.ts`
-   - ✅ `stripe-server.ts` → `stripe-server-utils.ts`
-
-6. **In `/lib/supabase/`:**
-   - ✅ `client.ts` → `supabase-client.ts`
-   - ✅ `server.ts` → `supabase-server.ts`
-   - ✅ `action.ts` → `supabase-action-utils.ts`
-
-Naming Convention Rules:
-1. Use kebab-case for all file names
-2. Add `-utils` suffix for utility files
-3. Add domain prefix for domain-specific utilities
-4. Use descriptive names that indicate functionality
-5. Group related utilities in appropriately named files
-
-Benefits:
-- Clearer file purpose and contents
-- Easier to find related utilities
-- Consistent naming across the codebase
-- Better code organization
-- Improved maintainability
-
-Implementation Plan:
-1. Rename files in batches by directory
-2. Update all imports in related files
-3. Test after each batch of changes
-4. Update documentation to reflect new names
+3. **Code Organization**
+   - Business logic in actions
+   - Utils in proper directories
+   - Types centralized
+   - Clear separation of concerns
