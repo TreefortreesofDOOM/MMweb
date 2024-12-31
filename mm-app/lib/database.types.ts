@@ -121,6 +121,44 @@ export type Database = {
           },
         ]
       }
+      artwork_embeddings_gemini: {
+        Row: {
+          artwork_id: string | null
+          created_at: string | null
+          embedding: string
+          embedding_type: string
+          id: string
+          metadata: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          artwork_id?: string | null
+          created_at?: string | null
+          embedding: string
+          embedding_type: string
+          id?: string
+          metadata?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          artwork_id?: string | null
+          created_at?: string | null
+          embedding?: string
+          embedding_type?: string
+          id?: string
+          metadata?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artwork_embeddings_gemini_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artwork_favorites: {
         Row: {
           artwork_id: string
@@ -155,6 +193,7 @@ export type Database = {
           artist_id: string
           created_at: string | null
           description: string | null
+          display_order: number | null
           id: string
           images: Json
           keywords: string[] | null
@@ -164,12 +203,12 @@ export type Database = {
           techniques: string[] | null
           title: string
           updated_at: string | null
-          display_order: number
         }
         Insert: {
           artist_id: string
           created_at?: string | null
           description?: string | null
+          display_order?: number | null
           id?: string
           images?: Json
           keywords?: string[] | null
@@ -179,12 +218,12 @@ export type Database = {
           techniques?: string[] | null
           title: string
           updated_at?: string | null
-          display_order?: number
         }
         Update: {
           artist_id?: string
           created_at?: string | null
           description?: string | null
+          display_order?: number | null
           id?: string
           images?: Json
           keywords?: string[] | null
@@ -194,7 +233,6 @@ export type Database = {
           techniques?: string[] | null
           title?: string
           updated_at?: string | null
-          display_order?: number
         }
         Relationships: [
           {
@@ -522,12 +560,11 @@ export type Database = {
           artist_approved_at: string | null
           artist_approved_by: string | null
           artist_rejection_reason: string | null
-          artist_status:
-            | Database["public"]["Enums"]["artist_application_status"]
-            | null
+          artist_status: Database["public"]["Enums"]["artist_application_status"] | null
           artist_type: string | null
           avatar_url: string | null
           bio: string | null
+          community_engagement_score: number | null
           created_at: string
           email: string
           exhibition_badge: boolean | null
@@ -539,6 +576,7 @@ export type Database = {
           last_notification_sent: string | null
           last_notification_type: string | null
           location: string | null
+          medium: string[] | null
           name: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           stripe_account_id: string | null
@@ -546,6 +584,8 @@ export type Database = {
           updated_at: string
           verification_progress: number | null
           verification_requirements: Json | null
+          verification_status: string | null
+          verification_status_updated_at: string | null
           view_count: number | null
           website: string | null
         }
@@ -554,12 +594,11 @@ export type Database = {
           artist_approved_at?: string | null
           artist_approved_by?: string | null
           artist_rejection_reason?: string | null
-          artist_status?:
-            | Database["public"]["Enums"]["artist_application_status"]
-            | null
+          artist_status?: Database["public"]["Enums"]["artist_application_status"] | null
           artist_type?: string | null
           avatar_url?: string | null
           bio?: string | null
+          community_engagement_score?: number | null
           created_at?: string
           email: string
           exhibition_badge?: boolean | null
@@ -571,6 +610,7 @@ export type Database = {
           last_notification_sent?: string | null
           last_notification_type?: string | null
           location?: string | null
+          medium?: string[] | null
           name?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           stripe_account_id?: string | null
@@ -578,6 +618,8 @@ export type Database = {
           updated_at?: string
           verification_progress?: number | null
           verification_requirements?: Json | null
+          verification_status?: string | null
+          verification_status_updated_at?: string | null
           view_count?: number | null
           website?: string | null
         }
@@ -586,12 +628,11 @@ export type Database = {
           artist_approved_at?: string | null
           artist_approved_by?: string | null
           artist_rejection_reason?: string | null
-          artist_status?:
-            | Database["public"]["Enums"]["artist_application_status"]
-            | null
+          artist_status?: Database["public"]["Enums"]["artist_application_status"] | null
           artist_type?: string | null
           avatar_url?: string | null
           bio?: string | null
+          community_engagement_score?: number | null
           created_at?: string
           email?: string
           exhibition_badge?: boolean | null
@@ -603,6 +644,7 @@ export type Database = {
           last_notification_sent?: string | null
           last_notification_type?: string | null
           location?: string | null
+          medium?: string[] | null
           name?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           stripe_account_id?: string | null
@@ -610,6 +652,8 @@ export type Database = {
           updated_at?: string
           verification_progress?: number | null
           verification_requirements?: Json | null
+          verification_status?: string | null
+          verification_status_updated_at?: string | null
           view_count?: number | null
           website?: string | null
         }
@@ -943,103 +987,6 @@ export type Database = {
           },
         ]
       }
-      match_artworks: {
-        Row: {
-          id: string
-          artwork_id: string
-          similarity: number
-        }
-        Insert: {
-          id?: string
-          artwork_id?: string
-          similarity?: number
-        }
-        Update: {
-          id?: string
-          artwork_id?: string
-          similarity?: number
-        }
-        Relationships: []
-      }
-      match_artworks_gemini: {
-        Row: {
-          id: string
-          artwork_id: string
-          similarity: number
-        }
-        Insert: {
-          id?: string
-          artwork_id?: string
-          similarity?: number
-        }
-        Update: {
-          id?: string
-          artwork_id?: string
-          similarity?: number
-        }
-        Relationships: []
-      }
-      match_conversations: {
-        Row: {
-          id: string
-          message: string
-          response: string
-          created_at: string
-          metadata: Json
-          context: Json
-        }
-        Insert: {
-          id?: string
-          message?: string
-          response?: string
-          created_at?: string
-          metadata?: Json
-          context?: Json
-        }
-        Update: {
-          id?: string
-          message?: string
-          response?: string
-          created_at?: string
-          metadata?: Json
-          context?: Json
-        }
-        Relationships: []
-      }
-      artwork_embeddings_gemini: {
-        Row: {
-          id: string
-          artwork_id: string
-          embedding: number[]
-          embedding_type: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          artwork_id: string
-          embedding: number[]
-          embedding_type: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          artwork_id?: string
-          embedding?: number[]
-          embedding_type?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "artwork_embeddings_gemini_artwork_id_fkey"
-            columns: ["artwork_id"]
-            referencedRelation: "artworks"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
     }
     Views: {
       artwork_counts: {
@@ -1082,6 +1029,12 @@ export type Database = {
             }
             Returns: unknown
           }
+      calculate_engagement_score: {
+        Args: {
+          user_id: string
+        }
+        Returns: number
+      }
       cleanup_expired_registrations: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1235,8 +1188,8 @@ export type Database = {
       match_artworks_gemini: {
         Args: {
           query_embedding: string
-          match_threshold: number
-          match_count: number
+          match_threshold?: number
+          match_count?: number
         }
         Returns: {
           id: string
@@ -1297,6 +1250,13 @@ export type Database = {
           first_name: string
           last_name: string
         }[]
+      }
+      update_artwork_order: {
+        Args: {
+          p_artwork_ids: string[]
+          p_artist_id: string
+        }
+        Returns: undefined
       }
       vector_avg: {
         Args: {
