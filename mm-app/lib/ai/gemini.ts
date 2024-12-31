@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, Content, Part, Tool as GoogleTool, SchemaType, FunctionCallingMode } from '@google/generative-ai';
-import { createActionClient } from '@/lib/supabase/action';
+import { createActionClient } from '@/lib/supabase/supabase-action-utils';
 import { env } from '@/lib/env';
 
 interface FunctionDeclaration {

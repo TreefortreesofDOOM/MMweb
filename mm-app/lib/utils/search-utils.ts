@@ -1,4 +1,4 @@
-import { createBrowserClient } from '@/lib/supabase/client'
+import { createBrowserClient } from '@/lib/supabase/supabase-client'
 import { type ArtistWithCount } from '@/app/(public)/artists/artists-client'
 import { ARTIST_ROLES } from '@/lib/types/custom-types'
 

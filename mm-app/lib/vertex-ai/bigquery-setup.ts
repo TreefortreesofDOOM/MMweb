@@ -1,5 +1,5 @@
 import { BigQuery } from '@google-cloud/bigquery'
-import { extractArtistData } from './extract-data'
+import { extractArtistData } from './data-extraction-utils'
 import type { Database } from '@/lib/database.types'
 import path from 'path'
 import fs from 'fs'

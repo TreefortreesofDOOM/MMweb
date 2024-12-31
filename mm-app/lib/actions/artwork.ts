@@ -1,6 +1,6 @@
 'use server';
 
-import { createActionClient } from '@/lib/supabase/action';
+import { createActionClient } from '@/lib/supabase/supabase-action-utils';
 import { updateArtworkEmbeddings, findSimilarArtworks } from '@/lib/ai/embeddings';
 import { getArtist } from './helpers';
 

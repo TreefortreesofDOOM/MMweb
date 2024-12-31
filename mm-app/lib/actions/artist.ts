@@ -1,7 +1,7 @@
 'use server';
 
-import { createActionClient } from '@/lib/supabase/action';
-import { encodedRedirect } from '@/lib/utils';
+import { createActionClient } from '@/lib/supabase/supabase-action-utils';
+import { encodedRedirect } from '@/lib/utils/common-utils';
 import { trackOnboardingStep } from '@/lib/actions/analytics';
 
 export async function submitArtistApplication(formData: FormData) {

@@ -1,9 +1,9 @@
 'use server';
 
-import { createActionClient } from '@/lib/supabase/action';
+import { createActionClient } from '@/lib/supabase/supabase-action-utils';
 import { redirect } from "next/navigation";
-import { encodedRedirect } from "@/lib/utils";
-import { Database } from "@/lib/database.types";
+import { encodedRedirect } from "@/lib/utils/common-utils";
+import { Database } from "@/lib/types/database.types";
 import { trackProfileCompletion } from '@/lib/actions/analytics';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];

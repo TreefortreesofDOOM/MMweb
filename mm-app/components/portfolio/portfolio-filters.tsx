@@ -17,8 +17,8 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
-import { useDebounce } from '@/lib/hooks/use-debounce'
-import { formatPrice } from '@/lib/utils'
+import { useDebounce } from '@/hooks/use-debounce'
+import { formatPrice } from '@/lib/utils/common-utils'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Popover,
@@ -26,7 +26,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { CalendarIcon, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils/common-utils'
 import { format } from 'date-fns'
 import type { DateRange } from 'react-day-picker'
 

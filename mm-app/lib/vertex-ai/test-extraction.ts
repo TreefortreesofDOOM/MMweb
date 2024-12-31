@@ -1,7 +1,7 @@
 'use server'
 
-import { extractArtistData } from './extract-data'
-import { formatForVertexAI } from './format'
+import { extractArtistData } from './data-extraction-utils'
+import { formatForVertexAI } from './format-utils'
 
 export async function testDataExtraction() {
   try {

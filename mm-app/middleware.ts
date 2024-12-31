@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
-import { getOrCreateSession } from "@/lib/analytics";
+import { getOrCreateSession } from "@/lib/analytics/analytics";
 
 // Export as default function
 export default async function middleware(request: NextRequest) {

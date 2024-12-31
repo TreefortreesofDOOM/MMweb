@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/common-utils";
 import { Loader2, type LucideProps } from "lucide-react";
 
 interface SpinnerProps extends Partial<LucideProps> {

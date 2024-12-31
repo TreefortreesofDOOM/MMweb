@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { AvatarUpload } from '@/components/avatar-upload'
+import { AvatarUpload } from '@/components/profile/avatar-upload'
 import { updateAvatarAction, removeAvatarAction } from '@/lib/actions/update-avatar'
 import { useToast } from '@/components/ui/use-toast'
 

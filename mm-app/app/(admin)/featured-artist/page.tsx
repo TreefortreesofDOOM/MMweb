@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/supabase-server';
 import { FeaturedArtistManager } from '@/components/admin/featured-artist-manager';
 
 export const dynamic = 'force-dynamic';

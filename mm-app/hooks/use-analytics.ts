@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useUser } from '@/hooks/use-user';
-import { trackEvent, trackFeatureUsage, EventType } from '@/lib/analytics';
+import { trackEvent, trackFeatureUsage, EventType } from '@/lib/analytics/analytics';
 
 export function useAnalytics() {
   const { user } = useUser();

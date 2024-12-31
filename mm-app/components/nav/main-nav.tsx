@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
-import { Logo } from '@/components/logo';
+import { cn } from '@/lib/utils/common-utils';
+import { Logo } from '@/components/nav/logo';
 import { useArtist } from '@/hooks/use-artist';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2 } from 'lucide-react';
-import { validateDynamicUrl } from '@/lib/navigation/utils';
+import { validateDynamicUrl } from '@/lib/navigation/navigation-utils';
 import type { UserRole } from '@/lib/navigation/types';
 
 interface MainNavProps {

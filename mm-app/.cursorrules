@@ -3,6 +3,7 @@
 Every time you choose to apply a rule(s), explicitly state the rule(s) in the output. You can abbreviate the rule description to a single word or phrase.
 
 - Do not over engineer.
+- Follow DRY (Do not Repeat Yourself) principles.
 
 ## Supabase Client Patterns
 Use the following patterns consistently for Supabase client initialization:
@@ -141,10 +142,13 @@ mm-app/
 - Do not use supabases auth-helper library
 - Supabase handles cookies
 
-
-## Naming Conventions
+# Naming Convention Rules:
 - Use lowercase with dashes for directories (e.g., components/form-wizard)
-- Favor named exports for components and utilities
+1. Use kebab-case for all file names
+2. Add `-utils` suffix for utility files
+3. Add domain prefix for domain-specific utilities
+4. Use descriptive names that indicate functionality
+5. Group related utilities in appropriately named files
 
 ## TypeScript Usage
 - Use TypeScript for all code; prefer interfaces over types

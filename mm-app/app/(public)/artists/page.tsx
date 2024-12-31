@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/supabase-server'
 import { ArtistsClient } from './artists-client'
 import { Suspense } from 'react'
 import { ErrorBoundary } from './error-boundary'

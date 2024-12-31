@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createDataStore, uploadDocuments } from '@/lib/vertex-ai/client'
-import { extractArtistData } from '@/lib/vertex-ai/extract-data'
-import { formatForVertexAI } from '@/lib/vertex-ai/format'
+import { createDataStore, uploadDocuments } from '@/lib/vertex-ai/vertex-client'
+import { extractArtistData } from '@/lib/vertex-ai/data-extraction-utils'
+import { formatForVertexAI } from '@/lib/vertex-ai/format-utils'
 
 export async function POST() {
   try {

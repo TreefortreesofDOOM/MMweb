@@ -1,9 +1,9 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/supabase-server';
 import { ArtworkQR } from '@/components/artwork/artwork-qr';
 import { PatronAssistant } from '@/components/ai/patron-assistant';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice } from '@/lib/utils/common-utils';
 import { PageViewTracker } from '@/components/analytics/page-view-tracker';
 import { FavoriteButton } from '@/components/social';
 

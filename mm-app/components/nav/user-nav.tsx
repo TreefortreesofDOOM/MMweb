@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { signOutAction } from '@/lib/actions';
-import { ThemeSwitcher } from '@/components/theme-switcher';
+import { ThemeSwitcher } from '@/components/nav/theme-switcher';
 
 interface UserNavProps {
   userEmail?: string | null;

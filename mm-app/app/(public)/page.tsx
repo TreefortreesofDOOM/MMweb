@@ -1,7 +1,7 @@
-import Hero from "@/components/hero";
-import { createClient } from '@/lib/supabase/server';
+import Hero from "@/components/ui/hero";
+import { createClient } from '@/lib/supabase/supabase-server';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
-import { FeaturedArtist } from '@/components/featured-artist';
+import { FeaturedArtist } from '@/components/artist/featured-artist';
 import { PageViewTracker } from '@/components/analytics/page-view-tracker';
 
 export const dynamic = 'force-dynamic';

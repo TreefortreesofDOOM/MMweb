@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/supabase-server';
 import ArtworksClient from './artworks-client';
 
 export default async function ArtworksPage() {

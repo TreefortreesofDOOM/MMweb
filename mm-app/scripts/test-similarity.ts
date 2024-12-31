@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { generateEmbedding } from '../lib/ai/embeddings';
-import type { Database } from '../lib/database.types';
+import type { Database } from '../lib/types/database.types';
 
 // Load environment variables
 dotenv.config({ path: resolve(__dirname, '../.env.local') });

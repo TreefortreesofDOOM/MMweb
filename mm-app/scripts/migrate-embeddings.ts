@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { resolve } from 'path';
 import { Client } from 'pg';
-import type { Database } from '../lib/database.types';
+import type { Database } from '../lib/types/database.types';
 import { generateEmbedding } from '../lib/ai/embeddings';
 
 // Set up environment variables

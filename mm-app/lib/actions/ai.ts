@@ -1,6 +1,6 @@
 'use server';
 
-import { createActionClient } from '@/lib/supabase/action';
+import { createActionClient } from '@/lib/supabase/supabase-action-utils';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { updateArtworkEmbeddings, findSimilarArtworks } from '@/lib/ai/embeddings';
 import { blobToBase64 } from './helpers';

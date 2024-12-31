@@ -8,11 +8,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
 import { ARTIST_ROLES, type ArtistRole } from '@/lib/types/custom-types'
-import { searchArtists } from '@/lib/utils/search'
+import { searchArtists } from '@/lib/utils/search-utils'
 import { trackArtistDirectoryView } from '@/lib/actions/analytics'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useDebounce } from '@/lib/hooks/use-debounce'
+import { useDebounce } from '@/hooks/use-debounce'
 import dynamic from 'next/dynamic'
 
 // Create a client-only search form component

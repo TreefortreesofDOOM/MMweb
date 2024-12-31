@@ -6,7 +6,7 @@ import { favoriteArtwork, unfavoriteArtwork, hasFavoritedArtwork } from '@/lib/a
 import { useAuth } from '@/hooks/use-auth';
 import { toast } from 'sonner';
 import { Heart } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/common-utils';
 
 interface FavoriteButtonProps {
   artworkId: string;

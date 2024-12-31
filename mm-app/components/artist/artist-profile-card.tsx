@@ -7,7 +7,7 @@ import { ArtistBadge } from '@/components/ui/artist-badge'
 import { MapPin } from 'lucide-react'
 import type { ArtistRole } from '@/lib/types/custom-types'
 import { Badge } from "@/components/ui/badge"
-import { useUser } from '@/lib/hooks/use-user'
+import { useUser } from '@/hooks/use-user'
 
 interface Artist {
   id: string;

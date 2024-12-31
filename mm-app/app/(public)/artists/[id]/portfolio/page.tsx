@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/supabase-server'
 import { notFound } from 'next/navigation'
 import { PortfolioClient } from './portfolio-client'
 import { Card, CardContent } from "@/components/ui/card"

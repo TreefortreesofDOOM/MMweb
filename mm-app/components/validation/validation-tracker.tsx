@@ -1,5 +1,5 @@
 import { Check, HelpCircle, ArrowRight } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils/common-utils"
 import Link from "next/link"
 import {
   Card,

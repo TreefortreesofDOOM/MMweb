@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { QRCodeCanvas as QRCode } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/common-utils';
 import { AlertCircle } from 'lucide-react';
 
 interface UserQRProps {

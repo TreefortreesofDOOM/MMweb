@@ -1,8 +1,8 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/supabase-server'
 import { ARTIST_ROLES, type ArtistRole } from '@/lib/types/custom-types'
-import { searchDataStore } from '@/lib/vertex-ai/client'
+import { searchDataStore } from '@/lib/vertex-ai/vertex-client'
 
 interface AISearchParams {
   location?: string

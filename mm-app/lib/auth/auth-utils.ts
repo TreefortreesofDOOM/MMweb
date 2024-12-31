@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
-import { Database } from '../database.types';
+import { createClient } from '@/lib/supabase/supabase-server';
+import { Database } from '../types/database.types';
 
 export async function getProfile() {
   const supabase = await createClient();

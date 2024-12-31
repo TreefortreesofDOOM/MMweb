@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createBrowserClient } from '@/lib/supabase/client';
+import { createBrowserClient } from '@/lib/supabase/supabase-client';
 import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 export function useUser() {

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/supabase-server'
 import { redirect } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { submitArtistApplication } from "@/lib/actions"
-import { FormMessage, Message } from "@/components/form-message"
+import { FormMessage, Message } from "@/components/ui/form-message"
 import Link from "next/link"
 
 export default async function ArtistApplicationPage({

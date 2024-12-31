@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/supabase-server';
 import { redirect } from 'next/navigation';
 import { ArtworkForm } from '@/components/artwork/artwork-form';
 

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/supabase-server';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
 import { GalleryAssistant } from '@/components/ai/gallery-assistant';
 import { PageViewTracker } from '@/components/analytics/page-view-tracker';

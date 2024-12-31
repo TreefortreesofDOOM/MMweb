@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getGeminiResponse, artworkTools } from '@/lib/ai/gemini';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/supabase-server';
 import { Content } from '@google/generative-ai';
 import { buildSystemInstruction } from '@/lib/ai/instructions';
 import { GoogleGenerativeAI } from '@google/generative-ai';

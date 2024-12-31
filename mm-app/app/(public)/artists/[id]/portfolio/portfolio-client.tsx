@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { createBrowserClient } from '@/lib/supabase/client'
+import { createBrowserClient } from '@/lib/supabase/supabase-client'
 import { PortfolioFilters } from '@/components/portfolio/portfolio-filters'
 import { PortfolioSort, type PortfolioSort as PortfolioSortType } from '@/components/portfolio/portfolio-sort'
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery'

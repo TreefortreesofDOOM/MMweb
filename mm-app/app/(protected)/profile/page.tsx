@@ -4,9 +4,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { getProfileAction } from "@/lib/actions"
 import { redirect } from 'next/navigation'
 import { ARTIST_ROLES } from "@/lib/types/custom-types"
-import type { Database } from '@/lib/database.types'
-import { VerificationBanner } from "@/components/verification-banner"
-import { createActionClient } from "@/lib/supabase/action"
+import type { Database } from '@/lib/types/database.types'
+import { VerificationBanner } from "@/components/verification/verification-banner"
+import { createActionClient } from "@/lib/supabase/supabase-action-utils"
 import { ArtistProfileCard } from "@/components/artist/artist-profile-card"
 
 type Profile = Database['public']['Tables']['profiles']['Row']

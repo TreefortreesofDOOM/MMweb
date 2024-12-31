@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/supabase-server';
 import { redirect } from 'next/navigation';
 import { RequirementsList } from '@/components/verification/requirements-list';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

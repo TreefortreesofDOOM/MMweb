@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/supabase-server';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, Tool, SchemaType } from '@google/generative-ai';
 import { NextResponse } from 'next/server';

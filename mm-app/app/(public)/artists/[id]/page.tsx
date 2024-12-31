@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/supabase-server';
 import { notFound } from 'next/navigation';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
 import { Card, CardContent } from "@/components/ui/card";

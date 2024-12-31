@@ -6,7 +6,7 @@ import { CSS } from '@dnd-kit/utilities';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { X, GripVertical } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/common-utils';
 import type { ArtworkImage } from '../artwork-upload';
 
 interface SortableImageItemProps {

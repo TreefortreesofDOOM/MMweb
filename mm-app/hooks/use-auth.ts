@@ -1,6 +1,6 @@
 'use client';
 
-import { createBrowserClient } from '@/lib/supabase/client';
+import { createBrowserClient } from '@/lib/supabase/supabase-client';
 import { useEffect, useState } from 'react';
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import type { Database } from '@/lib/database.types';

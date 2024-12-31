@@ -1,5 +1,5 @@
 import { type ReactNode, type ReactElement } from 'react';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/supabase-server';
 import { redirect } from 'next/navigation';
 import { RoleNav } from '@/components/nav/role-nav';
 

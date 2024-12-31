@@ -5,7 +5,7 @@ import { SideNav } from './side-nav';
 import { MobileNav } from './mobile-nav';
 import { useArtist } from '@/hooks/use-artist';
 import { useNavigation } from '@/hooks/use-navigation';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/common-utils';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';

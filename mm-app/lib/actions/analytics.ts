@@ -1,7 +1,7 @@
 'use server'
 
-import { createActionClient } from '@/lib/supabase/action'
-import { trackEvent, trackFeatureUsage, getOrCreateSession } from '@/lib/analytics'
+import { createActionClient } from '@/lib/supabase/supabase-action-utils'
+import { trackEvent, trackFeatureUsage, getOrCreateSession } from '@/lib/analytics/analytics'
 import { headers } from 'next/headers'
 
 export async function trackPageView(pathname: string) {

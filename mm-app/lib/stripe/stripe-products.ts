@@ -1,4 +1,4 @@
-import { stripe } from './stripe-server';
+import { stripe } from './stripe-server-utils';
 
 /**
  * Retrieves all products from Stripe with their prices

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/supabase-server';
 import { getGeminiResponse } from '@/lib/ai/gemini';
 import { NextResponse } from 'next/server';
 import { AI_ROLES } from '@/lib/ai/prompts';

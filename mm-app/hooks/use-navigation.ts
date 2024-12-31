@@ -1,6 +1,6 @@
 import { useArtist } from './use-artist';
 import type { RoleNavigation, UserRole } from '@/lib/navigation/types';
-import { getSafeNavigationConfig, validateDynamicUrl } from '@/lib/navigation/utils';
+import { getSafeNavigationConfig, validateDynamicUrl } from '@/lib/navigation/navigation-utils';
 
 export function useNavigation(role: unknown) {
   const { profile } = useArtist();

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { RoleSelectionWizard } from '@/components/role/role-selection-wizard';
 import { AuthForm } from '@/components/auth/auth-form';
-import { FormMessage, type Message } from '@/components/form-message';
+import { FormMessage, type Message } from '@/components/ui/form-message';
 import { Button } from '@/components/ui/button';
 import type { UserRole } from '@/lib/navigation/types';
 import { updateUserRole } from '@/lib/actions/role';

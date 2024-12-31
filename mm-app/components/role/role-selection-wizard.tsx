@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/common-utils';
 import { Users, Palette, ChevronDown, ChevronUp, BadgeCheck, Store, LineChart, MessageSquare, QrCode } from 'lucide-react';
 import type { UserRole } from '@/lib/navigation/types';
 

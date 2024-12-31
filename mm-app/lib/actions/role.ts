@@ -1,6 +1,6 @@
 'use server';
 
-import { createActionClient } from '@/lib/supabase/action';
+import { createActionClient } from '@/lib/supabase/supabase-action-utils';
 import type { UserRole } from '@/lib/navigation/types';
 import { trackOnboardingStep } from '@/lib/actions/analytics';
 
