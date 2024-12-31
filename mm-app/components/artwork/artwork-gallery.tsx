@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { ArtworkCard } from './artwork-card';
 import { ArtworkModal } from './artwork-modal';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useFavorites } from '@/hooks/use-favorites';
 
 interface ArtworkGalleryProps {
   artworks: Array<{
@@ -28,10 +29,18 @@ interface ArtworkGalleryProps {
 export function ArtworkGallery({ artworks, isLoading = false }: ArtworkGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const isModalOpen = selectedIndex !== -1;
+  
+  const artworkIds = useMemo(() => artworks.map(artwork => artwork.id), [artworks]);
+  
+  const { favorites, isLoading: isFavoriteLoading, toggleFavorite } = useFavorites(artworkIds);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setSelectedIndex(-1);
-  };
+  }, []);
+
+  const handleSelectArtwork = useCallback((index: number) => {
+    setSelectedIndex(index);
+  }, []);
 
   if (isLoading) {
     return (
@@ -56,18 +65,26 @@ export function ArtworkGallery({ artworks, isLoading = false }: ArtworkGalleryPr
           <ArtworkCard
             key={artwork.id}
             artwork={artwork}
-            onSelect={() => setSelectedIndex(index)}
+            onSelect={() => handleSelectArtwork(index)}
+            isFavorited={favorites[artwork.id] || false}
+            isLoading={isFavoriteLoading[artwork.id] || false}
+            onToggleFavorite={toggleFavorite}
           />
         ))}
       </div>
 
-      <ArtworkModal
-        artworks={artworks}
-        currentIndex={selectedIndex}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onNavigate={setSelectedIndex}
-      />
+      {isModalOpen && artworks[selectedIndex] && (
+        <ArtworkModal
+          artworks={artworks}
+          currentIndex={selectedIndex}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onNavigate={handleSelectArtwork}
+          favorites={favorites}
+          isLoading={isFavoriteLoading}
+          onToggleFavorite={toggleFavorite}
+        />
+      )}
     </>
   );
 } 

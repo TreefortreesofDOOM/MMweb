@@ -11,6 +11,8 @@ import type { ArtworkImage } from './artwork-upload';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from "@/lib/utils/common-utils";
 import { FavoriteButton } from '@/components/social';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ArtworkWithArtist } from "@/lib/types/custom-types";
 
 interface ArtworkCardProps {
   artwork: {
@@ -24,6 +26,11 @@ interface ArtworkCardProps {
       name?: string;
       bio?: string;
     };
+    profiles?: {
+      id: string;
+      avatar_url: string;
+      name: string;
+    };
   };
   showStatus?: boolean;
   showEdit?: boolean;
@@ -34,6 +41,8 @@ interface ArtworkCardProps {
   isLoading?: boolean;
   isEmergingArtist?: boolean;
   isAtPublishLimit?: boolean;
+  isFavorited?: boolean;
+  onToggleFavorite?: (artworkId: string) => void;
 }
 
 export function ArtworkCard({ 
@@ -46,7 +55,9 @@ export function ArtworkCard({
   onSelect,
   isLoading,
   isEmergingArtist,
-  isAtPublishLimit
+  isAtPublishLimit,
+  isFavorited,
+  onToggleFavorite
 }: ArtworkCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
@@ -102,7 +113,18 @@ export function ArtworkCard({
           onSelect();
         }
       }}
+      suppressHydrationWarning
     >
+      <CardContent className="p-6 pb-4 border-b">
+        <Link href={`/artists/${artwork.profiles?.id}`} className="flex items-center gap-3 hover:opacity-80">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={artwork.profiles?.avatar_url || ''} alt={artwork.profiles?.name || 'Artist'} />
+            <AvatarFallback>{artwork.profiles?.name?.charAt(0) || 'A'}</AvatarFallback>
+          </Avatar>
+          <span className="text-base font-medium">{artwork.profiles?.name || 'Unknown Artist'}</span>
+        </Link>
+      </CardContent>
+
       <div className="relative aspect-square">
         {imageError ? (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -119,6 +141,7 @@ export function ArtworkCard({
             placeholder="blur"
             blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx4eHRoaHSQtJSEkLzYvLy0vLi44QjQ4OEQ4LjE1REVHS1NTW1xfXkVRZGZsZ2tpU1P/2wBDARUXFx4aHh4pKSk8Ozs7U1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1P/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
             onError={() => setImageError(true)}
+            suppressHydrationWarning
           />
         )}
         {sortedImages.length > 1 && (
@@ -127,7 +150,12 @@ export function ArtworkCard({
               variant="ghost"
               size="icon"
               className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
-              onClick={previousImage}
+              onClick={(e) => {
+                e.stopPropagation();
+                previousImage();
+              }}
+              aria-label="Previous artwork"
+              suppressHydrationWarning
             >
               <ChevronLeft className="h-6 w-6" />
             </Button>
@@ -135,7 +163,12 @@ export function ArtworkCard({
               variant="ghost"
               size="icon"
               className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
-              onClick={nextImage}
+              onClick={(e) => {
+                e.stopPropagation();
+                nextImage();
+              }}
+              aria-label="Next artwork"
+              suppressHydrationWarning
             >
               <ChevronRight className="h-6 w-6" />
             </Button>
@@ -143,34 +176,50 @@ export function ArtworkCard({
               {sortedImages.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => setCurrentImageIndex(index)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex(index);
+                  }}
                   className={`w-2 h-2 rounded-full transition-colors duration-200 ${
                     index === currentImageIndex 
                       ? 'bg-white' 
                       : 'bg-white/50 hover:bg-white/75'
                   }`}
                   aria-label={`View image ${index + 1}`}
+                  suppressHydrationWarning
                 />
               ))}
             </div>
           </>
         )}
       </div>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-primary truncate">{artwork.title}</h3>
-            <p className="text-sm font-medium text-muted-foreground">{formatPrice(artwork.price)}</p>
+
+      <CardContent className="p-6 pt-5">
+        <div className="flex flex-col gap-5">
+          <div className="space-y-3">
+            <h3 className="text-2xl font-semibold tracking-tight">{artwork.title}</h3>
+            {artwork.description && (
+              <p className="text-base text-muted-foreground leading-relaxed line-clamp-2" suppressHydrationWarning>
+                {artwork.description}
+              </p>
+            )}
           </div>
-          <div className="ml-4">
-            <FavoriteButton artworkId={artwork.id} variant="ghost" />
+          <div className="flex items-center justify-between py-1">
+            <span className="text-2xl font-bold">{formatPrice(artwork.price)}</span>
+            <FavoriteButton
+              artworkId={artwork.id}
+              variant="ghost"
+              isFavorited={isFavorited || false}
+              isLoading={isLoading || false}
+              onToggle={onToggleFavorite || (() => {})}
+            />
           </div>
+          {showStatus && (
+            <Badge variant={artwork.status === 'published' ? 'default' : 'secondary'} className="w-fit">
+              {artwork.status}
+            </Badge>
+          )}
         </div>
-        {showStatus && (
-          <Badge variant={artwork.status === 'published' ? 'default' : 'secondary'} className="mb-2">
-            {artwork.status}
-          </Badge>
-        )}
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between">
         {showEdit && (

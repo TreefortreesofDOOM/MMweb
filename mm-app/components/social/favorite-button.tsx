@@ -1,91 +1,41 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { favoriteArtwork, unfavoriteArtwork, hasFavoritedArtwork } from '@/lib/actions/social';
-import { useAuth } from '@/hooks/use-auth';
-import { toast } from 'sonner';
-import { Heart } from 'lucide-react';
-import { cn } from '@/lib/utils/common-utils';
+import { Loader2, Heart } from 'lucide-react';
 
 interface FavoriteButtonProps {
   artworkId: string;
-  className?: string;
   variant?: 'default' | 'ghost';
+  isFavorited?: boolean;
+  isLoading?: boolean;
+  onToggle: (artworkId: string) => void;
 }
 
-export function FavoriteButton({ artworkId, className, variant = 'default' }: FavoriteButtonProps) {
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
-
-  useEffect(() => {
-    const checkFavoriteStatus = async () => {
-      if (!user) return;
-      const { hasFavorited } = await hasFavoritedArtwork(artworkId);
-      setIsFavorited(hasFavorited);
-    };
-
-    checkFavoriteStatus();
-  }, [artworkId, user]);
-
-  const handleClick = async () => {
-    if (!user) {
-      toast.error('Please sign in to favorite artworks');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Optimistic update
-      setIsFavorited(!isFavorited);
-
-      const action = isFavorited ? unfavoriteArtwork : favoriteArtwork;
-      const { success, error } = await action(artworkId);
-
-      if (!success) {
-        // Revert optimistic update on failure
-        setIsFavorited(isFavorited);
-        throw new Error(error);
-      }
-
-      toast.success(isFavorited ? 'Removed from favorites' : 'Added to favorites');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update favorite status');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+export function FavoriteButton({
+  artworkId,
+  variant = 'default',
+  isFavorited = false,
+  isLoading = false,
+  onToggle,
+}: FavoriteButtonProps) {
   return (
     <Button
       variant={variant}
-      size="sm"
-      className={cn(
-        'group',
-        variant === 'ghost' && 'hover:bg-transparent',
-        className
-      )}
-      onClick={handleClick}
+      size="icon"
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle(artworkId);
+      }}
       disabled={isLoading}
       aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleClick();
-        }
-      }}
     >
-      <Heart
-        className={cn(
-          'h-4 w-4 mr-2 transition-colors',
-          isFavorited ? 'fill-current' : 'group-hover:fill-current',
-          variant === 'ghost' && 'text-muted-foreground group-hover:text-foreground'
-        )}
-        aria-hidden="true"
-      />
-      {isFavorited ? 'Favorited' : 'Favorite'}
+      {isLoading ? (
+        <Loader2 className="h-5 w-5 animate-spin" />
+      ) : (
+        <Heart 
+          className={`h-5 w-5 ${isFavorited ? 'fill-current text-red-500' : ''}`} 
+        />
+      )}
     </Button>
   );
 } 
