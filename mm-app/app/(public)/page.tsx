@@ -1,7 +1,6 @@
 import Hero from "@/components/hero";
 import { createClient } from '@/lib/supabase/server';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
-import { GalleryAssistant } from '@/components/ai/gallery-assistant';
 import { FeaturedArtist } from '@/components/featured-artist';
 import { PageViewTracker } from '@/components/analytics/page-view-tracker';
 
@@ -102,14 +101,6 @@ export default async function Home() {
             Discover unique pieces from our talented artists
           </p>
           <ArtworkGallery artworks={transformedArtworks} />
-        </div>
-
-        <div>
-          <h2 className="text-3xl font-bold mb-2">AI Gallery Assistant</h2>
-          <p className="text-muted-foreground mb-6">
-            Get personalized artwork recommendations
-          </p>
-          <GalleryAssistant />
         </div>
       </main>
     </>

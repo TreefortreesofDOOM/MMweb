@@ -29,6 +29,7 @@ export function ChatInterface({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,8 +39,11 @@ export function ChatInterface({
   }, [initialMessage]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    // Only scroll into view if there's been user interaction
+    if (hasUserInteracted) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, hasUserInteracted]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,6 +52,7 @@ export function ChatInterface({
     const userMessage = input.trim();
     setInput('');
     setIsLoading(true);
+    setHasUserInteracted(true);
 
     // Add user message immediately
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
