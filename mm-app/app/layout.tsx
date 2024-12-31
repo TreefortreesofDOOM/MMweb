@@ -32,7 +32,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-dashlane-skip="true" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"

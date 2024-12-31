@@ -32,102 +32,123 @@ interface ValidationTrackerProps {
   className?: string
 }
 
-const requirementActions = {
-  profile_complete: "/profile/edit",
-  portfolio_quality: "/artist/artworks/new",
-  platform_engagement: "/profile",
-} as const
+const requirementDetails = {
+  profile_complete: {
+    title: "Complete Profile",
+    description: "Add your personal information, bio, and social links",
+    tooltip: "A complete profile helps collectors understand your work and journey",
+    action: "/profile/edit"
+  },
+  portfolio_quality: {
+    title: "Portfolio Quality",
+    description: "Upload high-quality artworks with detailed information",
+    tooltip: "Your portfolio should showcase your best work with proper descriptions and pricing",
+    action: "/artist/artworks/new"
+  },
+  platform_engagement: {
+    title: "Platform Engagement",
+    description: "Build your presence on the platform",
+    tooltip: "Active participation helps you connect with collectors and grow your audience",
+    action: "/profile"
+  }
+} as const;
 
-export const ValidationTracker = ({
+export function ValidationTracker({
   requirements,
   progress,
   isVerified,
-  className,
-}: ValidationTrackerProps) => {
-  const requirementsList = Object.entries(requirements).map(([id, req]) => ({
-    id,
-    title: id.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-    message: req.message,
-    completed: req.complete,
-    actionLink: requirementActions[id as keyof typeof requirementActions]
-  }))
-
-  const completedCount = requirementsList.filter(req => req.completed).length
-
+  className
+}: ValidationTrackerProps) {
   return (
-    <Card className={cn("w-full", className)}>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          Verification Progress
-          <span className="text-sm font-normal text-muted-foreground">
-            {completedCount}/{requirementsList.length} Requirements
-          </span>
-        </CardTitle>
-        <CardDescription>
-          {isVerified 
-            ? "Your account is verified!"
-            : "Complete these steps to get verified"}
-        </CardDescription>
+    <div className={cn("space-y-6", className)}>
+      {/* Progress Overview */}
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <div className="space-y-1">
+            <h3 className="font-medium">Verification Progress</h3>
+            <p className="text-sm text-muted-foreground">
+              Complete these requirements to become verified
+            </p>
+          </div>
+          <span className="text-2xl font-bold">{progress}%</span>
+        </div>
         <Progress value={progress} className="h-2" />
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {requirementsList.map((requirement) => (
+      </div>
+
+      {/* Requirements List */}
+      <div className="grid gap-4">
+        {Object.entries(requirements).map(([key, requirement]) => {
+          const details = requirementDetails[key as keyof typeof requirementDetails];
+          
+          return (
             <div
-              key={requirement.id}
+              key={key}
               className={cn(
-                "flex items-start space-x-4 rounded-lg border p-4 transition-colors",
-                requirement.completed
-                  ? "border-green-200 bg-green-50 dark:border-green-900/50 dark:bg-green-900/20"
-                  : "border-gray-200 dark:border-gray-800"
+                "p-4 rounded-lg border",
+                requirement.complete
+                  ? "bg-primary/5 border-primary/20"
+                  : "bg-muted/50 border-muted"
               )}
             >
-              <div
-                className={cn(
-                  "mt-0.5 rounded-full p-1",
-                  requirement.completed
-                    ? "bg-green-500 text-white"
-                    : "border border-gray-300 dark:border-gray-600"
-                )}
-              >
-                {requirement.completed ? (
-                  <Check className="h-4 w-4" />
-                ) : (
-                  <div className="h-4 w-4" />
-                )}
-              </div>
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center">
-                  <p
-                    className={cn(
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h4 className={cn(
                       "font-medium",
-                      requirement.completed && "text-green-700 dark:text-green-300"
-                    )}
-                  >
-                    {requirement.title}
-                  </p>
-                  <span className="ml-2">
+                      requirement.complete ? "text-primary" : "text-foreground"
+                    )}>
+                      {details.title}
+                    </h4>
                     <Tooltip>
                       <TooltipTrigger>
                         <HelpCircle className="h-4 w-4 text-muted-foreground" />
                       </TooltipTrigger>
-                      <TooltipContent>{requirement.message}</TooltipContent>
+                      <TooltipContent>
+                        <p className="max-w-xs">{details.tooltip}</p>
+                      </TooltipContent>
                     </Tooltip>
-                  </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {details.description}
+                  </p>
+                  <p className="text-sm font-medium mt-2">
+                    {requirement.message}
+                  </p>
                 </div>
-                {!requirement.completed && (
-                  <Button variant="outline" size="sm" className="w-full sm:w-auto" asChild>
-                    <Link href={requirement.actionLink}>
-                      Complete This Step
+                {!requirement.complete && (
+                  <Button asChild variant="outline" size="sm">
+                    <Link
+                      href={details.action}
+                      className="whitespace-nowrap"
+                      role="button"
+                      aria-label={`Complete ${details.title}`}
+                      tabIndex={0}
+                    >
+                      Complete Now
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                 )}
               </div>
             </div>
-          ))}
+          );
+        })}
+      </div>
+
+      {/* Next Steps */}
+      {!isVerified && progress === 100 && (
+        <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
+          <div className="flex items-center gap-2">
+            <Check className="h-5 w-5 text-primary" />
+            <div>
+              <h4 className="font-medium text-primary">Ready for Review</h4>
+              <p className="text-sm text-muted-foreground">
+                All requirements complete! Your application will be reviewed soon.
+              </p>
+            </div>
+          </div>
         </div>
-      </CardContent>
-    </Card>
-  )
+      )}
+    </div>
+  );
 } 

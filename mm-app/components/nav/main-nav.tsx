@@ -7,8 +7,8 @@ import { Logo } from '@/components/logo';
 import { useArtist } from '@/hooks/use-artist';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2 } from 'lucide-react';
+import { validateDynamicUrl } from '@/lib/navigation/utils';
 import type { UserRole } from '@/lib/navigation/types';
-import { useCallback } from 'react';
 
 interface MainNavProps {
   userRole?: UserRole | null;
@@ -16,18 +16,22 @@ interface MainNavProps {
 
 export function MainNav({ userRole }: MainNavProps) {
   const pathname = usePathname();
-  const { isArtist, isVerifiedArtist, isEmergingArtist } = useArtist();
+  const { isArtist, isVerifiedArtist, isEmergingArtist, profile } = useArtist();
 
   const isActive = (path: string) => {
-    return pathname === path || pathname?.startsWith(path + '/');
+    return pathname === path || pathname?.startsWith(path.replace('{id}', profile?.id || ''));
   };
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       (e.target as HTMLElement).click();
     }
-  }, []);
+  };
+
+  const getArtistLink = (path: string) => {
+    return validateDynamicUrl(path, profile?.id);
+  };
 
   return (
     <nav className="flex items-center space-x-6 lg:space-x-8" role="navigation" aria-label="Main">
@@ -89,6 +93,19 @@ export function MainNav({ userRole }: MainNavProps) {
             onKeyDown={handleKeyDown}
           >
             Artworks
+          </Link>
+          <Link
+            href={getArtistLink('/artists/{id}/portfolio')}
+            className={cn(
+              'text-sm font-medium transition-colors hover:text-primary',
+              isActive('/artists/{id}/portfolio') ? 'text-black dark:text-white' : 'text-muted-foreground'
+            )}
+            role="link"
+            aria-label="View Portfolio"
+            tabIndex={0}
+            onKeyDown={handleKeyDown}
+          >
+            Portfolio
           </Link>
           {isVerifiedArtist ? (
             <Badge variant="outline" className="ml-2 gap-1" role="status" aria-label="Verified Artist Status">
