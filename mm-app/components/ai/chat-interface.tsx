@@ -31,6 +31,7 @@ export function ChatInterface({
   const [isLoading, setIsLoading] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (initialMessage) {
@@ -39,7 +40,6 @@ export function ChatInterface({
   }, [initialMessage]);
 
   useEffect(() => {
-    // Only scroll into view if there's been user interaction
     if (hasUserInteracted) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
@@ -54,7 +54,6 @@ export function ChatInterface({
     setIsLoading(true);
     setHasUserInteracted(true);
 
-    // Add user message immediately
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
 
     try {
@@ -103,7 +102,12 @@ export function ChatInterface({
             </div>
           </ScrollArea>
 
-          <form onSubmit={handleSubmit} className="flex gap-2">
+          <form 
+            ref={formRef}
+            onSubmit={handleSubmit} 
+            className="flex gap-2"
+            suppressHydrationWarning
+          >
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -115,8 +119,15 @@ export function ChatInterface({
                   handleSubmit(e);
                 }
               }}
+              autoComplete="off"
+              data-form-type="other"
+              suppressHydrationWarning
             />
-            <Button type="submit" disabled={isLoading || !input.trim()}>
+            <Button 
+              type="submit" 
+              disabled={isLoading || !input.trim()}
+              suppressHydrationWarning
+            >
               {isLoading ? 'Sending...' : 'Send'}
             </Button>
           </form>

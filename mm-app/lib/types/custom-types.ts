@@ -1,4 +1,4 @@
-import type { Database } from '@/lib/database.types'
+import type { Database } from './database.types'
 
 // Artist Role Types
 export const ARTIST_ROLES = {
@@ -29,12 +29,18 @@ export interface VerificationRequirements {
   stripeConnected: boolean
 }
 
-// Base Profile Type
+// Base Types from Database
 export type Profile = Database['public']['Tables']['profiles']['Row']
+export type Artwork = Database['public']['Tables']['artworks']['Row']
 
 // Extended Profile Type with Artist Features
-export type ArtistProfile = Omit<Profile, 'artist_type'> & {
+export type ArtistProfile = Profile & {
   artist_type: ArtistRole | null
   features: ArtistFeatures | null
   verificationProgress: VerificationRequirements | null
+}
+
+// Extended Artwork Type with Artist Profile
+export interface ArtworkWithArtist extends Artwork {
+  profiles: Pick<Profile, 'id' | 'name' | 'avatar_url' | 'bio'>
 } 

@@ -224,7 +224,7 @@ export async function updateCommunityEngagement(userId: string, action: 'follow'
     // Get current profile
     const { data: profile } = await supabase
       .from('profiles')
-      .select('community_engagement_score, role')
+      .select('role')
       .eq('id', userId)
       .single();
 
@@ -233,25 +233,16 @@ export async function updateCommunityEngagement(userId: string, action: 'follow'
       return { success: false, error: 'Only emerging artists can earn engagement points' };
     }
 
-    const currentScore = profile?.community_engagement_score || 0;
-    
-    // Calculate score increment based on action
-    const scoreIncrements = {
-      follow: 2,
-      like: 1,
-      comment: 3,
-      share: 5
-    };
-
-    const newScore = Math.min(100, currentScore + scoreIncrements[action]);
-
-    // Update engagement score
-    const { error: updateError } = await supabase
+    // Get the updated score after the action triggers have run
+    const { data: updatedProfile, error: scoreError } = await supabase
       .from('profiles')
-      .update({ community_engagement_score: newScore })
-      .eq('id', userId);
+      .select('community_engagement_score')
+      .eq('id', userId)
+      .single();
 
-    if (updateError) throw updateError;
+    if (scoreError) throw scoreError;
+
+    const newScore = updatedProfile?.community_engagement_score || 0;
 
     // Trigger verification check if score reaches threshold
     if (newScore >= 50) {

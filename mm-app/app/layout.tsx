@@ -11,6 +11,21 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'MM Web',
   description: 'Art Gallery Platform',
+  metadataBase: new URL('https://mmweb.com'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'MM Web',
+    description: 'Art Gallery Platform',
+    locale: 'en_US',
+    type: 'website',
+  },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
 };
 
 export default async function RootLayout({
@@ -32,17 +47,29 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" data-dashlane-skip="true" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html 
+      lang="en"
+      suppressHydrationWarning
+      translate="no"
+    >
+      <head>
+        <meta name="color-scheme" content="light dark" />
+        <meta httpEquiv="Content-Language" content="en" />
+        <meta name="google" content="notranslate" />
+        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+      </head>
+      <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <SiteHeader userRole={userRole} userEmail={user?.email} />
-          <main>{children}</main>
-          <Toaster />
+          <div suppressHydrationWarning>
+            <SiteHeader userRole={userRole} userEmail={user?.email} />
+            <main>{children}</main>
+            <Toaster />
+          </div>
         </ThemeProvider>
       </body>
     </html>

@@ -142,7 +142,15 @@ export async function createArtwork(formData: FormData) {
         status: isPublished ? 'published' : 'draft',
         display_order: nextOrder
       })
-      .select()
+      .select(`
+        *,
+        profiles (
+          id,
+          name,
+          avatar_url,
+          bio
+        )
+      `)
       .single();
 
     if (artworkError) throw artworkError;
@@ -256,7 +264,15 @@ export async function updateArtwork(artworkId: string, formData: FormData) {
         keywords,
       })
       .eq('id', artworkId)
-      .select()
+      .select(`
+        *,
+        profiles (
+          id,
+          name,
+          avatar_url,
+          bio
+        )
+      `)
       .single();
 
     if (artworkError) {
@@ -451,10 +467,18 @@ export async function getSimilarArtworks(artworkId: string) {
     // Get the full artwork details for the similar artworks
     const { data: artworksData, error: artworksError } = await supabase
       .from('artworks')
-      .select('*')
-      .in('id', similarArtworks.map(a => a.artwork_id))
-      .neq('id', artworkId) // Exclude the current artwork
-      .eq('status', 'published'); // Only include published artworks
+      .select(`
+        *,
+        profiles (
+          id,
+          name,
+          avatar_url,
+          bio
+        )
+      `)
+      .in('id', similarArtworks.map((a: { artwork_id: string }) => a.artwork_id))
+      .neq('id', artworkId)
+      .eq('status', 'published');
 
     if (artworksError) throw artworksError;
 
@@ -462,7 +486,7 @@ export async function getSimilarArtworks(artworkId: string) {
     const sortedArtworks = artworksData
       .map(artwork => ({
         ...artwork,
-        similarity: similarArtworks.find(a => a.artwork_id === artwork.id)?.similarity || 0
+        similarity: similarArtworks.find((a: { artwork_id: string; similarity: number }) => a.artwork_id === artwork.id)?.similarity || 0
       }))
       .sort((a, b) => b.similarity - a.similarity);
 
@@ -514,4 +538,29 @@ export async function updateArtworkOrder(artworkIds: string[]) {
     console.error('Error updating artwork order:', error);
     return { error: 'Failed to update artwork order' };
   }
+}
+
+export async function getArtworkDetails(id: string) {
+  const supabase = await createActionClient();
+  
+  const { data: artwork, error } = await supabase
+    .from('artworks')
+    .select(`
+      *,
+      profiles (
+        id,
+        name,
+        avatar_url,
+        bio
+      )
+    `)
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching artwork:', error);
+    return { error: error.message };
+  }
+
+  return { artwork };
 } 
