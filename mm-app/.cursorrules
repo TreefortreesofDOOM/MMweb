@@ -3,6 +3,8 @@
 Every time you choose to apply a rule(s), explicitly state the rule(s) in the output. You can abbreviate the rule description to a single word or phrase.
 
 - Do not over engineer.
+- Check for existing files before creating new ones.
+- make sure you are in mm-app directory before running commands.
 - Follow DRY (Do not Repeat Yourself) principles.
 
 ## Directory Structure Standards
