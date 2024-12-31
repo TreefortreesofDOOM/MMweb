@@ -1,7 +1,9 @@
 # UX Improvements Roadmap
 
 **New items to incorporate**
-- [ ] change the badge design.  
+- [ ] change the badge design. 
+- [ ] on upload artwork page if no price is entered, show a message to the user. it currently errors. 
+- [ ] Make the entire site mobile responsive. 
 
 ## High Priority Issues 🚨
 
