@@ -5,6 +5,58 @@ Every time you choose to apply a rule(s), explicitly state the rule(s) in the ou
 - Do not over engineer.
 - Follow DRY (Do not Repeat Yourself) principles.
 
+## Directory Structure Standards
+
+### Core Directories
+```
+mm-app/
+├── app/              # Next.js app router pages
+│   ├── (admin)/     # Protected admin routes
+│   ├── (auth)/      # Authentication flow
+│   ├── (protected)/ # Protected user routes
+│   ├── (public)/    # Public pages
+│   └── api/         # API endpoints
+├── components/       # React components
+├── context/         # React contexts
+├── hooks/           # Custom React hooks
+├── lib/             # Core business logic
+│   ├── actions/     # Server actions
+│   ├── ai/          # AI implementation
+│   ├── analytics/   # Analytics
+│   ├── auth/        # Auth utilities
+│   ├── stripe/      # Payment integration
+│   ├── supabase/    # Database client
+│   ├── types/       # Type definitions
+│   ├── utils/       # Common utilities
+│   └── vertex-ai/   # AI integration
+├── public/          # Static assets
+└── supabase/        # Database config & migrations
+```
+
+## Naming Conventions
+
+1. **File Names**
+   - Use kebab-case for all files (e.g., `artwork-card.tsx`, `search-utils.ts`)
+   - Add `-utils` suffix for utility files (e.g., `common-utils.ts`)
+   - Add domain prefix for domain-specific files (e.g., `stripe-client-utils.ts`)
+   - Use descriptive names that indicate functionality
+
+2. **Component Files**
+   - Use kebab-case for file names (e.g., `artwork-card.tsx`)
+   - Export PascalCase component names (e.g., `export const ArtworkCard = ...`)
+   - Group by feature in dedicated directories
+   - Include type definitions
+
+3. **Utility Files**
+   - Add `-utils` suffix (e.g., `auth-utils.ts`)
+   - Group related utilities in feature directories
+   - Use domain prefixes when specific to a service
+
+4. **Hook Files**
+   - Use camelCase with `use` prefix (e.g., `useAuth.ts`)
+   - Place in `/hooks` directory
+   - One hook per file
+
 ## Supabase Client Patterns
 Use the following patterns consistently for Supabase client initialization:
 
@@ -28,7 +80,28 @@ const supabase = createBrowserClient()
 
 > **Note:** All patterns use `@supabase/ssr` under the hood but with different cookie handling strategies appropriate for their context. Do not use the older `auth-helpers-nextjs` package.
 
-- 'gemini-1.5-flash' is the correct model for image analysis.
+## Component Organization
+1. Group components by feature (e.g., `admin/`, `artwork/`, `auth/`)
+2. Keep shared UI components in `ui/` directory
+3. No loose components at root level
+4. Follow consistent file naming patterns
+5. Include proper type definitions
+6. Export PascalCase component names
+
+## Route Organization
+1. Use route groups with parentheses for organization:
+   - `(admin)/` - Protected admin routes
+   - `(auth)/` - Authentication flow
+   - `(protected)/` - Protected user routes
+   - `(public)/` - Public pages
+2. Keep API routes in `api/` directory
+3. Maintain proper layouts for each group
+
+## Code Style and Structure
+- Write concise, technical TypeScript code
+- Use functional and declarative programming patterns
+- Prefer iteration and modularization over code duplication
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
 
 ## Project Context
 This project involves integrating various features and services to create a comprehensive platform for artists and administrators. The key components include:
@@ -38,95 +111,6 @@ This project involves integrating various features and services to create a comp
 - **AI Gallery Assistant**: Setting up an AI-powered assistant using Google Cloud Multimodal Live API for real-time conversation and session management.
 - **Admin and Artist Dashboards**: Creating dashboards for both admins and artists to manage applications, view sales history, and handle payouts.
 - **Security and Access Control**: Implementing role-based access control, data validation, and rate limiting to ensure platform security and integrity.
-
-## Code Style and Structure
-- Write concise, technical TypeScript code with accurate examples
-- Use functional and declarative programming patterns; avoid classes
-- Prefer iteration and modularization over code duplication
-- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
-- Structure repository files as follows:
-```
-## Directory Structure
-
-# Core directory structure:
-```
-mm-app/
-├── app/              # Next.js app router pages
-├── components/       # React components
-├── lib/             # Core utilities
-├── public/          # Static assets
-├── utils/           # Helper functions
-└── docs/            # Documentation
-```
-
-# For more detailed organization:
-```
-MM-web/
-mm-app/
-├── app/
-│   ├── (auth-pages)/
-│   │   ├── sign-in/
-│   │   ├── sign-up/
-│   │   └── reset-password/
-│   ├── actions/
-│   │   └── upload.ts
-│   ├── admin/
-│   │   └── applications/
-│   ├── api/
-│   │   ├── artworks/
-│   │   │   ├── create/
-│   │   │   └── upload/
-│   │   └── webhooks/
-│   ├── artist/
-│   │   └── artworks/
-│   │       ├── new/
-│   │       ├── artworks-client.tsx
-│   │       └── page.tsx
-│   ├── artist-application/
-│   ├── auth/
-│   │   └── callback/
-│   ├── profile/
-│   │   └── edit/
-│   │   └── application/
-│   │   │   └── page.tsx
-│   ├── protected/
-│   ├── actions.ts
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-├── components/
-│   ├── artwork/
-│   │   ├── artwork-card.tsx
-│   │   ├── artwork-form.tsx
-│   │   └── artwork-upload.tsx
-│   ├── auth/
-│   ├── ui/
-├── docs/
-│   └── implementation.md
-├── lib/
-│   └── utils.ts
-├── public/
-│   └── images/
-│       ├── favicons/
-│       └── logos/
-├── scripts/
-│   └── create-test-users.ts
-├── supabase/
-│   ├── migrations/
-│   └── config.toml
-├── utils/
-│   ├── supabase/
-│   │   ├── action.ts
-│   │   ├── client.ts
-│   │   ├── middleware.ts
-│   │   └── server.ts
-│   └── utils.ts
-├── .env.local
-├── middleware.ts
-├── next.config.js
-├── package.json
-└── [config files]
-```
 
 ## Tech Stack
 - Next.js   
