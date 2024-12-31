@@ -35,7 +35,8 @@ export async function getProfileAction() {
         verification_requirements,
         avatar_url,
         exhibition_badge,
-        location
+        location,
+        medium
       `)
       .eq('id', user.id)
       .single();
@@ -61,17 +62,20 @@ export async function getProfileAction() {
 }
 
 export const updateProfileAction = async (formData: FormData) => {
-  try {
-    const supabase = await createActionClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const supabase = await createActionClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return encodedRedirect(
-        'error',
-        '/profile/edit',
-        'Not authenticated'
-      );
-    }
+  if (authError || !user) {
+    return redirect('/sign-in');
+  }
+
+  try {
+    // Get current profile to check if anything changed
+    const { data: currentProfile } = await supabase
+      .from('profiles')
+      .select('first_name, last_name, bio, location, website, instagram')
+      .eq('id', user.id)
+      .single();
 
     const firstName = formData.get('firstName')?.toString();
     const lastName = formData.get('lastName')?.toString();
@@ -79,6 +83,20 @@ export const updateProfileAction = async (formData: FormData) => {
     const location = formData.get('location')?.toString();
     const website = formData.get('website')?.toString();
     const instagram = formData.get('instagram')?.toString();
+
+    // Check if any values actually changed
+    const hasChanges = 
+      firstName !== currentProfile?.first_name ||
+      lastName !== currentProfile?.last_name ||
+      bio !== currentProfile?.bio ||
+      location !== currentProfile?.location ||
+      website !== currentProfile?.website ||
+      instagram !== currentProfile?.instagram;
+
+    // If nothing changed, redirect with success message
+    if (!hasChanges) {
+      redirect('/profile?success=' + encodeURIComponent('No changes to save'));
+    }
 
     const updateData = {
       first_name: firstName || null,
@@ -98,11 +116,7 @@ export const updateProfileAction = async (formData: FormData) => {
 
     if (updateError) {
       console.error('Error updating profile:', updateError);
-      return encodedRedirect(
-        'error',
-        '/profile/edit',
-        'Failed to update profile'
-      );
+      redirect('/profile?error=' + encodeURIComponent('Failed to update profile'));
     }
 
     // Track profile field completions
@@ -136,18 +150,13 @@ export const updateProfileAction = async (formData: FormData) => {
       metadata: { userId: user.id }
     });
 
-    return encodedRedirect(
-      'success',
-      '/profile/edit',
-      'Profile updated successfully'
-    );
+    redirect('/profile?success=' + encodeURIComponent('Profile updated successfully'));
   } catch (error) {
     console.error('Error in updateProfileAction:', error);
-    return encodedRedirect(
-      'error',
-      '/profile/edit',
-      'Failed to update profile'
-    );
+    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+      throw error; // Re-throw redirect errors
+    }
+    redirect('/profile?error=' + encodeURIComponent('Failed to update profile'));
   }
 };
 
@@ -235,4 +244,31 @@ export async function updateAvatarAction(formData: FormData) {
       'Failed to update avatar'
     );
   }
+}
+
+export async function updateProfileMediums(mediums: string[]) {
+  const supabase = await createActionClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    throw new Error('Unauthorized')
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ medium: mediums })
+    .eq('id', user.id)
+
+  if (error) {
+    throw new Error('Failed to update mediums')
+  }
+
+  // Track medium completion
+  await trackProfileCompletion({
+    fieldName: 'medium',
+    completed: mediums.length > 0,
+    metadata: { userId: user.id }
+  })
+
+  return { success: true }
 } 

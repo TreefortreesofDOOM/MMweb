@@ -13,6 +13,7 @@ import { AlertCircle, CheckCircle2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ProfileAvatarForm } from '@/components/profile/profile-avatar-form'
+import { ProfileMediumForm } from '@/components/profile/profile-medium-form'
 import type { Database } from '@/lib/database.types'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
@@ -59,7 +60,7 @@ export default async function EditProfilePage({
     ?.split(' ')
     .map((name: string) => name[0])
     .join('')
-    .toUpperCase() || '';
+    .toUpperCase() || ''
   
   return (
     <div className="container max-w-2xl mx-auto py-8 space-y-6">
@@ -86,6 +87,11 @@ export default async function EditProfilePage({
           )}
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Show form message if exists */}
+          {params && (
+            <FormMessage message={params} />
+          )}
+
           {/* Avatar Upload Section */}
           <ProfileAvatarForm 
             currentAvatarUrl={profile?.avatar_url} 
@@ -157,6 +163,12 @@ export default async function EditProfilePage({
                 placeholder="@your.instagram"
               />
             </div>
+
+            {/* Add Medium Selection */}
+            <ProfileMediumForm
+              initialMediums={profile?.medium || []}
+              isArtist={isArtist}
+            />
 
             <div className="flex justify-end gap-4">
               <Button asChild variant="outline">
