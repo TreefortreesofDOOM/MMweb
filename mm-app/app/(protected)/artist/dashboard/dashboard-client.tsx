@@ -190,6 +190,17 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
             </Button>
             <Button asChild variant="outline" className="w-full">
               <Link 
+                href="/artist/portfolio"
+                role="button"
+                aria-label="View Your Portfolio"
+                tabIndex={0}
+                onKeyDown={handleKeyDown}
+              >
+                View Portfolio
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link 
                 href="/artist/artworks"
                 role="button"
                 aria-label="Manage Your Artworks"

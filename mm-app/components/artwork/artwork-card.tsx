@@ -10,6 +10,7 @@ import { useState } from "react";
 import type { ArtworkImage } from './artwork-upload';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { FavoriteButton } from '@/components/social';
 
 interface ArtworkCardProps {
   artwork: {
@@ -92,9 +93,13 @@ export function ArtworkCard({
         "overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300",
         onSelect && "cursor-pointer"
       )}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onSelect?.();
+      onClick={() => onSelect?.()}
+      role={onSelect ? "button" : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (onSelect && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onSelect();
         }
       }}
     >
@@ -153,8 +158,13 @@ export function ArtworkCard({
       </div>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-semibold text-primary truncate">{artwork.title}</h3>
-          <p className="text-sm font-medium text-muted-foreground">{formatPrice(artwork.price)}</p>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-primary truncate">{artwork.title}</h3>
+            <p className="text-sm font-medium text-muted-foreground">{formatPrice(artwork.price)}</p>
+          </div>
+          <div className="ml-4">
+            <FavoriteButton artworkId={artwork.id} variant="ghost" />
+          </div>
         </div>
         {showStatus && (
           <Badge variant={artwork.status === 'published' ? 'default' : 'secondary'} className="mb-2">

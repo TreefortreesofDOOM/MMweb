@@ -26,10 +26,12 @@ export function FeaturedArtist({ artist, artworks }: FeaturedArtistProps) {
     <div className="space-y-8">
       <Card>
         <CardHeader className="flex flex-row items-center gap-4">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={artist.avatar_url || ''} alt={artist.name} />
-            <AvatarFallback>{artist.name?.[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
+          <Link href={`/artists/${artist.id}/portfolio`} className="w-full">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={artist.avatar_url || ''} alt={artist.name} />
+              <AvatarFallback>{artist.name?.[0]?.toUpperCase()}</AvatarFallback>
+            </Avatar>
+          </Link>
           <div>
             <CardTitle className="text-2xl">Featured Artist: {artist.name}</CardTitle>
             <CardDescription 
@@ -46,12 +48,6 @@ export function FeaturedArtist({ artist, artworks }: FeaturedArtistProps) {
           </div>
         </CardContent>
         <CardFooter>
-          <Link href={`/artists/${artist.id}`} className="w-full">
-            <Button className="w-full">
-              View Artist Profile
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
         </CardFooter>
       </Card>
     </div>

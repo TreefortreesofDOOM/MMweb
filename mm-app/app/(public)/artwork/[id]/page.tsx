@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils';
 import { PageViewTracker } from '@/components/analytics/page-view-tracker';
+import { FavoriteButton } from '@/components/social';
 
 export default async function ArtworkPage({ params }: { params: { id: string } }) {
   const supabase = await createClient();
@@ -54,6 +55,7 @@ export default async function ArtworkPage({ params }: { params: { id: string } }
             <div className="space-y-2">
               <p className="text-2xl font-semibold">{formatPrice(artwork.price)}</p>
               <p className="text-muted-foreground">By {artwork.profiles.name}</p>
+              <FavoriteButton artworkId={artwork.id} variant="ghost" />
             </div>
             <p className="text-muted-foreground">{artwork.description}</p>
           </div>

@@ -32,20 +32,20 @@ export default async function ArtistsPage(): Promise<React.ReactElement> {
       created_at,
       exhibition_badge,
       view_count,
-      artist_type,
+      role,
       location,
       artworks (count)
     `)
-    .in('artist_type', [ARTIST_ROLES.VERIFIED, ARTIST_ROLES.EMERGING])
+    .in('role', ['verified_artist', 'emerging_artist'])
     .order('exhibition_badge', { ascending: false, nullsFirst: false })
-    .order('artist_type', { ascending: false, nullsFirst: false })
+    .order('role', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .range(0, 11)
 
   // Transform the data to include artwork counts
   const transformedArtists: ArtistWithCount[] = artists?.map(artist => ({
     ...artist,
-    artist_type: artist.artist_type as ArtistRole,
+    artist_type: artist.role === 'verified_artist' ? 'verified' : 'emerging',
     artworks: [{ count: artist.artworks?.[0]?.count || 0 }] as [{ count: number }]
   })) || []
 

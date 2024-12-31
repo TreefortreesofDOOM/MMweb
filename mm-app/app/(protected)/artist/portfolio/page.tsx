@@ -1,39 +1,57 @@
-'use client';
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import type { Database } from '@/lib/database.types'
 
-import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+type UserRole = Database['public']['Enums']['user_role']
 
-export default function PortfolioPage() {
-  return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Your Public Portfolio</h1>
-          <p className="text-muted-foreground">
-            This is how collectors and other artists see your work.
-          </p>
-          <div className="mt-2">
-            <Link 
-              href="/artist/artworks" 
-              className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span>Back to artwork management</span>
-            </Link>
-          </div>
-        </div>
-      </div>
+export default async function PortfolioPage() {
+  const supabase = await createClient()
+  
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.error('Auth error in portfolio redirect:', authError)
+      throw redirect('/sign-in')
+    }
 
-      <Alert className="mb-6">
-        <p>
-          Your portfolio displays all your published artworks in the order you've set.
-          To make changes, visit the <Link href="/artist/artworks" className="underline">artwork management</Link> page.
-        </p>
-      </Alert>
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, role')
+      .eq('id', user.id)
+      .single()
 
-      {/* Portfolio content here */}
-    </div>
-  );
+    if (profileError) {
+      console.error('Error fetching profile in portfolio redirect:', profileError)
+      throw redirect('/sign-in')
+    }
+
+    if (!profile) {
+      console.log('No profile found in portfolio redirect')
+      throw redirect('/sign-in')
+    }
+
+    // Check if user has any valid artist role
+    const validArtistRoles: UserRole[] = ['artist', 'emerging_artist', 'verified_artist']
+    if (!profile.role || !validArtistRoles.includes(profile.role as UserRole)) {
+      console.log('Profile is not an artist:', {
+        userId: user.id,
+        role: profile.role
+      })
+      throw redirect('/')
+    }
+
+    console.log('Redirecting to artist portfolio:', {
+      userId: user.id,
+      role: profile.role
+    })
+
+    throw redirect(`/artists/${user.id}/portfolio`)
+  } catch (error) {
+    if ((error as any)?.digest?.includes('NEXT_REDIRECT')) {
+      throw error
+    }
+    console.error('Unexpected error in portfolio redirect:', error)
+    throw redirect('/sign-in')
+  }
 } 

@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { PageViewTracker } from '@/components/analytics/page-view-tracker';
-import { ARTIST_ROLES } from '@/lib/types/custom-types';
+import { ARTIST_ROLES, type ArtistRole } from '@/lib/types/custom-types';
+import { ArtistProfileCard } from '@/components/artist/artist-profile-card';
 
 interface PageProps {
   params: Promise<{ id: string }> | { id: string };
@@ -18,14 +19,30 @@ export default async function ArtistPage({ params }: PageProps) {
   // Fetch artist profile
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
+    .select(`
+      id,
+      full_name,
+      avatar_url,
+      bio,
+      website,
+      instagram,
+      location,
+      role,
+      medium
+    `)
     .eq('id', id)
-    .in('artist_type', [ARTIST_ROLES.VERIFIED, ARTIST_ROLES.EMERGING])
     .single();
 
   if (!profile) {
     notFound();
   }
+
+  // Transform profile to match ArtistProfileCard interface
+  const artistProfile = {
+    ...profile,
+    artist_type: (profile.role === 'verified_artist' ? 'verified' : 'emerging') as ArtistRole,
+    medium: profile.medium || []
+  };
 
   // Fetch artist's published artworks
   const { data: artworks } = await supabase
@@ -34,7 +51,7 @@ export default async function ArtistPage({ params }: PageProps) {
       *,
       profiles (
         id,
-        name,
+        full_name,
         bio
       )
     `)
@@ -47,7 +64,7 @@ export default async function ArtistPage({ params }: PageProps) {
     ...artwork,
     artist: artwork.profiles ? {
       id: artwork.profiles.id,
-      name: artwork.profiles.name,
+      name: artwork.profiles.full_name,
       bio: artwork.profiles.bio
     } : undefined
   })) || [];
@@ -56,48 +73,10 @@ export default async function ArtistPage({ params }: PageProps) {
     <div className="container max-w-7xl mx-auto px-4 py-8">
       <PageViewTracker pathname={`/artists/${id}`} />
       <div className="space-y-8">
-        {/* Artist Profile */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-3xl">{profile.name}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {profile.bio && (
-              <div>
-                <h2 className="text-lg font-semibold mb-2">About the Artist</h2>
-                <p className="text-muted-foreground">{profile.bio}</p>
-              </div>
-            )}
-            <div className="space-y-2">
-              {profile.website && (
-                <p>
-                  <span className="font-medium">Website: </span>
-                  <a 
-                    href={profile.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    {profile.website}
-                  </a>
-                </p>
-              )}
-              {profile.instagram && (
-                <p>
-                  <span className="font-medium">Instagram: </span>
-                  <a 
-                    href={`https://instagram.com/${profile.instagram.replace('@', '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    {profile.instagram}
-                  </a>
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <ArtistProfileCard 
+          artist={artistProfile} 
+          isPublicRoute={true}
+        />
 
         {/* Artist's Artworks */}
         {transformedArtworks.length > 0 && (

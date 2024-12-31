@@ -8,6 +8,7 @@ import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
 
 interface ArtworkModalProps {
   artworks: Array<{
@@ -38,6 +39,8 @@ export function ArtworkModal({
   onClose,
   onNavigate,
 }: ArtworkModalProps) {
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  
   if (!artworks.length || currentIndex < 0 || currentIndex >= artworks.length) return null;
   
   const artwork = artworks[currentIndex];
@@ -56,30 +59,36 @@ export function ArtworkModal({
     onNavigate(newIndex);
   };
 
+  const toggleDescription = () => {
+    setIsDescriptionExpanded(!isDescriptionExpanded);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-full h-[90vh] p-0 overflow-hidden">
+      <DialogContent className="max-w-7xl w-full h-[95vh] p-0 overflow-hidden">
         <DialogHeader className="sr-only">
           <DialogTitle>{artwork.title}</DialogTitle>
         </DialogHeader>
         
-        <div className="relative h-full flex flex-col md:flex-row overflow-hidden">
+        <div className="relative h-full flex flex-col overflow-hidden">
           {/* Image Section */}
-          <div className="relative w-full md:w-1/2 h-[40vh] md:h-full">
-            <Image
-              src={primaryImage.url}
-              alt={artwork.title}
-              fill
-              className="object-contain"
-              priority
-            />
+          <div className="relative w-full h-[70vh] bg-background">
+            <div className="absolute inset-x-0 top-6 bottom-6">
+              <Image
+                src={primaryImage.url}
+                alt={artwork.title}
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
             
             {/* Navigation buttons */}
-            <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2">
+            <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4">
               <Button
                 variant="ghost"
                 size="icon"
-                className="bg-black/50 text-white hover:bg-black/70"
+                className="bg-background/50 hover:bg-background/70"
                 onClick={handlePrevious}
                 aria-label="Previous artwork"
               >
@@ -88,7 +97,7 @@ export function ArtworkModal({
               <Button
                 variant="ghost"
                 size="icon"
-                className="bg-black/50 text-white hover:bg-black/70"
+                className="bg-background/50 hover:bg-background/70"
                 onClick={handleNext}
                 aria-label="Next artwork"
               >
@@ -98,48 +107,52 @@ export function ArtworkModal({
           </div>
 
           {/* Details Section */}
-          <div className="w-full md:w-1/2 p-6 overflow-y-auto">
-            <div className="space-y-6">
-              <Card className="border-0 shadow-none">
-                <CardHeader className="px-0 pt-0">
-                  <CardTitle className="text-2xl">{artwork.title}</CardTitle>
-                  {artwork.artist?.name && (
-                    <div className="space-y-1">
-                      <p className="text-muted-foreground">by {artwork.artist.name}</p>
-                      {artwork.artist.id && (
-                        <Link 
-                          href={`/artists/${artwork.artist.id}`}
-                          className="inline-flex items-center text-sm text-primary hover:underline"
-                          onClick={onClose}
-                        >
-                          View all works by this artist →
-                        </Link>
-                      )}
+          <div className="flex-1 w-full overflow-y-auto scrollbar-hide">
+            <div className="p-8">
+              <div className="max-w-2xl mx-auto space-y-4">
+                <Card className="border-0 shadow-none">
+                  <CardHeader className="px-0 pt-0">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-xl">{artwork.title}</CardTitle>
+                        {artwork.artist?.name && (
+                          <div className="space-y-1">
+                            <p className="text-sm text-muted-foreground">by {artwork.artist.name}</p>
+                            {artwork.artist.id && (
+                              <Link 
+                                href={`/artists/${artwork.artist.id}`}
+                                className="inline-flex items-center text-xs text-primary hover:underline"
+                                onClick={onClose}
+                              >
+                                View all works by this artist →
+                              </Link>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xl font-semibold">{formatPrice(artwork.price)}</p>
                     </div>
-                  )}
-                </CardHeader>
-                <CardContent className="px-0 space-y-4">
-                  <div>
-                    <p className="text-2xl font-semibold">{formatPrice(artwork.price)}</p>
+                  </CardHeader>
+                  <CardContent className="px-0 space-y-4">
                     {artwork.description && (
-                      <p className="text-muted-foreground mt-2">{artwork.description}</p>
+                      <div>
+                        <p className={cn(
+                          "text-sm text-muted-foreground",
+                          !isDescriptionExpanded && "line-clamp-3"
+                        )}>
+                          {artwork.description}
+                        </p>
+                        <button
+                          onClick={toggleDescription}
+                          className="text-xs text-primary hover:underline mt-1"
+                        >
+                          {isDescriptionExpanded ? "Show less" : "Show more"}
+                        </button>
+                      </div>
                     )}
-                  </div>
-
-                  {artwork.artist?.bio && (
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-semibold">About the Artist</h3>
-                      <p className="text-muted-foreground">{artwork.artist.bio}</p>
-                    </div>
-                  )}
-
-                  <div className="pt-4">
-                    <p className="text-sm text-muted-foreground">
-                      Artwork {currentIndex + 1} of {artworks.length}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
