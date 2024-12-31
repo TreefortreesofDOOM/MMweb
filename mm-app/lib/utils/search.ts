@@ -68,11 +68,11 @@ export async function searchArtists(params: SearchParams): Promise<{
       created_at,
       exhibition_badge,
       view_count,
-      artist_type,
+      role,
       location,
       artworks (count)
     `)
-    .in('artist_type', [ARTIST_ROLES.VERIFIED, ARTIST_ROLES.EMERGING])
+    .in('role', ['verified_artist', 'emerging_artist'])
 
   // Use text search function for search queries
   if (params.query) {
@@ -87,7 +87,7 @@ export async function searchArtists(params: SearchParams): Promise<{
   }
 
   if (params.artistType) {
-    query = query.eq('artist_type', params.artistType)
+    query = query.eq('role', params.artistType === 'verified' ? 'verified_artist' : 'emerging_artist')
   }
 
   // Apply sorting
@@ -97,11 +97,16 @@ export async function searchArtists(params: SearchParams): Promise<{
       nullsFirst: false 
     })
   } else {
-    // Default sorting
+    // Default sorting - ensure consistent order across pages
     query = query
+      // First sort by role to group verified and emerging artists
+      .order('role', { ascending: true, nullsFirst: false })
+      // Then sort by exhibition badge within each role group
       .order('exhibition_badge', { ascending: false, nullsFirst: false })
-      .order('artist_type', { ascending: false, nullsFirst: false })
+      // Then sort by created_at to maintain order within groups
       .order('created_at', { ascending: false })
+      // Finally add id to ensure consistent ordering when other fields are equal
+      .order('id', { ascending: true })
   }
 
   const { data, error } = await query.range(from, to)
@@ -110,8 +115,26 @@ export async function searchArtists(params: SearchParams): Promise<{
     throw new Error('Failed to fetch artists')
   }
 
+  console.log('Query parameters:', {
+    from,
+    to,
+    sortBy: params.sortBy,
+    sortOrder: params.sortOrder,
+    artistType: params.artistType
+  });
+
+  console.log('Raw query results:', data.map((a: typeof data[0]) => ({
+    name: a.full_name,
+    role: a.role,
+    exhibition_badge: a.exhibition_badge,
+    created_at: a.created_at,
+    id: a.id,
+    page: Math.floor(from / ARTISTS_PER_PAGE) + 1
+  })));
+
   const artists = data.map((artist: typeof data[0]) => ({
     ...artist,
+    artist_type: artist.role === 'verified_artist' ? 'verified' : 'emerging',
     artworks: [{ count: artist.artworks?.[0]?.count || 0 }]
   })) as ArtistWithCount[]
 

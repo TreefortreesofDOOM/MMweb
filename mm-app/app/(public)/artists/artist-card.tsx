@@ -22,6 +22,15 @@ interface ArtistCardProps {
 export function ArtistCard({ artist, index, totalArtists }: ArtistCardProps) {
   const router = useRouter();
   
+  console.log('Rendering artist:', {
+    name: artist.full_name,
+    role: artist.role,
+    exhibition_badge: artist.exhibition_badge,
+    index,
+    created_at: artist.created_at,
+    id: artist.id
+  });
+
   const initials = useMemo(() => {
     return artist.full_name
       ?.split(' ')
@@ -40,7 +49,7 @@ export function ArtistCard({ artist, index, totalArtists }: ArtistCardProps) {
         totalArtists,
         interactionType: 'keyboard'
       });
-      router.push(`/artists/${artist.id}`);
+      router.push(`/artists/${artist.id}/portfolio`);
     } else if (e.key === 'ArrowRight' && index < totalArtists - 1) {
       e.preventDefault();
       const nextCard = document.querySelector(`[data-index="${index + 1}"]`) as HTMLElement;
@@ -74,7 +83,7 @@ export function ArtistCard({ artist, index, totalArtists }: ArtistCardProps) {
       aria-label={`${artist.full_name}'s profile - ${isVerified ? 'Verified' : 'Emerging'} Artist with ${artworkCount} artworks${artist.location ? ` from ${artist.location}` : ''}`}
       className="outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
     >
-      <Link href={`/artists/${artist.id}`} onClick={handleClick}>
+      <Link href={`/artists/${artist.id}/portfolio`} onClick={handleClick}>
         <Card className={cn(
           "group h-full overflow-hidden transition-colors hover:bg-muted/50",
           isVerified && "border-primary/20",
@@ -102,7 +111,7 @@ export function ArtistCard({ artist, index, totalArtists }: ArtistCardProps) {
               </div>
               <div className="flex flex-col items-end gap-2">
                 <ArtistBadge type={artistType} />
-                {isVerified && artist.exhibition_badge && (
+                {artist.exhibition_badge && (
                   <ExhibitionBadge />
                 )}
               </div>
