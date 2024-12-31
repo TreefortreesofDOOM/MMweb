@@ -103,13 +103,23 @@ export const useVerification = () => {
   );
 
   const verificationStatus = useMemo((): VerificationStatus | null => {
-    if (!profile) return null;
+    if (!profile) {
+      console.log('[useVerification] No profile found');
+      return null;
+    }
+
+    console.log('[useVerification] Profile check:', {
+      role: profile.role,
+      artworkCount: profile.artworks?.[0]?.count ?? 0,
+      viewCount: profile.view_count ?? 0,
+      engagementScore: profile.community_engagement_score ?? 0
+    });
 
     const artworkCount = profile.artworks?.[0]?.count ?? 0;
     const check: VerificationCheck = {
       profile,
       artworkCount,
-      publishedArtworkCount: artworkCount, // We'll need to add a published count to the profile query
+      publishedArtworkCount: artworkCount,
       accountAgeInDays: Math.floor(
         (Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24)
       ),
@@ -127,18 +137,30 @@ export const useVerification = () => {
         100
     );
 
+    console.log('[useVerification] Status check:', {
+      progress,
+      isVerified: profile.role === 'verified_artist',
+      requirementsSummary: {
+        profile: requirements.profile_complete.complete,
+        portfolio: requirements.portfolio_quality.complete,
+        engagement: requirements.platform_engagement.complete
+      }
+    });
+
     return {
       requirements,
       progress,
-      isVerified: profile.artist_type === "verified",
-      isExhibitionArtist: profile.artist_type === "verified" && Boolean(profile.exhibition_badge),
+      isVerified: profile.role === 'verified_artist',
+      isExhibitionArtist: profile.role === 'verified_artist' && Boolean(profile.exhibition_badge),
     };
   }, [profile, checkProfileComplete, checkPortfolioQuality, checkPlatformEngagement]);
 
   // Check verification requirements on the server when status changes
   useEffect(() => {
-    if (profile && !profile.artist_type) {
+    if (profile?.role === 'emerging_artist') {
+      console.log('[useVerification] Checking requirements for emerging artist:', profile.id);
       checkVerificationRequirements(profile.id).then(({ isVerified }) => {
+        console.log('[useVerification] Requirements check result:', { isVerified });
         if (isVerified) {
           router.refresh();
         }
