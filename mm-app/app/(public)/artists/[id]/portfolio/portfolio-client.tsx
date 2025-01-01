@@ -9,13 +9,14 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
-import type { Database } from '@/lib/database.types'
+import type { Database } from '@/lib/types/database.types'
 
 type DbArtwork = Database['public']['Tables']['artworks']['Row'] & {
   profiles?: {
     id: string
     full_name: string | null
     bio: string | null
+    avatar_url: string | null
   } | null
 }
 
@@ -31,8 +32,15 @@ interface GalleryArtwork {
     order: number
   }>
   artist?: {
+    id?: string
     name?: string
     bio?: string
+    avatar_url?: string
+  }
+  profiles?: {
+    id: string
+    name: string
+    avatar_url: string
   }
 }
 
@@ -50,6 +58,13 @@ export function PortfolioClient({ artistId, initialArtworks }: PortfolioClientPr
       order: number
     }>
 
+    const artistData = artwork.profiles ? {
+      id: artwork.profiles.id,
+      name: artwork.profiles.full_name || undefined,
+      bio: artwork.profiles.bio || undefined,
+      avatar_url: artwork.profiles.avatar_url || undefined
+    } : undefined;
+
     return {
       id: artwork.id,
       title: artwork.title,
@@ -61,9 +76,11 @@ export function PortfolioClient({ artistId, initialArtworks }: PortfolioClientPr
         isPrimary: img.is_primary || index === 0,
         order: img.order || index
       })),
-      artist: artwork.profiles ? {
-        name: artwork.profiles.full_name || undefined,
-        bio: artwork.profiles.bio || undefined
+      artist: artistData,
+      profiles: artwork.profiles ? {
+        id: artwork.profiles.id,
+        name: artwork.profiles.full_name || '',
+        avatar_url: artwork.profiles.avatar_url || '',
       } : undefined
     }
   }, [])
@@ -123,7 +140,8 @@ export function PortfolioClient({ artistId, initialArtworks }: PortfolioClientPr
           profiles (
             id,
             full_name,
-            bio
+            bio,
+            avatar_url
           )
         `)
         .eq('artist_id', artistId)

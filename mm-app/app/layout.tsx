@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from 'sonner';
 import { SiteHeader } from '@/components/nav/site-header';
 import { createClient } from '@/lib/supabase/supabase-server';
 import { ThemeProvider } from 'next-themes';
+import { FloatingAssistantProvider } from '@/components/providers/floating-assistant-provider';
+import { cn } from '@/lib/utils/common-utils';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -58,18 +60,20 @@ export default async function RootLayout({
         <meta name="google" content="notranslate" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       </head>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={cn('min-h-screen bg-background font-sans antialiased', inter.className)}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <div suppressHydrationWarning>
-            <SiteHeader userRole={userRole} userEmail={user?.email} />
-            <main>{children}</main>
+          <FloatingAssistantProvider>
+            <div suppressHydrationWarning>
+              <SiteHeader userRole={userRole} userEmail={user?.email} />
+              <main>{children}</main>
+            </div>
             <Toaster />
-          </div>
+          </FloatingAssistantProvider>
         </ThemeProvider>
       </body>
     </html>

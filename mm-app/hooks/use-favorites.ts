@@ -11,7 +11,7 @@ export function useFavorites(artworkIds: string[]) {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   const { user } = useAuth();
   const isMounted = useRef(true);
-  const fetchTimeoutRef = useRef<NodeJS.Timeout>();
+  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingRequests = useRef<AbortController[]>([]);
 
   // Cleanup function to abort pending requests

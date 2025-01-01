@@ -45,7 +45,8 @@ export default async function Home() {
       profiles (
         id,
         name,
-        bio
+        bio,
+        avatar_url
       )
     `)
     .eq('artist_id', featuredArtist?.id)
@@ -61,7 +62,8 @@ export default async function Home() {
       profiles (
         id,
         name,
-        bio
+        bio,
+        avatar_url
       )
     `)
     .eq('status', 'published')
@@ -76,7 +78,8 @@ export default async function Home() {
       artist: artwork.profiles ? {
         id: artwork.profiles.id,
         name: artwork.profiles.name,
-        bio: artwork.profiles.bio
+        bio: artwork.profiles.bio,
+        avatar_url: artwork.profiles.avatar_url
       } : undefined
     })) || [];
 

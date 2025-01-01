@@ -12,6 +12,12 @@ interface SortableArtworkCardProps {
     price: number;
     status: string;
     images: ArtworkImage[];
+    description?: string;
+    profiles?: {
+      id: string;
+      avatar_url: string;
+      name: string;
+    };
   };
   showStatus?: boolean;
   showEdit?: boolean;

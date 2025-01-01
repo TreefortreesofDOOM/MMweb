@@ -16,7 +16,8 @@ export default async function ArtworkPage({ params }: { params: { id: string } }
       *,
       profiles (
         name,
-        bio
+        bio,
+        avatar_url
       )
     `)
     .eq('id', params.id)
@@ -55,7 +56,11 @@ export default async function ArtworkPage({ params }: { params: { id: string } }
             <div className="space-y-2">
               <p className="text-2xl font-semibold">{formatPrice(artwork.price)}</p>
               <p className="text-muted-foreground">By {artwork.profiles.name}</p>
-              <FavoriteButton artworkId={artwork.id} variant="ghost" />
+              <FavoriteButton 
+                artworkId={artwork.id} 
+                variant="ghost" 
+                onToggle={() => {}} 
+              />
             </div>
             <p className="text-muted-foreground">{artwork.description}</p>
           </div>

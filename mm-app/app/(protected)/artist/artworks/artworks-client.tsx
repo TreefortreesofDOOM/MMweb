@@ -19,11 +19,17 @@ interface ArtworksClientProps {
     title: string;
     price: number;
     status: string;
+    description?: string;
     images: Array<{
       url: string;
       isPrimary: boolean;
       order: number;
     }>;
+    profiles?: {
+      id: string;
+      avatar_url: string;
+      name: string;
+    };
   }>;
 }
 

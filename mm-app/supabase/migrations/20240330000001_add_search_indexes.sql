@@ -26,7 +26,8 @@ RETURNS TABLE (
   rank real,
   full_name text,
   bio text,
-  location text
+  location text,
+  avatar_url text
 ) AS $$
 BEGIN
   RETURN QUERY
@@ -37,7 +38,8 @@ BEGIN
     ts_rank(to_tsvector('english', coalesce(p.location, '')), plainto_tsquery(search_query)) as rank,
     p.full_name,
     p.bio,
-    p.location
+    p.location,
+    p.avatar_url
   FROM public.profiles p
   WHERE
     to_tsvector('english', coalesce(p.bio, '')) @@ plainto_tsquery(search_query) OR

@@ -33,6 +33,12 @@ interface SortableArtworkGridProps {
     price: number;
     status: string;
     images: ArtworkImage[];
+    description?: string;
+    profiles?: {
+      id: string;
+      avatar_url: string;
+      name: string;
+    };
   }>;
   onReorder: (artworks: string[]) => void;
   showStatus?: boolean;

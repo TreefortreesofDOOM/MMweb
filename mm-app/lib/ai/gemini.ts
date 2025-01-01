@@ -88,7 +88,8 @@ const functions = {
           *,
           profiles (
             name,
-            bio
+            bio,
+            avatar_url
           )
         `)
         .eq('artist_id', contextData.userId);
@@ -133,7 +134,8 @@ const functions = {
           *,
           profiles (
             name,
-            bio
+            bio,
+            avatar_url
           )
         `)
         .eq('id', artworkId)

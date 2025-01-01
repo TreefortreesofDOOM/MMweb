@@ -52,7 +52,8 @@ export default async function ArtistPage({ params }: PageProps) {
       profiles (
         id,
         full_name,
-        bio
+        bio,
+        avatar_url
       )
     `)
     .eq('artist_id', id)
@@ -65,7 +66,8 @@ export default async function ArtistPage({ params }: PageProps) {
     artist: artwork.profiles ? {
       id: artwork.profiles.id,
       name: artwork.profiles.full_name,
-      bio: artwork.profiles.bio
+      bio: artwork.profiles.bio,
+      avatar_url: artwork.profiles.avatar_url
     } : undefined
   })) || [];
 

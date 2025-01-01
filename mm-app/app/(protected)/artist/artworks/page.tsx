@@ -8,7 +8,15 @@ export default async function ArtworksPage() {
   // Get artist's artworks
   const { data: artworks } = await supabase
     .from('artworks')
-    .select('*')
+    .select(`
+      *,
+      profiles (
+        id,
+        name: full_name,
+        bio,
+        avatar_url
+      )
+    `)
     .eq('artist_id', user?.id)
     .order('display_order', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: false });

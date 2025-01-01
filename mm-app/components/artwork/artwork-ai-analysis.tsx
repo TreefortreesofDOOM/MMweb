@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { analyzeArtwork } from '@/lib/actions';
-import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
+import { useFloatingAssistant } from '@/components/providers/floating-assistant-provider';
 
 interface ArtworkAIAnalysisProps {
   imageUrl: string;
@@ -42,6 +42,28 @@ export function ArtworkAIAnalysis({
     keywords: false
   });
 
+  const { setAnalysisState } = useFloatingAssistant();
+
+  // Update floating assistant state when local state changes
+  useEffect(() => {
+    setAnalysisState({
+      isAnalyzing,
+      analysis,
+      onApplyDescription: handleApplyDescription,
+      onApplyStyles: handleApplyStyles,
+      onApplyTechniques: handleApplyTechniques,
+      onApplyKeywords: handleApplyKeywords,
+      applied
+    });
+  }, [isAnalyzing, analysis, applied]);
+
+  // Auto-analyze when imageUrl changes
+  useEffect(() => {
+    if (imageUrl) {
+      handleAnalyze();
+    }
+  }, [imageUrl]);
+
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     try {
@@ -49,7 +71,7 @@ export function ArtworkAIAnalysis({
       formData.append('imageUrl', imageUrl);
       const result = await analyzeArtwork(formData);
       if (result.error) {
-        toast.error(result.error);
+        setAnalysis({});
         return;
       }
       setAnalysis(result.analysis ?? { description: '', styles: [], techniques: [], keywords: [] });
@@ -61,7 +83,8 @@ export function ArtworkAIAnalysis({
         keywords: false
       });
     } catch (error) {
-      toast.error('Failed to analyze artwork');
+      console.error('Error analyzing artwork:', error);
+      setAnalysis({});
     } finally {
       setIsAnalyzing(false);
     }
@@ -71,7 +94,6 @@ export function ArtworkAIAnalysis({
     if (analysis.description) {
       onApplyDescription(analysis.description);
       setApplied(prev => ({ ...prev, description: true }));
-      toast.success('Description applied successfully');
     }
   };
 
@@ -79,7 +101,6 @@ export function ArtworkAIAnalysis({
     if (analysis.styles?.length) {
       onApplyStyles(analysis.styles);
       setApplied(prev => ({ ...prev, styles: true }));
-      toast.success('Styles applied successfully');
     }
   };
 
@@ -87,7 +108,6 @@ export function ArtworkAIAnalysis({
     if (analysis.techniques?.length) {
       onApplyTechniques(analysis.techniques);
       setApplied(prev => ({ ...prev, techniques: true }));
-      toast.success('Techniques applied successfully');
     }
   };
 
@@ -95,7 +115,6 @@ export function ArtworkAIAnalysis({
     if (analysis.keywords?.length) {
       onApplyKeywords(analysis.keywords);
       setApplied(prev => ({ ...prev, keywords: true }));
-      toast.success('Keywords applied successfully');
     }
   };
 
@@ -106,111 +125,27 @@ export function ArtworkAIAnalysis({
           <div className="space-y-1">
             <CardTitle className="text-2xl font-bold text-primary">AI Analysis</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Get AI-powered suggestions for your artwork
+              {isAnalyzing 
+                ? "Analyzing your artwork..."
+                : analysis && Object.keys(analysis).length > 0
+                ? "Analysis complete! Click the floating assistant in the bottom right to view insights and suggestions."
+                : "Upload an image to get AI-powered suggestions for your artwork"}
             </p>
           </div>
-          <Button 
-            onClick={handleAnalyze} 
-            disabled={isAnalyzing}
-            variant="secondary"
-            className="min-w-[120px] bg-primary text-primary-foreground hover:bg-primary/90"
-          >
+          <div className="min-w-[120px] text-right">
             {isAnalyzing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
-              </>
-            ) : (
-              'Analyze Image'
-            )}
-          </Button>
+              <div className="flex items-center justify-end gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Analyzing...</span>
+              </div>
+            ) : analysis && Object.keys(analysis).length > 0 ? (
+              <Badge variant="secondary">
+                Ready
+              </Badge>
+            ) : null}
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6 p-6">
-        {analysis.description && (
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-primary">Description</h3>
-            <p className="text-sm text-muted-foreground">{analysis.description}</p>
-            <Button 
-              onClick={handleApplyDescription} 
-              disabled={applied.description}
-              variant="outline"
-              className="mt-2 text-sm"
-            >
-              {applied.description ? 'Applied' : 'Apply Description'}
-            </Button>
-          </div>
-        )}
-
-        {analysis.styles && analysis.styles.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-primary">Styles</h3>
-            <div className="flex flex-wrap gap-2">
-              {analysis.styles.map((style, index) => (
-                <Badge key={index} variant="secondary" className="text-xs">
-                  {style}
-                </Badge>
-              ))}
-            </div>
-            <Button 
-              onClick={handleApplyStyles} 
-              disabled={applied.styles}
-              variant="outline"
-              className="mt-2 text-sm"
-            >
-              {applied.styles ? 'Applied' : 'Apply Styles'}
-            </Button>
-          </div>
-        )}
-
-        {analysis.techniques && analysis.techniques.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-primary">Techniques</h3>
-            <div className="flex flex-wrap gap-2">
-              {analysis.techniques.map((technique, index) => (
-                <Badge key={index} variant="secondary" className="text-xs">
-                  {technique}
-                </Badge>
-              ))}
-            </div>
-            <Button 
-              onClick={handleApplyTechniques} 
-              disabled={applied.techniques}
-              variant="outline"
-              className="mt-2 text-sm"
-            >
-              {applied.techniques ? 'Applied' : 'Apply Techniques'}
-            </Button>
-          </div>
-        )}
-
-        {analysis.keywords && analysis.keywords.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-primary">Keywords</h3>
-            <div className="flex flex-wrap gap-2">
-              {analysis.keywords.map((keyword, index) => (
-                <Badge key={index} variant="secondary" className="text-xs">
-                  {keyword}
-                </Badge>
-              ))}
-            </div>
-            <Button 
-              onClick={handleApplyKeywords} 
-              disabled={applied.keywords}
-              variant="outline"
-              className="mt-2 text-sm"
-            >
-              {applied.keywords ? 'Applied' : 'Apply Keywords'}
-            </Button>
-          </div>
-        )}
-
-        {!isAnalyzing && !analysis.description && (
-          <div className="py-8 text-center text-muted-foreground">
-            <p>Click 'Analyze Image' to get AI-powered suggestions for your artwork</p>
-          </div>
-        )}
-      </CardContent>
     </Card>
   );
 } 

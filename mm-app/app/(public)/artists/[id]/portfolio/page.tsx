@@ -100,6 +100,13 @@ export default async function PortfolioPage({ params }: PageProps) {
       notFound()
     }
 
+    console.log('Raw profile data:', {
+      id: profile.id,
+      full_name: profile.full_name,
+      avatar_url: profile.avatar_url,
+      role: profile.role
+    })
+
     // Map role to artist_type for the ArtistProfileCard
     const artistProfile = {
       ...profile,
@@ -107,9 +114,10 @@ export default async function PortfolioPage({ params }: PageProps) {
       medium: profile.medium || []
     }
 
-    console.log('Found artist profile:', {
-      id: profile.id,
-      role: profile.role,
+    console.log('Transformed artist profile:', {
+      id: artistProfile.id,
+      full_name: artistProfile.full_name,
+      avatar_url: artistProfile.avatar_url,
       artist_type: artistProfile.artist_type
     })
 
@@ -121,7 +129,8 @@ export default async function PortfolioPage({ params }: PageProps) {
         profiles (
           id,
           full_name,
-          bio
+          bio,
+          avatar_url
         )
       `)
       .eq('artist_id', id)
