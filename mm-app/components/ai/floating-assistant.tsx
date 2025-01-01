@@ -276,7 +276,7 @@ export function FloatingAssistant({
                   {isAnalyzing ? (
                     <div className="flex flex-col items-center gap-2">
                       <Loader2 className="h-6 w-6 animate-spin" />
-                      <p>Analyzing your artwork...</p>
+                      <p>Analyzing...</p>
                     </div>
                   ) : (
                     <p>No analysis results yet</p>
