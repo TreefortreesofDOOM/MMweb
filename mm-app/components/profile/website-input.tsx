@@ -4,17 +4,46 @@ import { useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { createRoot } from 'react-dom/client'
-import { WebsiteBioAssistant } from './website-bio-assistant'
+import { useFloatingAssistant } from '@/components/providers/floating-assistant-provider'
+import { extractBioAction } from '@/lib/actions/extract-bio'
 
 interface WebsiteInputProps {
   website: string | null;
   required?: boolean;
 }
 
+type FloatingAssistantState = {
+  isAnalyzing: boolean;
+  analysis?: {
+    description?: string;
+    styles?: string[];
+    techniques?: string[];
+    keywords?: string[];
+    bio?: {
+      content: string;
+      source: string;
+      status: 'success' | 'error';
+      error?: string;
+    };
+  };
+  onApplyDescription?: () => void;
+  onApplyStyles?: () => void;
+  onApplyTechniques?: () => void;
+  onApplyKeywords?: () => void;
+  onApplyBio?: () => void;
+  applied?: {
+    description: boolean;
+    styles: boolean;
+    techniques: boolean;
+    keywords: boolean;
+    bio: boolean;
+  };
+}
+
 export const WebsiteInput = ({ website, required }: WebsiteInputProps) => {
   const [currentWebsite, setCurrentWebsite] = useState(website || '')
   const [isValid, setIsValid] = useState(true)
+  const { setAnalysisState } = useFloatingAssistant()
 
   const validateUrl = (url: string) => {
     if (!url) return true // Empty is valid unless required
@@ -32,29 +61,78 @@ export const WebsiteInput = ({ website, required }: WebsiteInputProps) => {
     setIsValid(validateUrl(value))
   }
 
-  const handleShowAssistant = () => {
+  const handleShowAssistant = async () => {
     if (!currentWebsite || !isValid) return
 
-    const assistantDiv = document.createElement('div')
-    assistantDiv.id = 'bio-assistant'
-    document.body.appendChild(assistantDiv)
-    
-    const root = createRoot(assistantDiv)
-    root.render(
-      <WebsiteBioAssistant
-        website={currentWebsite.startsWith('http') ? currentWebsite : `https://${currentWebsite}`}
-        onBioExtracted={(bio) => {
+    // Initial state while loading
+    const initialState: FloatingAssistantState = {
+      isAnalyzing: true,
+      analysis: undefined,
+      onApplyBio: () => {},
+      applied: {
+        description: false,
+        styles: false,
+        techniques: false,
+        keywords: false,
+        bio: false
+      }
+    }
+    setAnalysisState(initialState)
+
+    try {
+      const { bio, error } = await extractBioAction(
+        currentWebsite.startsWith('http') ? currentWebsite : `https://${currentWebsite}`
+      )
+
+      // Update state with bio result
+      const successState: FloatingAssistantState = {
+        isAnalyzing: false,
+        analysis: {
+          bio: {
+            content: bio,
+            source: currentWebsite,
+            status: error ? 'error' : 'success',
+            error
+          }
+        },
+        onApplyBio: () => {
           const bioTextarea = document.getElementById('bio') as HTMLTextAreaElement
-          if (bioTextarea) {
+          if (bioTextarea && bio) {
             bioTextarea.value = bio
           }
-        }}
-        onClose={() => {
-          root.unmount()
-          assistantDiv.remove()
-        }}
-      />
-    )
+        },
+        applied: {
+          description: false,
+          styles: false,
+          techniques: false,
+          keywords: false,
+          bio: false
+        }
+      }
+      setAnalysisState(successState)
+    } catch (err) {
+      // Update state with error
+      const errorState: FloatingAssistantState = {
+        isAnalyzing: false,
+        analysis: {
+          bio: {
+            content: '',
+            source: currentWebsite,
+            status: 'error',
+            error: err instanceof Error ? err.message : 'Failed to extract bio'
+          }
+        },
+        onApplyBio: () => {},
+        applied: {
+          description: false,
+          styles: false,
+          techniques: false,
+          keywords: false,
+          bio: false
+        }
+      }
+      setAnalysisState(errorState)
+    }
   }
 
   return (

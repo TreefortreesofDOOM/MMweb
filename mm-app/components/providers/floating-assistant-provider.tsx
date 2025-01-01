@@ -11,16 +11,24 @@ interface FloatingAssistantContextType {
       styles?: string[];
       techniques?: string[];
       keywords?: string[];
+      bio?: {
+        content: string;
+        source: string;
+        status: 'success' | 'error';
+        error?: string;
+      };
     };
     onApplyDescription?: () => void;
     onApplyStyles?: () => void;
     onApplyTechniques?: () => void;
     onApplyKeywords?: () => void;
+    onApplyBio?: () => void;
     applied?: {
       description: boolean;
       styles: boolean;
       techniques: boolean;
       keywords: boolean;
+      bio: boolean;
     };
   }) => void;
 }
@@ -43,16 +51,24 @@ export function FloatingAssistantProvider({ children }: { children: React.ReactN
       styles?: string[];
       techniques?: string[];
       keywords?: string[];
+      bio?: {
+        content: string;
+        source: string;
+        status: 'success' | 'error';
+        error?: string;
+      };
     };
     onApplyDescription?: () => void;
     onApplyStyles?: () => void;
     onApplyTechniques?: () => void;
     onApplyKeywords?: () => void;
+    onApplyBio?: () => void;
     applied?: {
       description: boolean;
       styles: boolean;
       techniques: boolean;
       keywords: boolean;
+      bio: boolean;
     };
   }>({
     isAnalyzing: false,
@@ -60,7 +76,8 @@ export function FloatingAssistantProvider({ children }: { children: React.ReactN
       description: false,
       styles: false,
       techniques: false,
-      keywords: false
+      keywords: false,
+      bio: false
     }
   });
 
@@ -78,11 +95,13 @@ export function FloatingAssistantProvider({ children }: { children: React.ReactN
         onApplyStyles={state.onApplyStyles || (() => {})}
         onApplyTechniques={state.onApplyTechniques || (() => {})}
         onApplyKeywords={state.onApplyKeywords || (() => {})}
+        onApplyBio={state.onApplyBio || (() => {})}
         applied={state.applied || {
           description: false,
           styles: false,
           techniques: false,
-          keywords: false
+          keywords: false,
+          bio: false
         }}
       />
     </FloatingAssistantContext.Provider>

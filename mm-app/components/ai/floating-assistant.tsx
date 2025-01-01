@@ -14,27 +14,36 @@ interface FloatingAssistantProps {
     styles?: string[];
     techniques?: string[];
     keywords?: string[];
+    bio?: {
+      content: string;
+      source: string;
+      status: 'success' | 'error';
+      error?: string;
+    };
   };
   onApplyDescription: () => void;
   onApplyStyles: () => void;
   onApplyTechniques: () => void;
   onApplyKeywords: () => void;
+  onApplyBio: () => void;
   applied: {
     description: boolean;
     styles: boolean;
     techniques: boolean;
     keywords: boolean;
+    bio: boolean;
   };
 }
 
-export function FloatingAssistant({ 
-  isAnalyzing, 
+export function FloatingAssistant({
+  isAnalyzing,
   analysis,
   onApplyDescription,
   onApplyStyles,
   onApplyTechniques,
   onApplyKeywords,
-  applied 
+  onApplyBio,
+  applied
 }: FloatingAssistantProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasNewInsights, setHasNewInsights] = useState(false);
@@ -170,6 +179,7 @@ export function FloatingAssistant({
                       </Button>
                     </div>
                   )}
+
                   {analysis.styles && analysis.styles.length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium">Styles</h4>
@@ -191,6 +201,7 @@ export function FloatingAssistant({
                       </Button>
                     </div>
                   )}
+
                   {analysis.techniques && analysis.techniques.length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium">Techniques</h4>
@@ -212,6 +223,7 @@ export function FloatingAssistant({
                       </Button>
                     </div>
                   )}
+
                   {analysis.keywords && analysis.keywords.length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium">Keywords</h4>
@@ -231,6 +243,31 @@ export function FloatingAssistant({
                       >
                         {applied.keywords ? 'Applied' : 'Apply Keywords'}
                       </Button>
+                    </div>
+                  )}
+
+                  {analysis.bio && (
+                    <div>
+                      <h4 className="text-sm font-medium">Bio from Website</h4>
+                      {analysis.bio.status === 'error' ? (
+                        <div className="rounded-md bg-destructive/10 p-3 mt-2 text-sm text-destructive">
+                          {analysis.bio.error || 'Failed to extract bio'}
+                        </div>
+                      ) : (
+                        <>
+                          <p className="text-sm text-muted-foreground">{analysis.bio.content}</p>
+                          <p className="text-xs text-muted-foreground mt-1">Source: {analysis.bio.source}</p>
+                          <Button
+                            onClick={onApplyBio}
+                            disabled={applied.bio}
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                          >
+                            {applied.bio ? 'Applied' : 'Apply Bio'}
+                          </Button>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
