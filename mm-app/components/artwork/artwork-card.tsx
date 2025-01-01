@@ -34,6 +34,7 @@ interface ArtworkCardProps {
   };
   showStatus?: boolean;
   showEdit?: boolean;
+  showFavorite?: boolean;
   onPublish?: (id: string) => void;
   onUnpublish?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -49,6 +50,7 @@ export function ArtworkCard({
   artwork, 
   showStatus,
   showEdit = false,
+  showFavorite = true,
   onPublish, 
   onUnpublish, 
   onDelete,
@@ -206,13 +208,15 @@ export function ArtworkCard({
           </div>
           <div className="flex items-center justify-between py-1">
             <span className="text-2xl font-bold">{formatPrice(artwork.price)}</span>
-            <FavoriteButton
-              artworkId={artwork.id}
-              variant="ghost"
-              isFavorited={isFavorited || false}
-              isLoading={isLoading || false}
-              onToggle={onToggleFavorite || (() => {})}
-            />
+            {showFavorite && (
+              <FavoriteButton
+                artworkId={artwork.id}
+                variant="ghost"
+                isFavorited={isFavorited || false}
+                isLoading={isLoading || false}
+                onToggle={onToggleFavorite || (() => {})}
+              />
+            )}
           </div>
           {showStatus && (
             <Badge variant={artwork.status === 'published' ? 'default' : 'secondary'} className="w-fit">

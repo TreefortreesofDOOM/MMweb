@@ -62,24 +62,13 @@ export function SortableArtworkCard({
       role="listitem"
       aria-label={`Drag handle for ${artwork.title}`}
     >
-      {/* Drag handle overlay */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute inset-0 z-10 cursor-grab active:cursor-grabbing"
-        onClick={(e) => {
-          // Prevent click from reaching the card if we're dragging
-          if (isDragging) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
-        }}
-      />
-      <div className="relative z-20">
+      {/* Card content at base layer */}
+      <div className="relative">
         <ArtworkCard
           artwork={artwork}
           showStatus={showStatus}
           showEdit={showEdit}
+          showFavorite={false}
           onPublish={onPublish}
           onUnpublish={onUnpublish}
           isLoading={isLoading}
@@ -87,6 +76,13 @@ export function SortableArtworkCard({
           isAtPublishLimit={isAtPublishLimit}
         />
       </div>
+
+      {/* Drag handle avoiding only the bottom button area */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute inset-x-0 top-0 bottom-[72px] cursor-grab active:cursor-grabbing"
+      />
     </div>
   );
 } 
