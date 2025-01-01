@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress"
 import { ProfileAvatarForm } from '@/components/profile/profile-avatar-form'
 import { ProfileMediumForm } from '@/components/profile/profile-medium-form'
 import type { Database } from '@/lib/types/database.types'
+import { WebsiteInput } from '@/components/profile/website-input'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
@@ -143,16 +144,10 @@ export default async function EditProfilePage({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
-                name="website"
-                type="url"
-                defaultValue={profile?.website || ''}
-                placeholder="https://your-website.com"
-              />
-            </div>
+            <WebsiteInput 
+              website={profile?.website} 
+              required={isArtist}
+            />
 
             <div className="space-y-2">
               <Label htmlFor="instagram">Instagram</Label>
