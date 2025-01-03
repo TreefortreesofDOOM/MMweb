@@ -110,7 +110,68 @@ flowchart LR
 ```
 
 ## Overview
-The platform implements a role-based navigation system with distinct features and access levels for each user type.
+The platform implements a role-based navigation system with distinct features and access levels for each user type. The navigation is split into two main components: the public navigation and the role-specific dashboard access.
+
+## Navigation Components
+
+### Main Navigation (`MainNav`)
+The main navigation bar consists of three key sections:
+
+1. **Logo & Public Routes (Left-aligned)**
+   - Logo with home link
+   - Gallery link (`/gallery`)
+   - Artists link (`/artists`)
+
+2. **Role-Specific Dashboard (Right-aligned)**
+   - Conditionally rendered based on user role
+   - Icon + label design using Lucide icons
+   - Role-specific dashboard paths:
+     - Admin: `/admin/dashboard`
+     - Verified Artist: `/artist/dashboard`
+     - Emerging Artist: `/artist/dashboard`
+     - Patron: `/patron/dashboard`
+   - Not shown for basic users
+
+3. **User Navigation (Far Right)**
+   - User avatar with dropdown
+   - Mobile navigation toggle
+
+### Header Structure
+```tsx
+<header>
+  <div className="container">
+    <div className="flex flex-1">
+      {/* Public Navigation */}
+      <MainNav userRole={userRole} />
+    </div>
+    {/* User Navigation */}
+    <nav>
+      <UserNav />
+      <MobileNav />
+    </nav>
+  </div>
+</header>
+```
+
+### Dashboard Access
+Dashboard access is now streamlined:
+- Removed from side navigation for cleaner UX
+- Accessible via prominent button in main navigation
+- Right-aligned with user controls
+- Icon + label design for better visibility
+- Role-appropriate dashboard routing
+- Hover effects and active states
+- Full accessibility support
+
+### Implementation Features
+- Responsive design with mobile optimization
+- Keyboard navigation support
+- ARIA labels and roles
+- Active state management
+- Role-based access control
+- Consistent styling with design system
+- Icon integration with Lucide
+- Proper TypeScript typing
 
 ## Role-Based Navigation Structure
 
@@ -480,3 +541,27 @@ The platform implements a role-based navigation system with distinct features an
    - Extended keyboard shortcuts
    - Enhanced mobile gestures
    - Progressive enhancement 
+
+### Recent Updates
+✅ **Navigation Restructuring**
+- Simplified main navigation with public routes
+- Added role-specific dashboard access in header
+- Improved alignment and spacing
+- Enhanced visual hierarchy
+- Better mobile responsiveness
+- Streamlined user experience
+
+✅ **Dashboard Access**
+- Moved to main navigation bar
+- Right-aligned with user controls
+- Role-specific routing
+- Icon + label design
+- Improved accessibility
+- Better visual prominence
+
+⚠️ **Areas for Monitoring**
+- Mobile layout optimization
+- Dashboard button placement on smaller screens
+- User feedback on new dashboard access
+- Performance impact of role checks
+- Accessibility in practice 

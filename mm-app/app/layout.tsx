@@ -5,7 +5,8 @@ import './globals.css';
 import { Toaster } from 'sonner';
 import { SiteHeader } from '@/components/nav/site-header';
 import { createClient } from '@/lib/supabase/supabase-server';
-import { ThemeProvider } from 'next-themes';
+import { ThemeProvider } from '@/components/providers/theme-provider';
+import { SettingsProvider } from '@/components/providers/settings-provider';
 import { UnifiedAIProvider } from '@/lib/unified-ai/context';
 import { UnifiedAI } from '@/components/unified-ai/unified-ai';
 import { cn } from '@/lib/utils/common-utils';
@@ -41,13 +42,15 @@ export default async function RootLayout({
   const { data: { user } } = await supabase.auth.getUser();
 
   let userRole = null;
+  let userProfile = null;
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, full_name, avatar_url')
       .eq('id', user.id)
       .single();
     userRole = profile?.role;
+    userProfile = profile;
   }
 
   return (
@@ -63,20 +66,22 @@ export default async function RootLayout({
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       </head>
       <body className={cn('min-h-screen bg-background font-sans antialiased', inter.className)}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <UnifiedAIProvider>
-            <div suppressHydrationWarning>
-              <SiteHeader userRole={userRole} userEmail={user?.email} />
-              <main>{children}</main>
-              <UnifiedAI />
-            </div>
-            <Toaster />
-          </UnifiedAIProvider>
+        <ThemeProvider>
+          <SettingsProvider>
+            <UnifiedAIProvider>
+              <div suppressHydrationWarning>
+                <SiteHeader
+                  userRole={userRole}
+                  userEmail={user?.email}
+                  userAvatarUrl={userProfile?.avatar_url}
+                  userFullName={userProfile?.full_name}
+                />
+                <main>{children}</main>
+                <UnifiedAI />
+              </div>
+              <Toaster />
+            </UnifiedAIProvider>
+          </SettingsProvider>
         </ThemeProvider>
       </body>
     </html>

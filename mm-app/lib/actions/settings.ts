@@ -34,19 +34,18 @@ export const updatePreferences = async (
   
   if (!user) throw new Error('Not authenticated');
   
-  // Convert camelCase to snake_case for database
-  const dbPreferences = {
-    user_id: user.id,
-    theme: preferences.theme,
-    ai_personality: preferences.aiPersonality,
-    updated_at: new Date().toISOString(),
-  };
-  
   const { error } = await supabase
-    .from('user_preferences')
-    .upsert(dbPreferences);
+    .rpc('upsert_user_preferences', {
+      p_user_id: user.id,
+      p_theme: preferences.theme,
+      p_ai_personality: preferences.aiPersonality
+    });
   
-  if (error) throw error;
+  if (error) {
+    console.error('Error updating preferences:', error);
+    throw error;
+  }
+  
   return { success: true };
 };
 
