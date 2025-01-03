@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/supabase-server';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
-import { GalleryAssistant } from '@/components/ai/gallery-assistant';
 import { PageViewTracker } from '@/components/analytics/page-view-tracker';
 
 export const revalidate = 3600; // Revalidate every hour
@@ -48,11 +47,6 @@ export default async function GalleryPage() {
         <div className="grid grid-cols-1 gap-12">
           <div>
             <ArtworkGallery artworks={transformedArtworks} />
-          </div>
-
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Need Help?</h2>
-            <GalleryAssistant />
           </div>
         </div>
       </div>

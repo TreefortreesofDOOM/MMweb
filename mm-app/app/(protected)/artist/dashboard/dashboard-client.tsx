@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
-import { ArtistAssistant } from '@/components/ai/artist-assistant';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { StripeOnboarding } from '@/components/artist/stripe-onboarding';
 import { FeatureComingSoon } from '@/components/artist/feature-coming-soon';
@@ -235,7 +234,12 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ArtistAssistant />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <FeatureComingSoon 
+                title="AI Assistant"
+                description="Our AI assistant feature has been upgraded to a new unified system. You can find it in the floating button at the bottom right of your screen."
+              />
+            </div>
           </CardContent>
         </Card>
 

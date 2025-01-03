@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/supabase-server';
 import { ArtworkQR } from '@/components/artwork/artwork-qr';
-import { PatronAssistant } from '@/components/ai/patron-assistant';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils/common-utils';
@@ -93,13 +92,10 @@ export default async function ArtworkPage({ params }: { params: { id: string } }
       <div className="mt-12">
         <Card>
           <CardHeader>
-            <CardTitle>AI Art Advisor</CardTitle>
+            <CardTitle>About This Artwork</CardTitle>
           </CardHeader>
           <CardContent>
-            <PatronAssistant 
-              artworkId={artwork.id} 
-              imageUrl={imageUrl}
-            />
+            <p>This artwork is now integrated with our new unified AI assistant system. Click the floating button at the bottom right of your screen to get insights about this piece.</p>
           </CardContent>
         </Card>
       </div>
