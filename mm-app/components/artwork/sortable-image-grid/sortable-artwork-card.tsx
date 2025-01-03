@@ -2,8 +2,8 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ArtworkCard } from './artwork-card';
-import type { ArtworkImage } from './artwork-upload';
+import { ArtworkCard } from '../artwork-card';
+import type { ArtworkImage } from '../artwork-upload';
 
 interface SortableArtworkCardProps {
   artwork: {

@@ -271,4 +271,19 @@ export async function updateProfileMediums(mediums: string[]) {
   })
 
   return { success: true }
+}
+
+export async function updateProfileBio(bio: string) {
+  const supabase = await createActionClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error('Not authenticated');
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ bio })
+    .eq('id', user.id);
+
+  if (error) throw error;
+  return { success: true };
 } 

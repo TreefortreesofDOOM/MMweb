@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, Content, Part, Tool as GoogleTool, SchemaType, FunctionCallingMode } from '@google/generative-ai';
-import { createActionClient } from '@/lib/supabase/supabase-action-utils';
 import { env } from '@/lib/env';
+import { getArtistArtworks, getArtworkDetails } from '@/lib/actions/artwork-actions'
+import { generateEmbedding } from '@/lib/ai/embeddings'
+import { createClient } from '@/lib/supabase/supabase-server'
 
 interface FunctionDeclaration {
   name: string;
@@ -30,6 +32,28 @@ export const artworkTools: ArtworkTools = {
   tools: [
     {
       functionDeclarations: [
+        {
+          name: "searchChatHistory",
+          description: "Search through past conversations using semantic similarity to find relevant discussions",
+          parameters: {
+            type: SchemaType.OBJECT,
+            properties: {
+              query: {
+                type: SchemaType.STRING,
+                description: "The search query to find relevant past conversations"
+              },
+              match_count: {
+                type: SchemaType.NUMBER,
+                description: "Maximum number of conversations to return (default: 3)"
+              },
+              match_threshold: {
+                type: SchemaType.NUMBER,
+                description: "Minimum similarity threshold (0-1, default: 0.8)"
+              }
+            },
+            required: ["query"]
+          }
+        },
         {
           name: "getArtistArtworks",
           description: "Get all artworks for the current artist",
@@ -71,53 +95,76 @@ export const artworkTools: ArtworkTools = {
 
 // Function implementations
 const functions = {
+  searchChatHistory: async (
+    { query, match_count = 3, match_threshold = 0.8 }: { 
+      query: string; 
+      match_count?: number; 
+      match_threshold?: number 
+    }, 
+    context?: string
+  ): Promise<{ conversations: Array<{
+    message: string;
+    response: string;
+    artwork_id?: string;
+    metadata?: Record<string, any>;
+    context?: string;
+    similarity: number;
+  }> }> => {
+    console.log('searchChatHistory called:', { query, match_count, match_threshold, context });
+    const startTime = Date.now();
+    
+    try {
+      const contextData = context ? JSON.parse(context) : {};
+      const userId = contextData.userId;
+      
+      if (!userId) {
+        throw new Error('User ID not found in context');
+      }
+
+      const [queryEmbedding] = await generateEmbedding(query);
+
+      const supabase = await createClient();
+      const { data: conversations } = await supabase.rpc(
+        'find_similar_conversations',
+        {
+          p_user_id: userId,
+          p_query: query,
+          p_embedding: queryEmbedding,
+          p_match_count: match_count,
+          p_match_threshold: match_threshold
+        }
+      );
+
+      const duration = Date.now() - startTime;
+      console.log('searchChatHistory completed:', {
+        duration,
+        conversationsFound: conversations?.length
+      });
+
+      return { conversations: conversations || [] };
+    } catch (error) {
+      console.error('searchChatHistory failed:', error);
+      throw error;
+    }
+  },
+
   getArtistArtworks: async ({ status = "all" }: { status?: "published" | "draft" | "all" }, context?: string) => {
     console.log('getArtistArtworks called:', { status, context });
     const startTime = Date.now();
     
     try {
-      const contextData = context ? JSON.parse(context) : {};
-      if (!contextData.userId) {
-        throw new Error("User ID is required");
-      }
-
-      const supabase = await createActionClient();
-      let query = supabase
-        .from('artworks')
-        .select(`
-          *,
-          profiles (
-            name,
-            bio,
-            avatar_url
-          )
-        `)
-        .eq('artist_id', contextData.userId);
+      const { artworks } = await getArtistArtworks({ status }, context);
       
-      if (status !== "all") {
-        query = query.eq('status', status);
-      }
-
-      const { data: artworks, error } = await query;
-      if (error) throw error;
-
       const duration = Date.now() - startTime;
       console.log('getArtistArtworks completed:', { 
         duration,
         artworksCount: artworks?.length,
-        userId: contextData.userId,
         status
       });
 
       return { artworks };
     } catch (error) {
-      const duration = Date.now() - startTime;
-      console.error('getArtistArtworks failed:', {
-        duration,
-        error,
-        status,
-        context
-      });
+      console.error('getArtistArtworks failed:', { error, status, context });
       throw error;
     }
   },
@@ -127,22 +174,8 @@ const functions = {
     const startTime = Date.now();
 
     try {
-      const supabase = await createActionClient();
-      const { data: artwork, error } = await supabase
-        .from('artworks')
-        .select(`
-          *,
-          profiles (
-            name,
-            bio,
-            avatar_url
-          )
-        `)
-        .eq('id', artworkId)
-        .single();
+      const { artwork } = await getArtworkDetails({ artworkId });
       
-      if (error) throw error;
-
       const duration = Date.now() - startTime;
       console.log('getArtworkDetails completed:', {
         duration,
@@ -152,12 +185,7 @@ const functions = {
 
       return { artwork };
     } catch (error) {
-      const duration = Date.now() - startTime;
-      console.error('getArtworkDetails failed:', {
-        duration,
-        error,
-        artworkId
-      });
+      console.error('getArtworkDetails failed:', { error, artworkId });
       throw error;
     }
   }

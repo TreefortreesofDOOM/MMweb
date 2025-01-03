@@ -6,6 +6,7 @@ Every time you choose to apply a rule(s), explicitly state the rule(s) in the ou
 - Check for existing files before creating new ones.
 - make sure you are in mm-app directory before running commands.
 - Follow DRY (Do not Repeat Yourself) principles.
+- Apply YAGNI (You Aren't Gonna Need It) principles.
 
 ## Directory Structure Standards
 

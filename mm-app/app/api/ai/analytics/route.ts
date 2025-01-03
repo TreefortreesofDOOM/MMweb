@@ -2,7 +2,10 @@ import { createClient } from '@/lib/supabase/supabase-server';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, Tool, SchemaType } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
-import { Database } from '@/lib/database.types';
+import { Database } from '@/lib/types/database.types';
+import { getGeminiResponse } from '@/lib/ai/gemini';
+import { AI_TEMPERATURE } from '@/lib/ai/prompts';
+import { buildSystemInstruction } from '@/lib/ai/instructions';
 
 type UserSession = Database['public']['Tables']['user_sessions']['Row'];
 type UserEvent = Database['public']['Tables']['user_events']['Row'];
@@ -378,7 +381,7 @@ async function executeAnalyticsFunction(name: string, args: any) {
       }, {});
 
       const completedSteps = (verifications || []).reduce<Record<string, number>>((acc, v) => {
-        (v.steps_completed || []).forEach(step => {
+        (v.steps_completed || []).forEach((step: string) => {
           acc[step] = (acc[step] || 0) + 1;
         });
         return acc;
@@ -426,9 +429,17 @@ async function executeAnalyticsFunction(name: string, args: any) {
   }
 }
 
+interface GeminiResponse {
+    text: () => string;
+    functionCall?: {
+        name: string;
+        args: any;
+    };
+}
+
 export async function POST(request: Request) {
   try {
-    const { prompt, timeRange = '30d' } = await request.json();
+    const { prompt, timeRange = '30d', chatHistory = [] } = await request.json();
     console.log('Analytics request:', { prompt, timeRange });
 
     if (!prompt) {
@@ -461,16 +472,17 @@ export async function POST(request: Request) {
     });
 
     console.log('Sending message to Gemini...');
-    const result = await chat.sendMessage(
-      `Analyze the analytics data for the period ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()} and answer this question: ${prompt}`
-    );
+    const response = await getGeminiResponse(prompt, {
+        systemInstruction: buildSystemInstruction('advisor', {}).instruction,
+        temperature: AI_TEMPERATURE.factual,
+        chatHistory: chatHistory || []
+    }) as unknown as GeminiResponse;
     console.log('Received response from Gemini');
 
-    const response = result.response;
     let finalAnswer = '';
 
     // Handle function calls if any
-    const functionCall = response.candidates?.[0]?.content?.parts?.[0]?.functionCall;
+    const functionCall = response?.functionCall;
     if (functionCall) {
       console.log('Function call:', functionCall);
       const data = await executeAnalyticsFunction(

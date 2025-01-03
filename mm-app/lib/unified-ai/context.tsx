@@ -22,7 +22,8 @@ const initialState: UnifiedAIState = {
     analysis: [],
     pageContext: {
       route: '/',
-      pageType: 'general'
+      pageType: 'general',
+      persona: 'collector'
     }
   }
 }

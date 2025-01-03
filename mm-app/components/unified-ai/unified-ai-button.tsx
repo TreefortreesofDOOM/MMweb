@@ -21,12 +21,16 @@ const breatheAnimation: Variants = {
 
 export const UnifiedAIButton = ({
   className,
-  'aria-label': ariaLabel
+  'aria-label': ariaLabel,
+  suggestedMode = 'analysis'
 }: UnifiedAIButtonProps) => {
   const mode = useUnifiedAIMode()
-  const { setOpen } = useUnifiedAIActions()
+  const { setOpen, setMode } = useUnifiedAIActions()
 
-  const handleClick = () => setOpen(true)
+  const handleClick = () => {
+    setMode(suggestedMode)
+    setOpen(true)
+  }
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()

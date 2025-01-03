@@ -1,29 +1,54 @@
 import { type ReactNode } from 'react'
+import type { UserRole } from '@/lib/navigation/types'
 
 export interface Message {
   role: 'user' | 'assistant'
   content: string
+  timestamp: string
 }
 
 export type AIMode = 'chat' | 'analysis'
 
+// Assistant Personas
+export type AssistantPersona = 'curator' | 'mentor' | 'collector' | 'advisor'
+
+// Role to Persona mapping
+export const personaMapping: Record<UserRole, AssistantPersona> = {
+  admin: 'advisor',
+  emerging_artist: 'mentor',
+  verified_artist: 'mentor',
+  patron: 'collector',
+  user: 'collector'
+} as const
+
+// Context types
+export type ViewContext = 'profile' | 'artwork' | 'gallery' | 'general'
+
 export type AIContext = {
   route: string
-  pageType: 'profile' | 'artwork' | 'gallery' | 'general'
+  pageType: ViewContext
+  persona: AssistantPersona
   data?: {
     websiteUrl?: string
     artworkId?: string
     galleryId?: string
     profileId?: string
+    personaContext?: string
+    characterPersonality?: string
   }
 }
 
 export interface AnalysisResult {
   type: string
   content: string
-  timestamp: number
-  status: 'pending' | 'success' | 'error'
+  timestamp: string
+  status: 'success' | 'error' | 'pending'
+  source?: string
   error?: string
+  results: {
+    summary: string
+    details: string[]
+  }
 }
 
 export interface UnifiedAIState {
@@ -62,6 +87,7 @@ export interface UnifiedAIContainerProps {
 export interface UnifiedAIButtonProps {
   className?: string
   'aria-label'?: string
+  suggestedMode?: AIMode
 }
 
 export interface UnifiedAIPanelProps {
@@ -84,4 +110,16 @@ export interface UnifiedAIChatViewProps {
 export interface UnifiedAIAnalysisViewProps {
   className?: string
   onChatRequest?: () => void
-} 
+  onApplyResult?: (result: AnalysisResult) => void
+  websiteUrl?: string
+}
+
+export const ANALYSIS_TYPES = [
+  'bio_extraction',
+  'content_analysis',
+  'style_analysis',
+  'theme_analysis',
+  'technical_analysis'
+] as const
+
+export type AnalysisType = typeof ANALYSIS_TYPES[number] 

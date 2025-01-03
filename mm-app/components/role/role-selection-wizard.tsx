@@ -113,15 +113,91 @@ const artistAdvancedFeatures: RoleFeature[] = [
   },
 ];
 
-const roleOptions: RoleOption[] = [
+const patronFeatures: RoleFeature[] = [
   {
-    id: 'user',
-    title: 'Collector',
-    description: 'Discover and collect art from emerging and established artists',
-    icon: <Users className="h-6 w-6" />,
-    immediateFeatures: collectorFeatures,
-    advancedFeatures: collectorAdvancedFeatures,
+    title: 'Collect Art',
+    description: 'Build your personal art collection',
+    icon: <Store className="h-4 w-4" />,
+    available: true,
   },
+  {
+    title: 'Message Artists',
+    description: 'Connect directly with artists',
+    icon: <MessageSquare className="h-4 w-4" />,
+    available: true,
+  },
+  {
+    title: 'Follow Artists',
+    description: 'Stay updated with your favorite artists',
+    icon: <BadgeCheck className="h-4 w-4" />,
+    available: true,
+  },
+];
+
+const patronAdvancedFeatures: RoleFeature[] = [
+  {
+    title: 'Collection Management',
+    description: 'Organize and showcase your collection',
+    icon: <LineChart className="h-4 w-4" />,
+    available: true,
+  },
+  {
+    title: 'Early Access',
+    description: 'Preview new artworks before release',
+    icon: <QrCode className="h-4 w-4" />,
+    available: true,
+  },
+  {
+    title: 'Private Galleries',
+    description: 'Access exclusive collections',
+    icon: <Store className="h-4 w-4" />,
+    available: true,
+  },
+];
+
+const browseFeatures: RoleFeature[] = [
+  {
+    title: 'Browse Art',
+    description: 'Discover amazing artworks',
+    icon: <Users className="h-4 w-4" />,
+    available: true,
+  },
+  {
+    title: 'Follow Artists',
+    description: 'Keep track of artists you like',
+    icon: <BadgeCheck className="h-4 w-4" />,
+    available: true,
+  },
+  {
+    title: 'Basic Interaction',
+    description: 'Like and share artworks',
+    icon: <MessageSquare className="h-4 w-4" />,
+    available: true,
+  },
+];
+
+const browseAdvancedFeatures: RoleFeature[] = [
+  {
+    title: 'Public Comments',
+    description: 'Engage with the community',
+    icon: <MessageSquare className="h-4 w-4" />,
+    available: true,
+  },
+  {
+    title: 'Save Favorites',
+    description: 'Bookmark artworks you love',
+    icon: <Store className="h-4 w-4" />,
+    available: true,
+  },
+  {
+    title: 'Basic Profile',
+    description: 'Create your viewer profile',
+    icon: <Users className="h-4 w-4" />,
+    available: true,
+  },
+];
+
+const roleOptions: RoleOption[] = [
   {
     id: 'emerging_artist',
     title: 'Artist',
@@ -129,6 +205,22 @@ const roleOptions: RoleOption[] = [
     icon: <Palette className="h-6 w-6" />,
     immediateFeatures: artistFeatures,
     advancedFeatures: artistAdvancedFeatures,
+  },
+  {
+    id: 'patron',
+    title: 'Collector',
+    description: 'Discover and collect art from emerging and established artists',
+    icon: <Store className="h-6 w-6" />,
+    immediateFeatures: patronFeatures,
+    advancedFeatures: patronAdvancedFeatures,
+  },
+  {
+    id: 'user',
+    title: 'Just Browsing',
+    description: 'Explore artwork and follow artists without commitment',
+    icon: <Users className="h-6 w-6" />,
+    immediateFeatures: browseFeatures,
+    advancedFeatures: browseAdvancedFeatures,
   },
 ];
 

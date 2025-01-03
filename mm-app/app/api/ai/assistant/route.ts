@@ -6,6 +6,7 @@ import { buildSystemInstruction } from '@/lib/ai/instructions';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { env } from '@/lib/env';
 import { generateEmbedding } from '@/lib/ai/embeddings';
+import { personaMapping } from '@/lib/unified-ai/types';
 
 interface AssistantRequest {
   message: string;
@@ -154,7 +155,7 @@ export async function POST(req: Request) {
 
     // Build system instruction with context
     console.log('Building system instruction for:', assistantType);
-    const { instruction, contextMessage } = buildSystemInstruction(assistantType, {
+    const { instruction, contextMessage } = buildSystemInstruction(personaMapping[assistantType === 'gallery' ? 'admin' : assistantType === 'artist' ? 'verified_artist' : 'patron'], {
       ...artworkContext,
       user: {
         id: user.id,

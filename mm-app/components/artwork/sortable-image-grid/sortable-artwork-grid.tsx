@@ -18,7 +18,7 @@ import {
   rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { SortableArtworkCard } from './sortable-artwork-card';
-import type { ArtworkImage } from './artwork-upload';
+import type { ArtworkImage } from '../artwork-upload';
 
 // Prevent SSR for DndContext
 const DndContextClient = dynamic(
@@ -93,7 +93,7 @@ export function SortableArtworkGrid({
   if (!mounted) {
     return (
       <div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 gap-8"
         role="list"
         aria-label="Artwork Gallery"
       >
@@ -125,7 +125,7 @@ export function SortableArtworkGrid({
         strategy={rectSortingStrategy}
       >
         <div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
           role="list"
           aria-label="Sortable Artwork Gallery"
         >

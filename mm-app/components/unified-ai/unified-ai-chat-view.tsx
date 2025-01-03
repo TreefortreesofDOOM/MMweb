@@ -9,15 +9,31 @@ import { useUnifiedAIContext, useUnifiedAIActions } from '@/lib/unified-ai/hooks
 import { useChat } from '@/lib/unified-ai/use-chat'
 import { stagger } from '@/lib/unified-ai/animations'
 import type { UnifiedAIChatViewProps } from '@/lib/unified-ai/types'
+import { personaMapping } from '@/lib/unified-ai/types'
+import { useAuth } from '@/hooks/use-auth'
 
 export const UnifiedAIChatView = ({
   className,
   onAnalysisRequest
 }: UnifiedAIChatViewProps) => {
   const [input, setInput] = useState('')
-  const { conversation } = useUnifiedAIContext()
+  const { conversation, pageContext } = useUnifiedAIContext()
   const { setMode } = useUnifiedAIActions()
   const { isLoading, sendMessage } = useChat()
+  const { profile } = useAuth()
+
+  // Get active personality info
+  const activeCharacter = pageContext.data?.characterPersonality || 'JARVIS'
+  const contextSuggestion = pageContext.data?.personaContext || ''
+  const activePersona = profile?.artist_type === 'verified' ? 'mentor' : 
+                       profile?.artist_type === 'emerging' ? 'mentor' : 
+                       'collector'
+
+  // Debug user role and persona mapping
+  console.log('User:', profile)
+  console.log('User role:', profile?.artist_type)
+  console.log('Persona mapping:', personaMapping)
+  console.log('Active persona:', activePersona)
 
   const handleAnalysisClick = () => {
     setMode('analysis')
@@ -45,6 +61,28 @@ export const UnifiedAIChatView = ({
 
   return (
     <div className={cn('flex h-full flex-col space-y-4', className)}>
+      {/* Personality Info */}
+      <motion.div 
+        className="flex flex-col space-y-2 rounded-lg bg-muted p-3"
+        layout
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium">Character: {activeCharacter}</span>
+            <div className="h-2 w-2 rounded-full bg-green-500" />
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-foreground">Role: {activePersona || 'loading...'}</span>
+            <div className="h-2 w-2 rounded-full bg-blue-500" />
+          </div>
+        </div>
+        {contextSuggestion && (
+          <div className="rounded border border-border/50 bg-background/50 p-2">
+            <span className="text-xs text-muted-foreground">{contextSuggestion}</span>
+          </div>
+        )}
+      </motion.div>
+
       {/* Messages */}
       <motion.div
         className="flex-1 space-y-4 overflow-auto"

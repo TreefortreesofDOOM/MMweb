@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { Database } from '@/lib/database.types';
+import { Database } from '@/lib/types/database.types';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize clients lazily
@@ -88,7 +88,7 @@ export async function storeArtworkEmbedding({
       .insert({
         artwork_id,
         embedding_type,
-        embedding: embedding,
+        embedding: JSON.stringify(embedding),
         metadata
       })
       .select()

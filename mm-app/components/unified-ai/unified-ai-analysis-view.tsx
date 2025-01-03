@@ -7,9 +7,11 @@ import { useUnifiedAIContext, useUnifiedAIActions } from '@/lib/unified-ai/hooks
 import { useAnalysis } from '@/lib/unified-ai/use-analysis'
 import { stagger, spin } from '@/lib/unified-ai/animations'
 import { formatAnalysisType, isAnalysisInProgress, hasError, getErrorMessage } from '@/lib/unified-ai/utils'
-import type { UnifiedAIAnalysisViewProps } from '@/lib/unified-ai/types'
+import type { UnifiedAIAnalysisViewProps, AnalysisResult } from '@/lib/unified-ai/types'
+import { useState } from 'react'
 
 const ANALYSIS_TYPES = [
+  'bio_extraction',
   'content_analysis',
   'style_analysis',
   'theme_analysis',
@@ -18,9 +20,17 @@ const ANALYSIS_TYPES = [
 
 export const UnifiedAIAnalysisView = ({
   className,
-  onChatRequest
+  onChatRequest,
+  onApplyResult,
+  websiteUrl
 }: UnifiedAIAnalysisViewProps) => {
-  const { analysis } = useUnifiedAIContext()
+  const context = useUnifiedAIContext()
+  const { analysis } = context
+
+  console.log('UnifiedAIAnalysisView - Full Context:', context)
+  console.log('UnifiedAIAnalysisView - Analysis Array:', analysis)
+  console.log('UnifiedAIAnalysisView - Website URL:', websiteUrl)
+
   const { setMode } = useUnifiedAIActions()
   const { isAnalyzing, analyze } = useAnalysis()
 
@@ -31,7 +41,16 @@ export const UnifiedAIAnalysisView = ({
 
   const handleAnalyze = async (type: typeof ANALYSIS_TYPES[number]) => {
     try {
-      await analyze(type, `Sample ${type} content`)
+      console.log('handleAnalyze called with type:', type)
+      if (type === 'bio_extraction') {
+        if (!websiteUrl) {
+          throw new Error('No website URL provided')
+        }
+        const result = await analyze('bio_extraction', websiteUrl)
+        console.log('Bio extraction result:', result)
+      } else {
+        await analyze(type, `Sample ${type} content`)
+      }
     } catch (error) {
       console.error(`Failed to perform ${type}:`, error)
     }
@@ -73,39 +92,59 @@ export const UnifiedAIAnalysisView = ({
         className="flex-1 space-y-4 overflow-auto"
       >
         <AnimatePresence mode="popLayout">
-          {analysis.map((result, index) => (
-            <motion.div
-              key={index}
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className={cn(
-                'rounded-lg border border-border p-4',
-                result.status === 'pending' && 'animate-pulse bg-muted',
-                result.status === 'error' && 'border-destructive bg-destructive/10'
-              )}
-            >
+          {analysis.map((result, index) => {
+            console.log('Rendering analysis result:', result)
+            return (
               <motion.div
+                key={index}
                 layout
-                className="flex items-center justify-between"
-              >
-                <h3 className="font-medium">
-                  {formatAnalysisType(result.type)}
-                </h3>
-                <StatusBadge status={result.status} />
-              </motion.div>
-              <motion.p
-                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
                 className={cn(
-                  'mt-2',
-                  result.status === 'error' && 'text-destructive'
+                  'rounded-lg border border-border p-4',
+                  result.status === 'pending' && 'animate-pulse bg-muted',
+                  result.status === 'error' && 'border-destructive bg-destructive/10'
                 )}
               >
-                {result.content}
-              </motion.p>
-            </motion.div>
-          ))}
+                <motion.div
+                  layout
+                  className="flex items-center justify-between"
+                >
+                  <h3 className="font-medium">
+                    {formatAnalysisType(result.type)}
+                  </h3>
+                  <StatusBadge status={result.status} />
+                </motion.div>
+                <motion.p
+                  layout
+                  className={cn(
+                    'mt-2',
+                    result.status === 'error' && 'text-destructive'
+                  )}
+                >
+                  {result.content}
+                </motion.p>
+                {result.type === 'bio_extraction' && 
+                 result.status === 'success' && 
+                 onApplyResult && (
+                  <motion.div
+                    layout
+                    className="mt-4 flex justify-end"
+                  >
+                    <Button
+                      onClick={() => onApplyResult(result)}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      Apply to Profile
+                    </Button>
+                  </motion.div>
+                )}
+              </motion.div>
+            )
+          })}
         </AnimatePresence>
 
         {/* Loading indicator */}

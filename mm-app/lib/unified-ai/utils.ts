@@ -3,7 +3,8 @@ import type { Message, AnalysisResult } from './types'
 export function createMessage(content: string, role: Message['role'] = 'user'): Message {
   return {
     role,
-    content
+    content,
+    timestamp: new Date().toISOString()
   }
 }
 
@@ -15,9 +16,13 @@ export function createAnalysisResult(
   return {
     type,
     content,
-    timestamp: Date.now(),
+    timestamp: new Date().toISOString(),
     status,
-    error: status === 'error' ? content : undefined
+    error: status === 'error' ? content : undefined,
+    results: {
+      summary: content,
+      details: []
+    }
   }
 }
 

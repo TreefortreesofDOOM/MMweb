@@ -1,6 +1,6 @@
 'use client'
 
-import { useUnifiedAIMode, useUnifiedAIVisibility } from '@/lib/unified-ai/hooks'
+import { useUnifiedAIMode, useUnifiedAIVisibility, useUnifiedAIContext } from '@/lib/unified-ai/hooks'
 import { useAnalysis } from '@/lib/unified-ai/use-analysis'
 import { useChat } from '@/lib/unified-ai/use-chat'
 import { UnifiedAIButton } from './unified-ai-button'
@@ -9,10 +9,16 @@ import { UnifiedAIPanel } from './unified-ai-panel'
 import { UnifiedAITransition } from './unified-ai-transition'
 import { UnifiedAIChatView } from './unified-ai-chat-view'
 import { UnifiedAIAnalysisView } from './unified-ai-analysis-view'
+import type { AnalysisResult } from '@/lib/unified-ai/types'
+import { updateProfileBio } from '@/lib/actions/profile'
+import { useToast } from '@/components/ui/use-toast'
 
 export const UnifiedAI = () => {
   const mode = useUnifiedAIMode()
   const { isOpen, isMinimized } = useUnifiedAIVisibility()
+  const context = useUnifiedAIContext()
+  const websiteUrl = context.pageContext?.data?.websiteUrl
+  const { toast } = useToast()
 
   // Initialize analysis and chat hooks
   const { isAnalyzing, analyze } = useAnalysis({
@@ -44,6 +50,26 @@ export const UnifiedAI = () => {
     }
   }
 
+  const handleApplyResult = async (result: AnalysisResult) => {
+    try {
+      if (result.type === 'bio_extraction' && result.status === 'success') {
+        await updateProfileBio(result.content)
+        toast({
+          title: "Success",
+          description: "Bio has been updated in your profile",
+        })
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error('Failed to apply result:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update bio. Please try again.",
+        variant: "destructive"
+      })
+    }
+  }
+
   return (
     <>
       {/* Floating Button */}
@@ -60,6 +86,8 @@ export const UnifiedAI = () => {
             ) : (
               <UnifiedAIAnalysisView
                 onChatRequest={handleChatRequest}
+                websiteUrl={websiteUrl}
+                onApplyResult={handleApplyResult}
               />
             )}
           </UnifiedAIPanel>

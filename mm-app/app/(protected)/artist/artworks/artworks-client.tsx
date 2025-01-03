@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { SortableArtworkGrid } from "@/components/artwork/sortable-artwork-grid";
+import { SortableArtworkGrid } from "@/components/artwork/sortable-image-grid/sortable-artwork-grid";
 import { publishArtwork, unpublishArtwork, updateArtworkOrder } from '@/lib/actions/artwork';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';

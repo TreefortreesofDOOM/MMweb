@@ -123,17 +123,20 @@ export async function extractBioFromWebsite(url: string): Promise<WebsiteBioExtr
     }
 
     console.log('Found content using selector:', foundSelector)
-    console.log('Scraped content:', scrapedContent)
+    //console.log('Scraped content:', scrapedContent)
 
     // Use Gemini to analyze and extract the bio
     if (scrapedContent) {
       const prompt = `
         I have scraped content from a website that might contain a bio or about information. 
         Please analyze this content and extract a professional bio or cv.
-        If the content contains multiple sections, combine them intelligently but don't leave anything out.
-        If needed, break the content into sections and add a header to each section.
-        Do not include contact information. 
-        This content will be used to create a profile for an artist. 
+        If the content contains multiple sections, use multiple paragraphs to create.
+        Don't leave any relevant information out. 
+        Do not use markdown formatting or special characters.
+        Do not include headers or section titles.
+        Do not use bullet points or lists.
+        Return the bio as plain text with standard paragraphs.
+        Do not include contact information.
         
         Content to analyze:
         ${scrapedContent}

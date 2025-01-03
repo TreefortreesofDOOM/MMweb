@@ -1,3 +1,4 @@
+import * as React from 'react';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -5,7 +6,8 @@ import { Toaster } from 'sonner';
 import { SiteHeader } from '@/components/nav/site-header';
 import { createClient } from '@/lib/supabase/supabase-server';
 import { ThemeProvider } from 'next-themes';
-import { FloatingAssistantProvider } from '@/components/providers/floating-assistant-provider';
+import { UnifiedAIProvider } from '@/lib/unified-ai/context';
+import { UnifiedAI } from '@/components/unified-ai/unified-ai';
 import { cn } from '@/lib/utils/common-utils';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -37,7 +39,7 @@ export default async function RootLayout({
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   let userRole = null;
   if (user) {
     const { data: profile } = await supabase
@@ -49,7 +51,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html 
+    <html
       lang="en"
       suppressHydrationWarning
       translate="no"
@@ -67,13 +69,14 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <FloatingAssistantProvider>
+          <UnifiedAIProvider>
             <div suppressHydrationWarning>
               <SiteHeader userRole={userRole} userEmail={user?.email} />
               <main>{children}</main>
+              <UnifiedAI />
             </div>
             <Toaster />
-          </FloatingAssistantProvider>
+          </UnifiedAIProvider>
         </ThemeProvider>
       </body>
     </html>

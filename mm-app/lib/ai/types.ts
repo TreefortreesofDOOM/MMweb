@@ -1,11 +1,12 @@
 import { Content } from "@google/generative-ai";
 
 export interface UserContext {
+    id: string;
     displayName?: string;
     firstName?: string;  // From database first_name
     lastName?: string;   // From database last_name
     email?: string;
-    role: 'artist' | 'patron' | 'visitor' | 'anonymous';
+    role: 'artist' | 'patron' | 'gallery' | 'visitor' | 'anonymous' | 'analytics';
 }
 
 export interface AssistantContext {

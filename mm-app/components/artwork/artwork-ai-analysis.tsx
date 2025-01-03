@@ -35,11 +35,13 @@ export function ArtworkAIAnalysis({
     styles: boolean;
     techniques: boolean;
     keywords: boolean;
+    bio: boolean;
   }>({
     description: false,
     styles: false,
     techniques: false,
-    keywords: false
+    keywords: false,
+    bio: false
   });
 
   const { setAnalysisState } = useFloatingAssistant();
@@ -80,7 +82,8 @@ export function ArtworkAIAnalysis({
         description: false,
         styles: false,
         techniques: false,
-        keywords: false
+        keywords: false,
+        bio: false
       });
     } catch (error) {
       console.error('Error analyzing artwork:', error);

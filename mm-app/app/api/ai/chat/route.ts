@@ -1,8 +1,14 @@
 import { createClient } from '@/lib/supabase/supabase-server';
-import { getGeminiResponse } from '@/lib/ai/gemini';
+import { getGeminiResponse, artworkTools } from '@/lib/ai/gemini';
 import { NextResponse } from 'next/server';
-import { AI_ROLES } from '@/lib/ai/prompts';
 import { generateEmbedding } from '@/lib/ai/embeddings';
+import { Content } from '@google/generative-ai';
+import { buildSystemInstruction } from '@/lib/ai/instructions';
+import { UserContext, ArtworkContext } from '@/lib/ai/types';
+import { findRelevantChatHistory, formatChatContext } from '@/lib/ai/chat-history';
+import { personaMapping } from '@/lib/unified-ai/types';
+
+type AssistantRole = 'gallery' | 'artist' | 'patron';
 
 interface SimilarityMatch {
   id: string;
@@ -10,9 +16,48 @@ interface SimilarityMatch {
   similarity: number;
 }
 
-export async function POST(request: Request) {
+interface ChatRequest {
+  prompt: string;
+  artworkId?: string;
+  imageUrl?: string;
+  role?: AssistantRole;
+  chatHistory?: Content[];
+  context?: string;
+  systemInstruction?: string;
+  userContext?: {
+    id: string;
+    role: AssistantRole;
+    name?: string;
+    bio?: string;
+    artist_type?: string;
+    website?: string;
+  };
+}
+
+export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const { prompt, artworkId, imageUrl, role, chatHistory } = await request.json();
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const userId = user.id;
+
+    const { 
+      prompt, 
+      artworkId, 
+      imageUrl, 
+      role = 'patron',
+      chatHistory = [],
+      context: customContext,
+      systemInstruction: customInstruction,
+      userContext
+    } = await request.json() as ChatRequest;
 
     if (!prompt) {
       return NextResponse.json(
@@ -21,108 +66,70 @@ export async function POST(request: Request) {
       );
     }
 
+    // Find relevant chat history
+    const { similarConversations, artworkHistory } = await findRelevantChatHistory(
+      userId,
+      prompt,
+      artworkId
+    );
+
+    // Format chat history into context
+    const historyContext = formatChatContext(similarConversations, artworkHistory);
+
     // Get artwork details if artworkId is provided
-    let artworkContext = '';
+    let artworkContext: ArtworkContext | undefined;
     if (artworkId) {
-      const supabase = await createClient();
       const { data: artwork } = await supabase
         .from('artworks')
-        .select(`
-          *,
-          profiles (
-            name,
-            bio
-          )
-        `)
+        .select('*')
         .eq('id', artworkId)
         .single();
 
       if (artwork) {
-        artworkContext = `
-          Title: ${artwork.title}
-          Artist: ${artwork.profiles.name}
-          Description: ${artwork.description}
-          Price: $${artwork.price / 100}
-          Artist Bio: ${artwork.profiles.bio || 'Not provided'}
-        `;
+        artworkContext = {
+          artwork: {
+            title: artwork.title,
+            description: artwork.description,
+            price: artwork.price
+          }
+        };
       }
     }
 
-    // Get similar artworks if available
-    let similarArtworksContext = '';
-    if (artworkId) {
-      const supabase = await createClient();
-      
-      // Get the artwork details
-      const { data: artworks, error: artworksError } = await supabase
-        .from('artworks')
-        .select('id, title, description, artist_name')
-        .eq('id', artworkId);
-
-      if (artworksError) throw artworksError;
-      
-      const artwork = artworks?.[0];
-      if (!artwork) throw new Error('Artwork not found');
-      if (!artwork.title || !artwork.description) throw new Error('Artwork missing title or description');
-
-      // Generate embedding for the artwork
-      const content = `${artwork.title} ${artwork.description}`;
-      const [embedding] = await generateEmbedding(content);
-      const formattedEmbedding = `[${embedding.join(',')}]`;
-
-      const { data: similarArtworks } = await supabase.rpc('match_artworks_gemini', {
-        query_embedding: formattedEmbedding,
-        match_threshold: 0.1,
-        match_count: 5
-      });
-
-      if (similarArtworks && similarArtworks.length > 0) {
-        // Get details for similar artworks
-        const similarArtworkIds = (similarArtworks as SimilarityMatch[]).map(a => a.artwork_id);
-        const { data: similarArtworkDetails } = await supabase
-          .from('artworks')
-          .select('id, title, artist_name')
-          .in('id', similarArtworkIds);
-
-        if (similarArtworkDetails) {
-          similarArtworksContext = `
-            Similar artworks:
-            ${similarArtworkDetails.map(art => `- ${art.title} by ${art.artist_name}`).join('\n')}
-          `;
-        }
+    // Build system instruction with context
+    const { instruction, contextMessage } = buildSystemInstruction(personaMapping[role], {
+      artwork: artworkContext?.artwork,
+      user: userContext || {
+        id: userId,
+        role
       }
-    }
+    });
 
-    // Build system instruction based on role
-    let systemInstruction = '';
-    if (role === 'patron') {
-      systemInstruction = `
-         ${AI_ROLES.artExpert}
+    // Add context message and user message to chat history
+    const updatedChatHistory = [
+      ...(contextMessage ? [contextMessage] : []),
+      ...chatHistory,
+      {
+        role: 'user',
+        parts: [{ text: prompt }]
+      }
+    ];
 
-        Current artwork details:
-        ${artworkContext}
-
-        ${similarArtworksContext}
-
-        Keep responses concise but informative and entertaining, focus on helping users make informed decisions.
-      `;
-    }
-
-    const response = await getGeminiResponse(prompt, {
-      context: systemInstruction,
+    // Get response from Gemini
+    const response = await getGeminiResponse(prompt, { 
+      systemInstruction: customInstruction || instruction,
       imageUrl,
-      temperature: 0.7,
-      chatHistory: chatHistory || []
+      temperature: 0.5,
+      chatHistory: updatedChatHistory,
+      context: customContext || JSON.stringify({ userId }),
+      tools: artworkTools.tools
     });
 
-    return NextResponse.json({ 
-      response,
-      chatHistory: chatHistory || []
-    });
+    return NextResponse.json({ response });
   } catch (error) {
-    console.error('Chat API Error:', error);
+    console.error('Error in chat endpoint:', error);
     return NextResponse.json(
-      { error: 'Failed to get AI response' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

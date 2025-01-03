@@ -5,11 +5,25 @@
 ### Roles and Types
 ```sql
 -- Enum types
-public.user_role: 'verified_artist' | 'emerging_artist' | 'user' | 'admin'
+public.user_role: 'verified_artist' | 'emerging_artist' | 'patron' | 'user' | 'admin'
 
 -- Profile columns
 role: public.user_role
 artist_type: 'verified' | 'emerging' | null
+```
+
+### Assistant Personas
+```typescript
+type AssistantPersona = 'curator' | 'mentor' | 'collector' | 'advisor'
+
+// Role to Persona mapping
+const personaMapping: Record<UserRole, AssistantPersona> = {
+  admin: 'advisor',        // Platform oversight
+  emerging_artist: 'mentor',  // Professional development
+  verified_artist: 'mentor',  // Professional development
+  patron: 'collector',     // Art collection
+  user: 'collector'        // Basic exploration
+}
 ```
 
 ### Views
@@ -24,6 +38,9 @@ public.profile_roles
 ```sql
 public.is_artist(role_to_check public.user_role) returns boolean
 -- Returns true for: 'artist', 'verified_artist', 'emerging_artist'
+
+public.is_collector(role_to_check public.user_role) returns boolean
+-- Returns true for: 'patron'
 ```
 
 ## Role-Based Security
@@ -42,97 +59,119 @@ USING (
     AND public.is_artist(role)
   )
 );
+
+-- Example: Collection access
+CREATE POLICY "Collectors can view private galleries"
+ON public.galleries
+FOR SELECT
+USING (
+  public.is_collector(auth.role()) OR 
+  public.is_artist(auth.role())
+);
 ```
 
-## Progress Tracking
+## Role Selection Flow
 
-### Verification Progress Table
-```sql
-verification_progress
-- current_step: TEXT
-- steps_completed: TEXT[]
-- next_steps: TEXT[]
-- requirements_met: JSONB
+```mermaid
+graph TD
+    A[Initial Signup] --> B[Role Selection]
+    B -->|Artist| C[Artist Path]
+    B -->|Collector| D[Patron Path]
+    B -->|Browse| E[User Path]
+    C --> F[Emerging Artist]
+    F -->|Verification| G[Verified Artist]
+    D --> H[Collector Features]
+    E --> I[Basic Features]
+```
+
+## Feature Access Matrix
+```typescript
+const featureAccess = {
+  user: {
+    canBrowse: true,
+    canFollow: true,
+    canComment: true
+  },
+  patron: {
+    ...featureAccess.user,
+    canCollect: true,
+    canMessage: true
+  },
+  emerging_artist: {
+    ...featureAccess.patron,
+    canCreatePortfolio: true,
+    canSell: true
+  }
+}
 ```
 
 ## Best Practices
 
 ### 1. Role Checks
 ```typescript
-// Preferred: Use the is_artist function
-WHERE public.is_artist(role)
+// Preferred: Use helper functions
+const isCollector = public.is_collector(role)
+const isArtist = public.is_artist(role)
 
-// Instead of:
-WHERE role = 'artist'
+// For AI context
+const persona = personaMapping[userRole]
 ```
 
 ### 2. Feature Access
 ```typescript
-// Check both role and artist_type
+// Check role-based access
 const canAccessFeature = 
-  profile.role === 'verified_artist' || 
-  (profile.role === 'emerging_artist' && feature.isBasic);
+  featureAccess[userRole]?.[featureKey] ?? false;
 ```
 
 ### 3. UI Components
 ```typescript
-// Use the ArtistBadge component
-<ArtistBadge type={artist.artist_type} />
+// Use role-aware components
+<RoleBasedFeature
+  requiredRole={['patron', 'emerging_artist', 'verified_artist']}
+  fallback={<UpgradePrompt />}
+>
+  <FeatureContent />
+</RoleBasedFeature>
 ```
-
-## Backward Compatibility
-
-The system maintains backward compatibility through:
-1. The `profile_roles` view that maps old roles to new ones
-2. The `is_artist()` function that handles all artist role variations
-3. RLS policies that support both old and new role names
 
 ## Migration Guidelines
 
 When adding new features:
-1. Define access levels for both artist tiers
-2. Update RLS policies using `is_artist()`
-3. Use the `profile_roles` view for role mapping
-4. Add feature flags to `artist_features` table
-5. Update UI to reflect role-specific access
-
-## Registration Flow
-
-```mermaid
-graph TD
-    A[Initial Signup] --> B[Basic Registration]
-    B --> C[Role Selection]
-    C -->|Collector| D[User Account]
-    C -->|Artist| E[Artist Onboarding]
-    D -->|Profile/Dashboard| F[Become Artist Option]
-    F --> E
-    E -->|Auto Verification| G[Verified Artist]
-    G -->|Admin Review| H[Exhibition Status]
-    H -->|Invitation| I[Invited Exhibition]
-```
+1. Define access levels for all roles
+2. Update RLS policies using role helpers
+3. Add to feature access matrix
+4. Update UI to reflect role-specific access
+5. Consider AI persona behavior
 
 ## Implementation Checklist
 
 ### Security
-- [ ] Implement all RLS policies
-- [ ] Set up role transition triggers
-- [ ] Add audit logging for role changes
-- [ ] Test security boundaries
+- [ ] Update RLS policies for new roles
+- [ ] Add collector-specific policies
+- [ ] Update role transition triggers
+- [ ] Add role validation
 
 ### UI/UX
-- [ ] Implement role badges
-- [ ] Add feature gates
-- [ ] Create role-specific layouts
-- [ ] Add progress indicators
+- [ ] Update role selection UI
+- [ ] Add collector-specific features
+- [ ] Update role badges
+- [ ] Add role-based navigation
 
 ### Database
-- [ ] Set up role enums
-- [ ] Create helper functions
-- [ ] Implement views
-- [ ] Add indexes for performance
+- [ ] Add patron role enum
+- [ ] Create collector helper functions
+- [ ] Update existing views
+- [ ] Add role indexes
+
+### AI Integration
+- [ ] Implement persona mapping
+- [ ] Add context awareness
+- [ ] Update AI prompts
+- [ ] Add role-specific responses
 
 ### Testing
-- [ ] Unit tests for helper functions
-- [ ] Integration tests for role transitions
-- [ ] E2E tests for user journeys
+- [ ] Unit tests for new roles
+- [ ] Integration tests for personas
+- [ ] E2E tests for role flows
 - [ ] Security policy tests 

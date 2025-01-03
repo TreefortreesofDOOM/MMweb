@@ -2,6 +2,8 @@ import { type ReactNode, type ReactElement } from 'react';
 import { createClient } from '@/lib/supabase/supabase-server';
 import { redirect } from 'next/navigation';
 import { RoleNav } from '@/components/nav/role-nav';
+import { UnifiedAIProvider } from '@/components/unified-ai/unified-ai-provider';
+import { UnifiedAI } from '@/components/unified-ai/unified-ai';
 
 export default async function ProtectedLayout({
   children,
@@ -24,11 +26,14 @@ export default async function ProtectedLayout({
 
   return (
     <div className="min-h-screen">
-      <RoleNav role={profile?.role ?? 'user'}>
-        <main className="flex-1">
-          {children}
-        </main>
-      </RoleNav>
+      <UnifiedAIProvider>
+        <RoleNav role={profile?.role ?? 'user'}>
+          <main className="flex-1">
+            {children}
+          </main>
+        </RoleNav>
+        <UnifiedAI />
+      </UnifiedAIProvider>
     </div>
   );
 } 

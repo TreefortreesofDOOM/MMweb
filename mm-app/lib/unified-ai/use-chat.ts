@@ -1,50 +1,108 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useUnifiedAIActions } from './hooks'
-import { createMessage } from './utils'
 import type { Message } from './types'
+import type { Content } from '@google/generative-ai'
+import { useAuth } from '@/hooks/use-auth'
 
-interface UseChatProps {
-  onMessageSent?: (message: Message) => void
-  onResponse?: (response: Message) => void
-  onError?: (error: string) => void
+interface UseChatOptions {
+  onError?: (error: Error) => void
+  context?: string
+  systemInstruction?: string
+  role?: string
+  artworkId?: string
+  imageUrl?: string
+  userContext?: {
+    id: string
+    role: string
+    name?: string
+    bio?: string
+    artist_type?: string
+    website?: string
+  }
 }
 
-export function useChat({ onMessageSent, onResponse, onError }: UseChatProps = {}) {
+export function useChat(options: UseChatOptions = {}) {
   const [isLoading, setIsLoading] = useState(false)
-  const { addMessage } = useUnifiedAIActions()
+  const [chatHistory, setChatHistory] = useState<Content[]>([])
+  const [hasInitialContext, setHasInitialContext] = useState(false)
+  const { addMessage, setMode } = useUnifiedAIActions()
+  const { profile } = useAuth()
 
-  const sendMessage = useCallback(async (content: string) => {
+  const sendMessage = async (content: string) => {
     try {
       setIsLoading(true)
+      setMode('chat')
 
-      // Create and add user message
-      const userMessage = createMessage(content, 'user')
+      // Add user message
+      const userMessage: Message = {
+        role: 'user',
+        content,
+        timestamp: new Date().toISOString()
+      }
       addMessage(userMessage)
-      onMessageSent?.(userMessage)
 
-      // TODO: Implement actual chat logic here
-      // For now, simulate response with a delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Only send user context on first message
+      const isFirstMessage = !hasInitialContext
+      const userContext = isFirstMessage ? {
+        id: profile?.id,
+        role: profile?.artist_type || 'user',
+        name: profile?.name,
+        bio: profile?.bio,
+        artist_type: profile?.artist_type,
+        website: profile?.website
+      } : undefined
 
-      // Create and add assistant response
-      const response = createMessage('This is a simulated response.', 'assistant')
-      addMessage(response)
-      onResponse?.(response)
+      // Call the chat API route
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: content,
+          chatHistory,
+          context: options.context,
+          systemInstruction: options.systemInstruction,
+          role: options.role || profile?.artist_type,
+          artworkId: options.artworkId,
+          imageUrl: options.imageUrl,
+          userContext
+        })
+      })
 
-      return response
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to get AI response')
+      }
+
+      const { response: aiResponse, chatHistory: newChatHistory } = await response.json()
+
+      // Add assistant message
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: aiResponse,
+        timestamp: new Date().toISOString()
+      }
+      addMessage(assistantMessage)
+
+      // Update chat history and mark context as initialized
+      setChatHistory(newChatHistory)
+      if (isFirstMessage) {
+        setHasInitialContext(true)
+      }
+
+      return assistantMessage
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to send message'
-      onError?.(errorMessage)
+      options.onError?.(error as Error)
       throw error
     } finally {
       setIsLoading(false)
     }
-  }, [addMessage, onMessageSent, onResponse, onError])
+  }
 
   return {
     isLoading,
-    sendMessage
+    sendMessage,
+    chatHistory
   }
 } 
