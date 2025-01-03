@@ -20,242 +20,149 @@ mm-app/
 │   │   └── layout.tsx
 │   ├── (auth)/
 │   │   ├── callback/
+│   │   │   └── route.ts
 │   │   ├── email/
+│   │   │   └── smtp-message.tsx
 │   │   ├── forgot-password/
+│   │   │   └── page.tsx
 │   │   ├── onboarding/
+│   │   │   ├── complete/
+│   │   │   │   └── page.tsx
+│   │   │   ├── refresh/
+│   │   │   └── page.tsx
 │   │   ├── reset-password/
+│   │   │   └── page.tsx
 │   │   ├── role-selection/
+│   │   │   └── page.tsx
 │   │   ├── sign-in/
+│   │   │   └── page.tsx
 │   │   ├── sign-up/
+│   │   │   └── page.tsx
 │   │   └── layout.tsx
 │   ├── (protected)/
 │   │   ├── artist/
+│   │   │   ├── analytics/
+│   │   │   ├── artworks/
+│   │   │   ├── dashboard/
+│   │   │   ├── portfolio/
+│   │   │   ├── qr-code/
+│   │   │   └── verification/
 │   │   ├── profile/
 │   │   │   ├── application/
+│   │   │   │   ├── page.tsx
 │   │   │   ├── edit/
-│   │   │   ├── validation/
+│   │   │   │   └── page.tsx
+│   │   │   └── validation/
+│   │   │   │   └── page.tsx
 │   │   │   └── page.tsx
 │   │   └── layout.tsx
 │   ├── (public)/
 │   │   ├── artists/
+│   │   │   ├── [id]/
+│   │   │   │   └── page.tsx
+│   │   │   ├── artist-card.tsx
+│   │   │   ├── artists-client.tsx
+│   │   │   ├── error-boundary.tsx
+│   │   │   ├── loading.tsx
+│   │   │   └── page.tsx
 │   │   ├── artwork/
+│   │   │   └── [id]/
+│   │   │   │   └── page.tsx
 │   │   ├── gallery/
-│   │   ├── vertex-test/
+│   │   │   └── page.tsx
 │   │   ├── layout.tsx
 │   │   └── page.tsx
 │   ├── api/
 │   │   ├── ai/
+│   │   │   ├── analytics/
+│   │   │   │   └── route.ts
+│   │   │   ├── analyze-artwork/
+│   │   │   │   └── route.ts
+│   │   │   ├── assistant/
+│   │   │   │   └── route.ts
+│   │   │   ├── chat/
+│   │   │   │   └── route.ts
+│   │   │   └── extract-bio/
+│   │   │   │   └── route.ts
+│   │   ├── artworks/
+│   │   │   └── [id]/
 │   │   ├── gallery/
-│   │   ├── registration/
+│   │   │   └── visit/
+│   │   │   │   └── [userId]/
+│   │   │   │   └── route.ts
 │   │   ├── stripe/
-│   │   ├── test/
+│   │   │   ├── connect/
+│   │   │   │   └── route.ts
+│   │   │   ├── login-link/
+│   │   │   │   └── route.ts
+│   │   │   └── payment-link/
+│   │   │   │   └── route.ts
 │   │   ├── test-email/
+│   │   │   └── route.ts
 │   │   ├── verification/
+│   │   │   └── refresh/
 │   │   ├── vertex-ai/
+│   │   │   ├── search/
+│   │   │   │   └── route.ts
+│   │   │   ├── setup/
+│   │   │   │   └── route.ts
+│   │   │   ├── setup-bigquery/
+│   │   │   │   └── route.ts
+│   │   │   ├── test/
+│   │   │   │   └── route.ts
+│   │   │   └── test-setup/
+│   │   │   │   └── route.ts
 │   │   └── webhooks/
+│   │       └── stripe/
+│   │           └── route.ts
 │   ├── layout.tsx
 │   ├── globals.css
 │   └── favicon.ico
 ├── components/
 │   ├── admin/
-│   │   ├── application-list.tsx
-│   │   ├── application-review.tsx
-│   │   └── featured-artist-manager.tsx
 │   ├── ai/
-│   │   ├── ai-artist-search.tsx
-│   │   ├── artist-assistant.tsx
-│   │   ├── chat-interface.tsx
-│   │   ├── gallery-assistant.tsx
-│   │   ├── patron-assistant.tsx
-│   │   └── test-chat.tsx
 │   ├── analytics/
-│   │   ├── ai-chat.tsx
-│   │   ├── dashboard.tsx
-│   │   └── page-view-tracker.tsx
 │   ├── artist/
-│   │   ├── artist-profile-card.tsx
-│   │   ├── feature-coming-soon.tsx
-│   │   ├── featured-artist.tsx
-│   │   └── stripe-onboarding.tsx
 │   ├── artwork/
-│   │   ├── sortable-image-grid/
-│   │   ├── artwork-ai-analysis.tsx
-│   │   ├── artwork-card.tsx
-│   │   ├── artwork-form.tsx
-│   │   ├── artwork-gallery.tsx
-│   │   ├── artwork-grid.tsx
-│   │   ├── artwork-modal.tsx
-│   │   ├── artwork-qr.tsx
-│   │   ├── artwork-upload.tsx
-│   │   ├── sortable-artwork-card.tsx
-│   │   └── sortable-artwork-grid.tsx
 │   ├── auth/
-│   │   ├── auth-form.tsx
-│   │   ├── signup-form.tsx
-│   │   └── terms-modal.tsx
 │   ├── layout/
-│   │   ├── admin-layout.tsx
-│   │   ├── artist-layout.tsx
-│   │   └── sidebar-nav.tsx
 │   ├── nav/
-│   │   ├── main-nav.tsx
-│   │   ├── mobile-nav.tsx
-│   │   ├── role-nav.tsx
-│   │   ├── side-nav.tsx
-│   │   ├── site-header.tsx
-│   │   ├── logo.tsx
-│   │   ├── theme-switcher.tsx
-│   │   └── user-nav.tsx
 │   ├── portfolio/
-│   │   ├── portfolio-filters.tsx
-│   │   └── portfolio-sort.tsx
 │   ├── profile/
-│   │   ├── medium-input.tsx
-│   │   ├── profile-avatar-form.tsx
-│   │   ├── profile-medium-form.tsx
-│   │   ├── qr-error-boundary.tsx
-│   │   └── user-qr.tsx
 │   ├── providers/
-│   │   └── artist-provider.tsx
 │   ├── role/
-│   │   └── role-selection-wizard.tsx
 │   ├── social/
-│   │   ├── favorite-button.tsx
-│   │   ├── follow-button.tsx
-│   │   └── index.ts
 │   ├── typography/
-│   │   └── inline-code.tsx
 │   ├── ui/
-│   │   ├── accordion.tsx
-│   │   ├── alert.tsx
-│   │   ├── artist-badge.tsx
-│   │   ├── avatar.tsx
-│   │   ├── badge.tsx
-│   │   ├── button.tsx
-│   │   ├── calendar.tsx
-│   │   ├── card.tsx
-│   │   ├── checkbox.tsx
-│   │   ├── collapsible.tsx
-│   │   ├── command.tsx
-│   │   ├── copy-button.tsx
-│   │   ├── dialog.tsx
-│   │   ├── dropdown-menu.tsx
-│   │   ├── exhibition-badge.tsx
-│   │   ├── feature-gate.tsx
-│   │   ├── form-message.tsx
-│   │   ├── hero.tsx
-│   │   ├── input.tsx
-│   │   ├── label.tsx
-│   │   ├── popover.tsx
-│   │   ├── progress.tsx
-│   │   ├── scroll-area.tsx
-│   │   ├── select.tsx
-│   │   ├── sheet.tsx
-│   │   ├── skeleton.tsx
-│   │   ├── slider.tsx
-│   │   ├── spinner.tsx
-│   │   ├── switch.tsx
-│   │   ├── tabs.tsx
-│   │   ├── textarea.tsx
-│   │   ├── toast.tsx
-│   │   ├── toaster.tsx
-│   │   ├── toggle-group.tsx
-│   │   ├── toggle.tsx
-│   │   ├── tooltip.tsx
-│   │   └── use-toast.tsx
+│   ├── unified-ai/
 │   ├── validation/
-│   │   └── validation-tracker.tsx
 │   └── verification/
-│       ├── requirements-list.tsx
-│       └── verification-banner.tsx
-├── context/
-│   └── auth-context.tsx
-├── docs/
-├── hooks/
-│   ├── use-ai-chat.ts
-│   ├── use-analytics.ts
-│   ├── use-artist.ts
-│   ├── use-auth.ts
-│   ├── use-debounce.ts
-│   ├── use-feature-access.ts
-│   ├── use-navigation.ts
-│   ├── use-toast.ts
-│   ├── use-user.ts
-│   └── use-verification.ts
 ├── lib/
 │   ├── actions/
-│   │   ├── admin.ts
-│   │   ├── ai-search.ts
-│   │   ├── ai.ts
-│   │   ├── analytics.ts
-│   │   ├── artist.ts
-│   │   ├── artwork.ts
-│   │   ├── auth.ts
-│   │   ├── featured-artist.ts
-│   │   ├── helpers.ts
-│   │   ├── index.ts
-│   │   ├── profile.ts
-│   │   ├── registration.ts
-│   │   ├── role.ts
-│   │   ├── social.ts
-│   │   ├── update-avatar.ts
-│   │   └── verification.ts
 │   ├── ai/
-│   │   ├── embeddings.ts
-│   │   ├── gemini.ts
-│   │   ├── instructions.ts
-│   │   ├── personalities.ts
-│   │   ├── prompts.ts
-│   │   └── types.ts
 │   ├── analytics/
-│   │   ├── analytics.ts
-│   │   └── track.ts
 │   ├── auth/
-│   │   └── auth-utils.ts
 │   ├── constants/
-│   │   └── mediums.ts
 │   ├── emails/
-│   │   └── artist-notifications.ts
 │   ├── navigation/
-│   │   ├── config.ts
-│   │   ├── types.ts
-│   │   └── navigation-utils.ts
+│   ├── services/
 │   ├── stripe/
-│   │   ├── stripe-client-utils.ts
-│   │   ├── stripe-products.ts
-│   │   └── stripe-server-utils.ts
 │   ├── supabase/
-│   │   ├── supabase-action-utils.ts
-│   │   ├── check-env-vars.ts
-│   │   ├── supabase-client.ts
-│   │   ├── middleware.ts
-│   │   ├── supabase-server.ts
-│   │   └── service-role.ts
 │   ├── types/
-│   │   ├── database.types.ts
-│   │   └── custom-types.ts
+│   ├── unified-ai/
 │   ├── utils/
-│   │   ├── search-utils.ts
-│   │   └── common-utils.ts
 │   ├── vertex-ai/
-│   │   ├── bigquery-setup.ts
-│   │   ├── vertex-client.ts
-│   │   ├── data-extraction-utils.ts
-│   │   ├── format-utils.ts
-│   │   ├── test-extraction.ts
-│   │   └── types.ts
+│   ├── utils.ts
 │   └── env.ts
-├── node_modules/
+├── types/
+├── hooks/
+├── context/
 ├── public/
-│   └── images/
+├── reference/
 ├── scripts/
 ├── supabase/
-│   ├── .branches/
-│   ├── .temp/
-│   ├── migrations/
-│   ├── seed/
-│   ├── .gitignore
-│   └── config.toml
+├── .google/
+├── .next/
 ├── .cursorrules
 ├── .env
 ├── .env.local
@@ -264,7 +171,6 @@ mm-app/
 ├── middleware.ts
 ├── next-env.d.ts
 ├── next.config.js
-├── package-lock.json
 ├── package.json
 ├── postcss.config.js
 ├── README.md
@@ -283,7 +189,9 @@ mm-app/
 
 ### `components/` - React Components
 - Feature-specific directories (admin, ai, artist, etc.)
-- Shared UI components in `ui/`
+- `unified-ai/` - Unified AI component system
+- `ui/` - Shared UI components
+- `typography/` - Typography-specific components
 - No loose components at root level
 - Follows consistent naming patterns
 
@@ -298,10 +206,13 @@ mm-app/
 - `vertex-ai/` - AI integration
 
 ### Supporting Directories
+- `types/` - Global TypeScript types and interfaces
 - `hooks/` - Custom React hooks
 - `context/` - React contexts
 - `public/` - Static assets
 - `supabase/` - Database migrations and config
+- `reference/` - Reference documentation and examples
+- `.google/` - Google Cloud configuration
 
 ## File Naming Standards
 
@@ -334,14 +245,15 @@ mm-app/
 
 ## Recent Updates ✅
 
-### Removed
-- Root `/migrations/` directory (consolidated in supabase)
-- `next.config.ts` (duplicate config)
-- `config-overrides.js` (unused)
+### Added
+- `unified-ai/` components directory
+- `.google/` configuration directory
+- `reference/` documentation directory
+- Root level `types/` directory
 
 ### Consolidated
-- All hooks in `/hooks`
-- Types in `/types`
+- All global types in `/types`
+- AI components in `unified-ai`
 - Utils in feature directories
 - Analytics in proper directories
 
@@ -358,6 +270,7 @@ mm-app/
 - `tsconfig.json` - TypeScript settings
 - `tailwind.config.ts` - Styling
 - `components.json` - UI components
+- `.google/` - Google Cloud settings
 
 ### Environment
 - `.env` - Base variables
@@ -370,6 +283,7 @@ mm-app/
    - Group by feature
    - Maintain clear boundaries
    - Follow naming conventions
+   - Use unified AI components where applicable
 
 2. **Route Structure**
    - Use route groups
@@ -379,5 +293,6 @@ mm-app/
 3. **Code Organization**
    - Business logic in actions
    - Utils in proper directories
-   - Types centralized
+   - Types centralized in `/types`
    - Clear separation of concerns
+   - AI functionality in unified system

@@ -15,10 +15,13 @@ export default function RoleSelection() {
   const router = useRouter();
 
   const handleRoleSelect = (role: UserRole) => {
+    console.log('Setting role:', role);
     setSelectedRole(role);
   };
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent form submission
+    
     if (!selectedRole) {
       setError({ error: 'Please select a role to continue' });
       return;
@@ -34,7 +37,7 @@ export default function RoleSelection() {
 
   return (
     <div className="container flex items-center justify-center min-h-[calc(100vh-4rem)] -mt-16">
-      <AuthForm className="w-full max-w-4xl p-8 space-y-8">
+      <AuthForm className="w-full max-w-4xl p-8 space-y-8" onSubmit={handleSubmit}>
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">Choose Your Role</h1>
           <p className="text-sm text-muted-foreground">
@@ -51,7 +54,6 @@ export default function RoleSelection() {
           <Button
             type="submit"
             className="w-full"
-            formAction={handleSubmit}
             disabled={!selectedRole}
           >
             Continue

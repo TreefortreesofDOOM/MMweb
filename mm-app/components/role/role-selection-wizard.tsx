@@ -226,6 +226,13 @@ const roleOptions: RoleOption[] = [
 
 export function RoleSelectionWizard({ onRoleSelect, selectedRole }: RoleSelectionWizardProps) {
   const [expandedFeatures, setExpandedFeatures] = useState<Record<string, boolean>>({});
+  
+  console.log('RoleSelectionWizard render - selectedRole:', selectedRole);
+
+  const handleRoleSelect = (roleId: UserRole) => {
+    console.log('Role selected:', roleId);
+    onRoleSelect(roleId);
+  };
 
   const handleToggleFeatures = (e: React.MouseEvent, roleId: string) => {
     e.stopPropagation();
@@ -248,12 +255,14 @@ export function RoleSelectionWizard({ onRoleSelect, selectedRole }: RoleSelectio
         <Card
           key={role.id}
           className={cn(
-            'relative transition-all hover:border-primary',
+            'relative cursor-pointer transition-all hover:border-primary',
             selectedRole === role.id && 'border-primary bg-primary/5'
           )}
           tabIndex={0}
           role="button"
           aria-pressed={selectedRole === role.id}
+          onClick={() => onRoleSelect(role.id)}
+          onKeyDown={(e) => handleKeyDown(e, role.id)}
         >
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -327,10 +336,7 @@ export function RoleSelectionWizard({ onRoleSelect, selectedRole }: RoleSelectio
             <Button
               className="w-full"
               variant={selectedRole === role.id ? 'default' : 'outline'}
-              onClick={(e) => {
-                e.stopPropagation();
-                onRoleSelect(role.id);
-              }}
+              onClick={() => onRoleSelect(role.id)}
             >
               {selectedRole === role.id ? 'Selected' : `Choose ${role.title}`}
             </Button>

@@ -5,7 +5,16 @@ import { navigationConfig } from './config';
  * Type guard to check if a value is a valid UserRole
  */
 export function isValidUserRole(role: unknown): role is UserRole {
-  return typeof role === 'string' && role in navigationConfig;
+  const validRoles = [
+    'user',
+    'patron',           // Add patron role
+    'artist',
+    'admin',
+    'emerging_artist',
+    'verified_artist'
+  ];
+  
+  return typeof role === 'string' && validRoles.includes(role as string);
 }
 
 /**

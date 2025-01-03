@@ -87,18 +87,6 @@ export default async function ArtworkPage({ params }: { params: { id: string } }
           </Card>
         </div>
       </div>
-
-      {/* AI Art Advisor Section */}
-      <div className="mt-12">
-        <Card>
-          <CardHeader>
-            <CardTitle>About This Artwork</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>This artwork is now integrated with our new unified AI assistant system. Click the floating button at the bottom right of your screen to get insights about this piece.</p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 } 

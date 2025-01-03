@@ -235,10 +235,6 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <FeatureComingSoon 
-                title="AI Assistant"
-                description="Our AI assistant feature has been upgraded to a new unified system. You can find it in the floating button at the bottom right of your screen."
-              />
             </div>
           </CardContent>
         </Card>

@@ -9,7 +9,8 @@ import {
   MessageSquare,
   Store,
   Award,
-  GalleryVertical
+  GalleryVertical,
+  Image as Gallery
 } from 'lucide-react';
 import type { RoleNavigation, UserRole } from './types';
 
@@ -162,5 +163,30 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
   artist: {
     role: 'artist',
     navigation: [] // Legacy role, empty navigation
+  },
+  patron: {
+    role: 'patron',
+    navigation: [
+      {
+        title: 'Collecting',
+        items: [
+          {
+            title: 'Browse Art',
+            href: '/browse',
+            icon: Store
+          },
+          {
+            title: 'My Collection',
+            href: '/collection',
+            icon: Gallery
+          },
+          {
+            title: 'Following',
+            href: '/following',
+            icon: Users
+          }
+        ]
+      }
+    ]
   }
 }; 

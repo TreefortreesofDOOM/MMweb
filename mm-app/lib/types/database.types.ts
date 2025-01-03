@@ -987,6 +987,76 @@ export type Database = {
           },
         ]
       }
+      user_preferences: {
+        Row: {
+          id: string
+          user_id: string
+          theme: Database["public"]["Enums"]["theme_preference"]
+          ai_personality: Database["public"]["Enums"]["ai_personality"]
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          theme?: Database["public"]["Enums"]["theme_preference"]
+          ai_personality?: Database["public"]["Enums"]["ai_personality"]
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          theme?: Database["public"]["Enums"]["theme_preference"]
+          ai_personality?: Database["public"]["Enums"]["ai_personality"]
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      notification_settings: {
+        Row: {
+          id: string
+          user_id: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          enabled: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          enabled?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          enabled?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       artwork_counts: {
@@ -1301,16 +1371,20 @@ export type Database = {
         }
         Returns: number
       }
+      get_user_settings: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       artist_application_status: "draft" | "pending" | "approved" | "rejected"
       artwork_status: "draft" | "published" | "sold"
-      user_role:
-        | "user"
-        | "artist"
-        | "admin"
-        | "emerging_artist"
-        | "verified_artist"
+      user_role: 'user' | 'patron' | 'artist' | 'admin' | 'emerging_artist' | 'verified_artist'
+      notification_type: 'email' | 'new_artwork' | 'new_follower' | 'artwork_favorited' | 'price_alert'
+      theme_preference: 'light' | 'dark' | 'system'
+      ai_personality: 'HAL9000' | 'GLADOS' | 'JARVIS'
     }
     CompositeTypes: {
       [_ in never]: never
