@@ -1,6 +1,8 @@
 import { AIServiceProvider, Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult } from './providers/base'
 import { GeminiProvider, GeminiConfig } from './providers/gemini'
 import { ChatGPTProvider, ChatGPTConfig } from './providers/chatgpt'
+import { env } from '@/lib/env'
+import { createClient } from '@/lib/supabase/supabase-server'
 
 export type AIProvider = 'gemini' | 'chatgpt'
 
@@ -40,7 +42,68 @@ const DEFAULT_FALLBACK_OPTIONS = {
 }
 
 export class AIServiceFactory {
+  private static async getAISettings() {
+    const supabase = await createClient()
+    const { data: settings } = await supabase
+      .from('ai_settings')
+      .select('*')
+      .single()
+
+    return settings || {
+      primary_provider: env.AI_PRIMARY_PROVIDER,
+      fallback_provider: env.AI_FALLBACK_PROVIDER
+    }
+  }
+
+  private static getProviderConfig(provider: AIProvider): AIProviderConfig[AIProvider] {
+    switch (provider) {
+      case 'gemini':
+        return {
+          apiKey: env.GOOGLE_AI_API_KEY,
+          model: env.GEMINI_TEXT_MODEL,
+          temperature: 0.7,
+          maxOutputTokens: 2048,
+        } as GeminiConfig
+      case 'chatgpt':
+        return {
+          apiKey: env.OPENAI_API_KEY,
+          model: env.OPENAI_MODEL,
+          temperature: 0.7,
+          maxTokens: 2048,
+          threadExpiry: env.OPENAI_THREAD_EXPIRY,
+          assistantId: env.OPENAI_ASSISTANT_ID,
+        } as ChatGPTConfig
+      default:
+        throw new Error(`Unknown provider: ${provider}`)
+    }
+  }
+
+  static async createDefaultProvider(): Promise<AIServiceProvider> {
+    const settings = await AIServiceFactory.getAISettings()
+    
+    const config: AIConfig = {
+      primary: {
+        provider: settings.primary_provider as AIProvider,
+        config: AIServiceFactory.getProviderConfig(settings.primary_provider as AIProvider)
+      }
+    }
+
+    if (settings.fallback_provider) {
+      config.fallback = {
+        provider: settings.fallback_provider as AIProvider,
+        config: AIServiceFactory.getProviderConfig(settings.fallback_provider as AIProvider)
+      }
+    }
+
+    return AIServiceFactory.createProvider(config)
+  }
+
   static createProvider(config: AIConfig): AIServiceProvider {
+    console.log('Creating AI provider with config:', {
+      primaryProvider: config.primary.provider,
+      fallbackProvider: config.fallback?.provider
+    })
+
     const primaryProvider = AIServiceFactory.createSingleProvider(
       config.primary.provider,
       config.primary.config

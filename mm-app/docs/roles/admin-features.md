@@ -143,6 +143,25 @@ Homepage featured artist management.
   - [ ] Click-through rates (Not implemented)
   - [-] Performance analysis (Partially implemented via view tracking)
 
+### 6. AI Provider Settings (`/ai-settings`)
+AI service configuration management.
+
+#### Provider Management
+- Primary Provider
+  - [x] Provider selection (ChatGPT/Gemini)
+  - [x] Dynamic configuration
+  - [x] Real-time updates
+
+- Fallback Provider
+  - [x] Optional fallback setup
+  - [x] Automatic failover
+  - [x] Error handling
+
+- Configuration Features
+  - [x] Provider switching
+  - [x] Database persistence
+  - [x] Role-protected access
+
 ## Access Control
 - [x] Protected by admin layout wrapper
 - [x] Role verification on each route

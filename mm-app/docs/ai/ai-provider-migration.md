@@ -138,39 +138,48 @@ class AIServiceFactory {
 - Fixed OpenAI model configuration
 - Implemented proper fallback provider logic
 - Added detailed logging for provider operations
+- Added admin interface for provider configuration:
+  - Dynamic primary/fallback provider selection
+  - Real-time provider switching
+  - Database-backed settings persistence
+  - Role-protected access control
 
-### In Progress 🚧
-- Performance optimization:
-  - Caching strategies
-  - Request deduplication
-  - State management efficiency
-- Monitoring implementation:
-  - Error tracking
-  - Performance metrics
-  - Usage analytics
-- Fine-tuning provider selection logic
-- Optimizing thread management
+### Environment Configuration ✅
+```env
+# AI Provider Selection
+AI_PRIMARY_PROVIDER=chatgpt|gemini  # Default: chatgpt
+AI_FALLBACK_PROVIDER=chatgpt|gemini  # Optional fallback
 
-### Deferred ⏳
-- Test suite implementation
-- Documentation updates
-- Performance benchmarking
-- Cost optimization
+# Provider-specific Configuration
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4
+OPENAI_THREAD_EXPIRY=24h
+OPENAI_ASSISTANT_ID=asst_...
 
-## Next Steps
+GOOGLE_AI_API_KEY=...
+GEMINI_TEXT_MODEL=gemini-1.5-flash-latest
+```
 
-### 1. Immediate Focus
-- Monitor production performance
-- Gather usage metrics
-- Optimize resource usage
-- Fine-tune fallback triggers
-- Implement more comprehensive error logging
+### Database Schema ✅
+```sql
+create table if not exists ai_settings (
+  id uuid primary key default uuid_generate_v4(),
+  primary_provider text not null check (primary_provider in ('chatgpt', 'gemini')),
+  fallback_provider text check (fallback_provider in ('chatgpt', 'gemini')),
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
 
-### 2. Future Enhancements
-- Add caching layer
-- Implement metrics collection
-- Enhance error handling
-- Add comprehensive testing
+-- Only allow one active settings row
+create unique index if not exists ai_settings_singleton on ai_settings ((true));
+```
+
+### Next Steps
+- [ ] Add provider-specific configuration options to admin interface
+- [ ] Implement provider performance monitoring
+- [ ] Add usage analytics and cost tracking
+- [ ] Implement automated provider health checks
+- [ ] Add support for additional AI providers
 
 ## Environment Configuration
 ```typescript
@@ -180,11 +189,57 @@ interface ProcessEnv {
   OPENAI_MODEL: string // e.g., 'gpt-4', 'gpt-4-turbo-preview'
   OPENAI_ASSISTANT_ID?: string
   OPENAI_THREAD_EXPIRY?: string // defaults to '24h'
+  GOOGLE_AI_API_KEY: string
+  GEMINI_TEXT_MODEL: string
+  GEMINI_VISION_MODEL: string
+  AI_PRIMARY_PROVIDER: 'chatgpt' | 'gemini' // defaults to 'chatgpt'
+  AI_FALLBACK_PROVIDER?: 'chatgpt' | 'gemini' // optional fallback provider
 }
 ```
 
+## Provider Configuration
+The system now supports dynamic provider selection through environment variables:
+
+1. **Primary Provider Selection**
+   - Set `AI_PRIMARY_PROVIDER` to either 'chatgpt' or 'gemini'
+   - Default is 'chatgpt' if not specified
+   - Example: `AI_PRIMARY_PROVIDER=gemini`
+
+2. **Fallback Provider Selection**
+   - Set `AI_FALLBACK_PROVIDER` to configure a fallback provider
+   - Optional - if not set, no fallback will be used
+   - Must be different from the primary provider
+   - Example: `AI_FALLBACK_PROVIDER=chatgpt`
+
+3. **Provider-Specific Configuration**
+   - ChatGPT provider requires:
+     - `OPENAI_API_KEY`
+     - `OPENAI_MODEL`
+     - `OPENAI_ASSISTANT_ID` (optional)
+     - `OPENAI_THREAD_EXPIRY` (defaults to '24h')
+   - Gemini provider requires:
+     - `GOOGLE_AI_API_KEY`
+     - `GEMINI_TEXT_MODEL`
+     - `GEMINI_VISION_MODEL`
+
+4. **Example Configuration**
+   ```env
+   # Primary Provider (Gemini)
+   AI_PRIMARY_PROVIDER=gemini
+   GOOGLE_AI_API_KEY=your-gemini-api-key
+   GEMINI_TEXT_MODEL=gemini-1.5-flash-latest
+   GEMINI_VISION_MODEL=gemini-1.5-vision-latest
+
+   # Fallback Provider (ChatGPT)
+   AI_FALLBACK_PROVIDER=chatgpt
+   OPENAI_API_KEY=your-openai-api-key
+   OPENAI_MODEL=gpt-4
+   OPENAI_ASSISTANT_ID=asst_xxx
+   OPENAI_THREAD_EXPIRY=24h
+   ```
+
 ## Fallback Configuration
-The system now supports automatic fallback between providers with the following configuration:
+The system supports automatic fallback between providers with the following configuration:
 
 ```typescript
 const fallbackTriggers = [
@@ -197,10 +252,10 @@ const fallbackTriggers = [
 ]
 ```
 
-When the primary provider (ChatGPT) encounters any of these errors, the system automatically falls back to the secondary provider (Gemini) while maintaining the same interface and functionality.
+When the primary provider encounters any of these errors, the system automatically falls back to the secondary provider while maintaining the same interface and functionality.
 
 ## Notes
-- ChatGPT provider is now the primary provider
+- Primary and fallback providers can be configured via environment variables
 - Both providers support the complete interface
 - Factory supports seamless provider switching
 - Fallback mechanism handles common error cases

@@ -1,31 +1,39 @@
 import { AIServiceFactory, AIConfig } from './factory'
-import { Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult } from './providers/base'
+import { Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult, AIServiceProvider } from './providers/base'
 import { env } from '@/lib/env'
 import { Content } from '@google/generative-ai'
 import { ChatGPTProvider } from './providers/chatgpt'
 
-// Default configuration using ChatGPT as primary and Gemini as fallback
+// Default configuration using environment variables for provider selection
 const defaultConfig: AIConfig = {
   primary: {
-    provider: 'chatgpt',
+    provider: env.AI_PRIMARY_PROVIDER as 'chatgpt' | 'gemini',
     config: {
-      apiKey: env.OPENAI_API_KEY,
-      model: env.OPENAI_MODEL,
+      apiKey: env.AI_PRIMARY_PROVIDER === 'chatgpt' ? env.OPENAI_API_KEY : env.GOOGLE_AI_API_KEY,
+      model: env.AI_PRIMARY_PROVIDER === 'chatgpt' ? env.OPENAI_MODEL : env.GEMINI_TEXT_MODEL,
       temperature: 0.7,
       maxTokens: 2048,
-      threadExpiry: env.OPENAI_THREAD_EXPIRY,
-      assistantId: env.OPENAI_ASSISTANT_ID
+      ...(env.AI_PRIMARY_PROVIDER === 'chatgpt' ? {
+        threadExpiry: env.OPENAI_THREAD_EXPIRY,
+        assistantId: env.OPENAI_ASSISTANT_ID
+      } : {})
     }
   },
-  fallback: {
-    provider: 'gemini',
-    config: {
-      apiKey: env.GOOGLE_AI_API_KEY,
-      temperature: 0.7,
-      maxOutputTokens: 2048,
-      model: 'gemini-1.5-flash-latest'
+  ...(env.AI_FALLBACK_PROVIDER ? {
+    fallback: {
+      provider: env.AI_FALLBACK_PROVIDER as 'chatgpt' | 'gemini',
+      config: {
+        apiKey: env.AI_FALLBACK_PROVIDER === 'chatgpt' ? env.OPENAI_API_KEY : env.GOOGLE_AI_API_KEY,
+        model: env.AI_FALLBACK_PROVIDER === 'chatgpt' ? env.OPENAI_MODEL : env.GEMINI_TEXT_MODEL,
+        temperature: 0.7,
+        maxTokens: 2048,
+        ...(env.AI_FALLBACK_PROVIDER === 'chatgpt' ? {
+          threadExpiry: env.OPENAI_THREAD_EXPIRY,
+          assistantId: env.OPENAI_ASSISTANT_ID
+        } : {})
+      }
     }
-  },
+  } : {}),
   fallbackOptions: {
     maxRetries: 3,
     fallbackTriggers: [
@@ -54,28 +62,43 @@ export interface SendMessageOptions {
 }
 
 export class UnifiedAIClient {
-  private provider = AIServiceFactory.createProvider(defaultConfig)
+  private provider: AIServiceProvider | null = null
   private functions: AIFunction[] = []
 
   constructor(config: Partial<AIConfig> = {}) {
+    this.initializeProvider(config)
+  }
+
+  private async initializeProvider(config: Partial<AIConfig> = {}) {
     if (Object.keys(config).length > 0) {
-      this.provider = AIServiceFactory.createProvider({
+      this.provider = await AIServiceFactory.createProvider({
         ...defaultConfig,
         ...config
       })
+    } else {
+      this.provider = await AIServiceFactory.createDefaultProvider()
     }
   }
 
+  private async ensureProvider() {
+    if (!this.provider) {
+      await this.initializeProvider()
+    }
+    return this.provider!
+  }
+
   async sendMessage(content: string, options: SendMessageOptions = {}): Promise<Response> {
+    const provider = await this.ensureProvider()
+
     if (options.temperature) {
-      this.provider.setTemperature(options.temperature)
+      provider.setTemperature(options.temperature)
     }
     if (options.maxTokens) {
-      this.provider.setMaxTokens(options.maxTokens)
+      provider.setMaxTokens(options.maxTokens)
     }
     if (options.functions) {
       this.functions = options.functions
-      this.provider.registerFunctions(options.functions)
+      provider.registerFunctions(options.functions)
     }
 
     const message: Message = {
@@ -90,19 +113,21 @@ export class UnifiedAIClient {
       }
     }
 
-    return this.provider.sendMessage(message)
+    return provider.sendMessage(message)
   }
 
   async *streamMessage(content: string, options: SendMessageOptions = {}): AsyncIterator<Response> {
+    const provider = await this.ensureProvider()
+
     if (options.temperature) {
-      this.provider.setTemperature(options.temperature)
+      provider.setTemperature(options.temperature)
     }
     if (options.maxTokens) {
-      this.provider.setMaxTokens(options.maxTokens)
+      provider.setMaxTokens(options.maxTokens)
     }
     if (options.functions) {
       this.functions = options.functions
-      this.provider.registerFunctions(options.functions)
+      provider.registerFunctions(options.functions)
     }
 
     const message: Message = {
@@ -116,39 +141,50 @@ export class UnifiedAIClient {
       }
     }
 
-    return this.provider.streamMessage(message)
+    return provider.streamMessage(message)
   }
 
-  registerFunctions(functions: AIFunction[]): void {
+  async registerFunctions(functions: AIFunction[]): Promise<void> {
+    const provider = await this.ensureProvider()
     this.functions = functions
-    this.provider.registerFunctions(functions)
+    provider.registerFunctions(functions)
   }
 
   async analyzeImage(image: ImageData): Promise<Analysis> {
-    return this.provider.analyzeImage(image)
+    const provider = await this.ensureProvider()
+    return provider.analyzeImage(image)
   }
 
   async generateImageDescription(image: ImageData): Promise<string> {
-    return this.provider.generateImageDescription(image)
+    const provider = await this.ensureProvider()
+    return provider.generateImageDescription(image)
   }
 
   async generateEmbeddings(text: string): Promise<Vector> {
-    return this.provider.generateEmbeddings(text)
+    const provider = await this.ensureProvider()
+    return provider.generateEmbeddings(text)
   }
 
   async similaritySearch(query: string): Promise<SearchResult[]> {
-    return this.provider.similaritySearch(query)
+    const provider = await this.ensureProvider()
+    return provider.similaritySearch(query)
   }
 
   setTemperature(temperature: number): void {
-    this.provider.setTemperature(temperature)
+    if (this.provider) {
+      this.provider.setTemperature(temperature)
+    }
   }
 
   setMaxTokens(maxTokens: number): void {
-    this.provider.setMaxTokens(maxTokens)
+    if (this.provider) {
+      this.provider.setMaxTokens(maxTokens)
+    }
   }
 
   setSafetySettings(settings: Record<string, any>): void {
-    this.provider.setSafetySettings(settings)
+    if (this.provider) {
+      this.provider.setSafetySettings(settings)
+    }
   }
 } 
