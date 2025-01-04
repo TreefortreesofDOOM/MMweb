@@ -111,11 +111,23 @@ export async function POST(request: Request): Promise<NextResponse> {
     // Initialize AI client
     const ai = new UnifiedAIClient({
       primary: {
+        provider: 'chatgpt',
+        config: {
+          apiKey: env.OPENAI_API_KEY,
+          model: env.OPENAI_MODEL,
+          temperature: 0.5,
+          maxTokens: 2048,
+          threadExpiry: env.OPENAI_THREAD_EXPIRY,
+          assistantId: env.OPENAI_ASSISTANT_ID
+        }
+      },
+      fallback: {
         provider: 'gemini',
         config: {
           apiKey: env.GOOGLE_AI_API_KEY,
           temperature: 0.5,
           maxOutputTokens: 2048,
+          model: 'gemini-1.5-flash-latest'
         }
       }
     });

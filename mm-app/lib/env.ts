@@ -12,6 +12,9 @@ declare global {
       GOOGLE_AI_API_KEY: string
       GEMINI_TEXT_MODEL: string
       GEMINI_VISION_MODEL: string
+      OPENAI_MODEL: string
+      OPENAI_ASSISTANT_ID?: string
+      OPENAI_THREAD_EXPIRY?: string
     }
   }
 }
@@ -25,6 +28,9 @@ const envSchema = z.object({
   GOOGLE_AI_API_KEY: z.string().min(1),
   GEMINI_TEXT_MODEL: z.string().min(1),
   GEMINI_VISION_MODEL: z.string().min(1),
+  OPENAI_MODEL: z.string().default('gpt-4'),
+  OPENAI_ASSISTANT_ID: z.string().optional(),
+  OPENAI_THREAD_EXPIRY: z.string().default('24h')
 })
 
 export const env = envSchema.parse(process.env) 

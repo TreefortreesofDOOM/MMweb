@@ -1,11 +1,12 @@
 import { AIServiceProvider, Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult } from './providers/base'
 import { GeminiProvider, GeminiConfig } from './providers/gemini'
+import { ChatGPTProvider, ChatGPTConfig } from './providers/chatgpt'
 
 export type AIProvider = 'gemini' | 'chatgpt'
 
 export type AIProviderConfig = {
   gemini: GeminiConfig;
-  chatgpt: never; // Will be updated when ChatGPT is added
+  chatgpt: ChatGPTConfig;
 }
 
 export interface AIConfig {
@@ -31,7 +32,10 @@ const DEFAULT_FALLBACK_OPTIONS = {
     'timeout',
     'api_key_invalid',
     'api key not valid',
-    'invalid api key'
+    'invalid api key',
+    'context_length_exceeded',
+    'model_not_available',
+    'model_overloaded'
   ]
 }
 
@@ -65,11 +69,17 @@ export class AIServiceFactory {
     provider: AIProvider,
     config: AIProviderConfig[AIProvider]
   ): AIServiceProvider {
+    console.log(`Creating provider: ${provider}`, {
+      hasApiKey: !!config.apiKey,
+      model: config.model,
+      config: { ...config, apiKey: '[REDACTED]' }
+    });
+
     switch (provider) {
       case 'gemini':
         return new GeminiProvider(config as GeminiConfig)
       case 'chatgpt':
-        throw new Error('ChatGPT provider not yet implemented')
+        return new ChatGPTProvider(config as ChatGPTConfig)
       default:
         throw new Error(`Unknown provider: ${provider}`)
     }
@@ -86,15 +96,30 @@ class FallbackAIProvider implements AIServiceProvider {
     private primaryProvider: AIServiceProvider,
     private fallbackProvider: AIServiceProvider,
     private options: FallbackOptions = DEFAULT_FALLBACK_OPTIONS
-  ) {}
+  ) {
+    console.log('Initializing FallbackAIProvider', {
+      primaryProvider: primaryProvider.constructor.name,
+      fallbackProvider: fallbackProvider.constructor.name,
+      fallbackTriggers: options.fallbackTriggers
+    });
+  }
 
   private shouldFallback(error: Error): boolean {
     const errorMessage = error.message?.toLowerCase() || '';
     const errorCause = (error.cause as any)?.reason?.toLowerCase() || '';
     
-    return this.options.fallbackTriggers.some(trigger => 
+    const shouldFallback = this.options.fallbackTriggers.some(trigger => 
       errorMessage.includes(trigger) || errorCause.includes(trigger)
     );
+
+    console.log('Checking if should fallback:', {
+      errorMessage,
+      errorCause,
+      shouldFallback,
+      triggers: this.options.fallbackTriggers
+    });
+
+    return shouldFallback;
   }
 
   private async withFallback<T>(
@@ -102,8 +127,16 @@ class FallbackAIProvider implements AIServiceProvider {
     fallbackOperation: () => Promise<T>
   ): Promise<T> {
     try {
+      console.log('Attempting primary provider operation');
       return await operation()
     } catch (error) {
+      console.error('Error in primary provider:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : error,
+        cause: error instanceof Error ? error.cause : undefined,
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
       if (error instanceof Error && this.shouldFallback(error)) {
         console.warn('Falling back to secondary provider:', {
           error: error.message,

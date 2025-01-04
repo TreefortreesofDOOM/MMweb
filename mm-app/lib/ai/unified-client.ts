@@ -2,16 +2,19 @@ import { AIServiceFactory, AIConfig } from './factory'
 import { Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult } from './providers/base'
 import { env } from '@/lib/env'
 import { Content } from '@google/generative-ai'
+import { ChatGPTProvider } from './providers/chatgpt'
 
 // Default configuration using ChatGPT as primary and Gemini as fallback
 const defaultConfig: AIConfig = {
   primary: {
-    provider: 'gemini',
+    provider: 'chatgpt',
     config: {
-      apiKey: env.GOOGLE_AI_API_KEY,
+      apiKey: env.OPENAI_API_KEY,
+      model: env.OPENAI_MODEL,
       temperature: 0.7,
-      maxOutputTokens: 2048,
-      model: 'gemini-1.5-flash-latest'
+      maxTokens: 2048,
+      threadExpiry: env.OPENAI_THREAD_EXPIRY,
+      assistantId: env.OPENAI_ASSISTANT_ID
     }
   },
   fallback: {
@@ -28,7 +31,10 @@ const defaultConfig: AIConfig = {
     fallbackTriggers: [
       'rate_limit_exceeded',
       'service_unavailable',
-      'timeout'
+      'timeout',
+      'context_length_exceeded',
+      'model_not_available',
+      'model_overloaded'
     ]
   }
 }
@@ -72,18 +78,6 @@ export class UnifiedAIClient {
       this.provider.registerFunctions(options.functions)
     }
 
-    // Structure functions according to Gemini format
-    const toolConfig = this.functions.length > 0 ? {
-      tools: [{
-        function_declarations: this.functions
-      }],
-      tool_config: {
-        function_calling_config: {
-          mode: "ANY"
-        }
-      }
-    } : undefined;
-
     const message: Message = {
       role: 'user',
       content,
@@ -92,7 +86,7 @@ export class UnifiedAIClient {
       context: options.context,
       metadata: {
         imageUrl: options.imageUrl,
-        functions: toolConfig
+        functions: options.functions
       }
     }
 
