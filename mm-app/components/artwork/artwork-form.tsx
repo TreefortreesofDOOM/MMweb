@@ -147,50 +147,36 @@ export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
       formData.append('techniques', JSON.stringify(data.techniques || []));
       formData.append('keywords', JSON.stringify(data.keywords || []));
 
-      if (artwork?.id) {
-        const result = await updateArtwork(artwork.id, formData);
-        if (result.error) {
-          console.error('Error updating artwork:', result.error);
-          toast.custom((id) => (
-            <AIMessageBubble 
-              message={result.error}
-              type="error"
-              onDismiss={() => toast.dismiss(id)}
-            />
-          ));
-          return;
-        }
+      // Perform the artwork operation
+      const result = artwork?.id 
+        ? await updateArtwork(artwork.id, formData)
+        : await createArtwork(formData);
+
+      // Handle any errors
+      if (result.error) {
+        console.error('Error saving artwork:', result.error);
         toast.custom((id) => (
           <AIMessageBubble 
-            message="Artwork updated successfully"
-            type="success"
+            message={result.error}
+            type="error"
             onDismiss={() => toast.dismiss(id)}
           />
         ));
-      } else {
-        const result = await createArtwork(formData);
-        if (result.error) {
-          console.error('Error creating artwork:', result.error);
-          toast.custom((id) => (
-            <AIMessageBubble 
-              message={result.error}
-              type="error"
-              onDismiss={() => toast.dismiss(id)}
-            />
-          ));
-          return;
-        }
-        toast.custom((id) => (
-          <AIMessageBubble 
-            message="Artwork created successfully"
-            type="success"
-            onDismiss={() => toast.dismiss(id)}
-          />
-        ));
+        return;
       }
 
-      router.push('/artist/artworks');
+      // Navigate first
+      await router.push('/artist/artworks');
       router.refresh(); // Force a refresh of the page data
+
+      // Show success message after navigation
+      toast.custom((id) => (
+        <AIMessageBubble 
+          message={`Artwork ${artwork?.id ? 'updated' : 'created'} successfully`}
+          type="success"
+          onDismiss={() => toast.dismiss(id)}
+        />
+      ));
     } catch (error) {
       console.error('Error saving artwork:', error);
       toast.custom((id) => (
@@ -277,6 +263,13 @@ export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
             {form.watch('primaryImage') && (
               <ArtworkAIAnalysis
                 imageUrl={form.watch('primaryImage')}
+                mode={artwork ? 'edit' : 'create'}
+                existingAnalysis={artwork ? {
+                  description: artwork.description,
+                  styles: artwork.styles,
+                  techniques: artwork.techniques,
+                  keywords: artwork.keywords
+                } : undefined}
                 onApplyDescription={(description) =>
                   form.setValue('description', description)
                 }

@@ -13,6 +13,13 @@ import { useUnifiedAI } from '@/lib/unified-ai/context';
 
 interface ArtworkAIAnalysisProps {
   imageUrl: string;
+  mode: 'create' | 'edit';
+  existingAnalysis?: {
+    description?: string;
+    styles?: string[];
+    techniques?: string[];
+    keywords?: string[];
+  };
   onApplyDescription: (description: string) => void;
   onApplyStyles: (styles: string[]) => void;
   onApplyTechniques: (techniques: string[]) => void;
@@ -21,6 +28,8 @@ interface ArtworkAIAnalysisProps {
 
 export function ArtworkAIAnalysis({
   imageUrl,
+  mode,
+  existingAnalysis,
   onApplyDescription,
   onApplyStyles,
   onApplyTechniques,
@@ -51,12 +60,44 @@ export function ArtworkAIAnalysis({
     })
   }, [onApplyDescription, onApplyStyles, onApplyTechniques, onApplyKeywords, dispatch])
 
-  // Only run analysis when imageUrl is first set
+  // Only auto-analyze in create mode when imageUrl is first set
   useEffect(() => {
-    if (imageUrl && !hasStartedAnalysis.current) {
+    if (mode === 'create' && imageUrl && !hasStartedAnalysis.current) {
       handleAnalyze()
     }
-  }, [imageUrl])
+  }, [imageUrl, mode])
+
+  // Set existing analysis in edit mode
+  useEffect(() => {
+    if (mode === 'edit' && existingAnalysis && !hasStartedAnalysis.current) {
+      // Apply existing analysis to the context
+      if (existingAnalysis.description) {
+        dispatch({
+          type: 'ADD_ANALYSIS',
+          payload: createAnalysisResult('artwork_description', existingAnalysis.description)
+        })
+      }
+      if (existingAnalysis.styles?.length) {
+        dispatch({
+          type: 'ADD_ANALYSIS',
+          payload: createAnalysisResult('artwork_style', existingAnalysis.styles.join(', '))
+        })
+      }
+      if (existingAnalysis.techniques?.length) {
+        dispatch({
+          type: 'ADD_ANALYSIS',
+          payload: createAnalysisResult('artwork_techniques', existingAnalysis.techniques.join(', '))
+        })
+      }
+      if (existingAnalysis.keywords?.length) {
+        dispatch({
+          type: 'ADD_ANALYSIS',
+          payload: createAnalysisResult('artwork_keywords', existingAnalysis.keywords.join(', '))
+        })
+      }
+      hasStartedAnalysis.current = true
+    }
+  }, [mode, existingAnalysis, imageUrl, dispatch])
 
   const handleAnalyze = async () => {
     if (!imageUrl) return
@@ -95,7 +136,17 @@ export function ArtworkAIAnalysis({
 
   // Allow manual re-analysis
   const handleReanalyze = () => {
+    // Reset all state
     hasStartedAnalysis.current = false
+    setError(undefined)
+    
+    // Clear the UnifiedAI context
+    dispatch({ type: 'RESET' })
+    reset()
+    setMode('analysis')
+    setOpen(true)
+    
+    // Start new analysis
     handleAnalyze()
   }
 
@@ -108,7 +159,9 @@ export function ArtworkAIAnalysis({
             <p className="text-sm text-muted-foreground">
               {isAnalyzing 
                 ? "Analyzing your artwork..."
-                : "Click the floating assistant in the bottom right to view insights and suggestions."}
+                : mode === 'edit'
+                  ? "Click Analyze to update the AI analysis."
+                  : "Click the floating assistant in the bottom right to view insights and suggestions."}
             </p>
           </div>
           <div className="min-w-[120px] text-right">
@@ -138,11 +191,16 @@ export function ArtworkAIAnalysis({
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Analyzing...
               </>
+            ) : mode === 'edit' ? (
+              'Re-analyze'
             ) : (
               'Analyze'
             )}
           </Button>
         </div>
+        {error && (
+          <p className="text-sm text-red-500">{error}</p>
+        )}
       </CardContent>
     </Card>
   );
