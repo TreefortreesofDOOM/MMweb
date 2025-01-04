@@ -1,8 +1,10 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, Content, Part, Tool as GoogleTool, SchemaType, FunctionCallingMode } from '@google/generative-ai';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, Content, Tool as GoogleTool, SchemaType, Part, FunctionCallingMode } from '@google/generative-ai';
+import { AIServiceProvider, Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult } from '@/lib/ai/providers/base';
 import { env } from '@/lib/env';
-import { getArtistArtworks, getArtworkDetails } from '@/lib/actions/artwork-actions'
-import { generateEmbedding } from '@/lib/ai/embeddings'
-import { createClient } from '@/lib/supabase/supabase-server'
+import { getArtistArtworks, getArtworkDetails } from '@/lib/actions/artwork-actions';
+import { findRelevantChatHistory } from './chat-history';
+import { generateEmbedding } from '@/lib/ai/embeddings';
+import { createClient } from '@/lib/supabase/supabase-server';
 
 interface FunctionDeclaration {
   name: string;
@@ -27,70 +29,150 @@ interface ArtworkTools {
   };
 }
 
-// Function declarations in correct structure
-export const artworkTools: ArtworkTools = {
-  tools: [
-    {
-      functionDeclarations: [
-        {
-          name: "searchChatHistory",
-          description: "Search through past conversations using semantic similarity to find relevant discussions",
-          parameters: {
-            type: SchemaType.OBJECT,
-            properties: {
-              query: {
-                type: SchemaType.STRING,
-                description: "The search query to find relevant past conversations"
-              },
-              match_count: {
-                type: SchemaType.NUMBER,
-                description: "Maximum number of conversations to return (default: 3)"
-              },
-              match_threshold: {
-                type: SchemaType.NUMBER,
-                description: "Minimum similarity threshold (0-1, default: 0.8)"
-              }
+interface ArtworkTool {
+  functionDeclarations: Array<{
+    name: string;
+    description: string;
+    parameters: {
+      type: SchemaType;
+      properties: Record<string, any>;
+      required?: string[];
+    };
+  }>;
+  implementation: Record<string, (args: any, context?: string) => Promise<any>>;
+}
+
+interface SearchChatHistoryArgs {
+  query: string;
+  match_count?: number;
+  match_threshold?: number;
+}
+
+interface GetArtistArtworksArgs {
+  status?: 'published' | 'draft' | 'all';
+}
+
+interface GetArtworkDetailsArgs {
+  artworkId: string;
+}
+
+export const artworkTools = {
+  tools: [{
+    functionDeclarations: [
+      {
+        name: "searchChatHistory",
+        description: "Search through past conversations using semantic similarity. Only use this for finding previous chat discussions, NOT for getting artworks.",
+        parameters: {
+          type: SchemaType.OBJECT,
+          properties: {
+            query: {
+              type: SchemaType.STRING,
+              description: "The search query to find relevant past conversations"
             },
-            required: ["query"]
-          }
-        },
-        {
-          name: "getArtistArtworks",
-          description: "Get all artworks for the current artist",
-          parameters: {
-            type: SchemaType.OBJECT,
-            properties: {
-              status: {
-                type: SchemaType.STRING,
-                description: "Filter by artwork status",
-                enum: ["published", "draft", "all"]
-              }
+            match_count: {
+              type: SchemaType.NUMBER,
+              description: "Maximum number of conversations to return (default: 3)"
             },
-            required: []
-          }
-        },
-        {
-          name: "getArtworkDetails",
-          description: "Get detailed information about a specific artwork",
-          parameters: {
-            type: SchemaType.OBJECT,
-            properties: {
-              artworkId: {
-                type: SchemaType.STRING,
-                description: "The ID of the artwork to get details for"
-              }
-            },
-            required: ["artworkId"]
-          }
+            match_threshold: {
+              type: SchemaType.NUMBER,
+              description: "Minimum similarity threshold (0-1, default: 0.8)"
+            }
+          },
+          required: ["query"]
         }
-      ]
+      },
+      {
+        name: "getArtistArtworks",
+        description: "Get all artworks created by the current artist. ALWAYS use this function when asked about artworks, portfolio, or artwork collection. This is the primary way to access artwork information.",
+        parameters: {
+          type: SchemaType.OBJECT,
+          properties: {
+            status: {
+              type: SchemaType.STRING,
+              description: "Filter by artwork status",
+              enum: ["published", "draft", "all"]
+            }
+          },
+          required: []
+        }
+      },
+      {
+        name: "getArtworkDetails",
+        description: "Get detailed information about a specific artwork. Use this after getArtistArtworks when you need more details about a particular artwork.",
+        parameters: {
+          type: SchemaType.OBJECT,
+          properties: {
+            artworkId: {
+              type: SchemaType.STRING,
+              description: "The ID of the artwork to get details for"
+            }
+          },
+          required: ["artworkId"]
+        }
+      }
+    ],
+    implementation: {
+      searchChatHistory: async ({ query, match_count = 3, match_threshold = 0.8 }: SearchChatHistoryArgs, context?: string) => {
+        console.log('searchChatHistory called:', { query, match_count, match_threshold, context });
+        try {
+          const contextData = context ? JSON.parse(context) : {};
+          const userId = contextData.userId;
+          
+          if (!userId) {
+            throw new Error('User ID not found in context');
+          }
+
+          const { similarConversations } = await findRelevantChatHistory(userId, query);
+          return similarConversations;
+        } catch (error) {
+          console.error('searchChatHistory failed:', { error, query, context });
+          throw error;
+        }
+      },
+      getArtistArtworks: async ({ status = 'all' }: GetArtistArtworksArgs, context?: string) => {
+        console.log('getArtistArtworks called:', { status, context });
+        try {
+          const { artworks } = await getArtistArtworks({ status }, context);
+          return artworks;
+        } catch (error) {
+          console.error('getArtistArtworks failed:', { error, status, context });
+          throw error;
+        }
+      },
+      getArtworkDetails: async ({ artworkId }: GetArtworkDetailsArgs) => {
+        console.log('getArtworkDetails called:', { artworkId });
+        const startTime = Date.now();
+        try {
+          const { artwork } = await getArtworkDetails({ artworkId });
+          
+          const duration = Date.now() - startTime;
+          console.log('getArtworkDetails completed:', {
+            duration,
+            artworkId,
+            found: !!artwork
+          });
+
+          return { artwork };
+        } catch (error) {
+          console.error('getArtworkDetails failed:', { error, artworkId });
+          throw error;
+        }
+      }
     }
-  ],
+  }],
   tool_config: {
     functionCallingConfig: {
       mode: FunctionCallingMode.AUTO
     }
   }
+} as const;
+
+// When using with Gemini model
+const toolsForModel = {
+  tools: artworkTools.tools.map(tool => ({
+    functionDeclarations: tool.functionDeclarations
+  })) as GoogleTool[],
+  toolConfig: artworkTools.tool_config
 };
 
 // Function implementations
@@ -234,13 +316,30 @@ export async function getGeminiResponse(
   prompt: string,
   options: GenerateOptions = {}
 ) {
+  console.log('Starting getGeminiResponse:', {
+    promptFirstChars: prompt.slice(0, 100) + '...',
+    hasSystemInstruction: !!options.systemInstruction,
+    hasContext: !!options.context,
+    hasTools: !!options.tools,
+    chatHistoryLength: options.chatHistory?.length || 0
+  });
+
   const genAI = new GoogleGenerativeAI(env.GOOGLE_AI_API_KEY);
   
   // Use vision model if image is provided, otherwise use text model
+  const modelName = options.imageUrl || options.imageBase64 
+    ? env.GEMINI_VISION_MODEL
+    : env.GEMINI_TEXT_MODEL;
+
+  console.log('Initializing Gemini model:', {
+    model: modelName,
+    temperature: options.temperature ?? defaultConfig.temperature,
+    maxTokens: options.maxOutputTokens ?? defaultConfig.maxOutputTokens,
+    hasTools: !!options.tools
+  });
+
   const model = genAI.getGenerativeModel({ 
-    model: options.imageUrl || options.imageBase64 
-      ? env.GEMINI_VISION_MODEL
-      : env.GEMINI_TEXT_MODEL,
+    model: modelName,
     generationConfig: {
       temperature: options.temperature ?? defaultConfig.temperature,
       topK: options.topK ?? defaultConfig.topK,
@@ -252,11 +351,20 @@ export async function getGeminiResponse(
       systemInstruction: options.systemInstruction
     }),
     ...(options.tools && {
-      tools: artworkTools.tools,
-      toolConfig: {
-        functionCallingConfig: artworkTools.tool_config.functionCallingConfig
-      }
+      tools: toolsForModel.tools,
+      toolConfig: toolsForModel.toolConfig
     })
+  });
+
+  console.log('Tool configuration:', {
+    tools: options.tools ? artworkTools.tools.map(t => 
+      t.functionDeclarations.map(f => ({
+        name: f.name,
+        description: f.description.slice(0, 50) + '...',
+        requiredParams: f.parameters.required
+      }))
+    ) : 'No tools configured',
+    mode: options.tools ? artworkTools.tool_config.functionCallingConfig.mode : 'None'
   });
 
   // Start chat
@@ -305,41 +413,25 @@ export async function getGeminiResponse(
   }
 
   try {
-    // Send message and get response
-    console.log('Sending message to Gemini API:', {
-      modelType: options.imageUrl || options.imageBase64 ? 'vision' : 'text',
+    console.log('Sending message to model:', {
+      modelType: modelName,
       promptLength: prompt.length,
-      hasSystemInstruction: !!options.systemInstruction,
-      chatHistoryLength: options.chatHistory?.length || 0,
-      temperature: options.temperature ?? defaultConfig.temperature
+      partsCount: parts.length,
+      systemInstruction: options.systemInstruction ? options.systemInstruction.slice(0, 100) + '...' : 'None'
     });
 
     const result = await chat.sendMessage(parts);
-    let responseText = '';
-    
-    // Handle function calls if present
     const response = await result.response;
+    let responseText = response.text();
     
-    // Log safety ratings
-    const safetyRatings = response.promptFeedback?.safetyRatings;
-    if (safetyRatings) {
-      console.log('Safety Ratings:', safetyRatings.map(rating => ({
-        category: rating.category,
-        probability: rating.probability,
-        blocked: response.promptFeedback?.blockReason?.includes(rating.category)
-      })));
-    }
+    console.log('Raw model response:', {
+      hasText: !!responseText,
+      textLength: responseText.length,
+      candidates: response.candidates?.length,
+      parts: response.candidates?.[0]?.content?.parts?.length
+    });
 
-    // If response was blocked, throw error with details
-    if (response.promptFeedback?.blockReason) {
-      const error = new Error('Response blocked by safety settings');
-      error.cause = {
-        blockReason: response.promptFeedback.blockReason,
-        safetyRatings
-      };
-      throw error;
-    }
-
+    // Handle function calls if present
     const functionCalls = response.functionCalls();
     
     if (functionCalls?.length && options.tools) {
@@ -347,7 +439,8 @@ export async function getGeminiResponse(
         count: functionCalls.length,
         functions: functionCalls.map(call => ({
           name: call.name,
-          args: call.args
+          args: call.args,
+          argsType: typeof call.args
         }))
       });
       
@@ -361,7 +454,8 @@ export async function getGeminiResponse(
         
         console.log('Processing function call:', {
           function: functionName,
-          arguments: functionArgs,
+          parsedArgs: functionArgs,
+          availableFunctions: Object.keys(functions),
           timestamp: new Date().toISOString()
         });
         
@@ -373,19 +467,16 @@ export async function getGeminiResponse(
             const functionResult = await func(functionArgs, options.context);
             const endTime = performance.now();
             
-            console.log('Function execution completed:', {
+            console.log('Function execution result:', {
               function: functionName,
               executionTimeMs: endTime - startTime,
               resultSize: JSON.stringify(functionResult).length,
-              success: true,
-              timestamp: new Date().toISOString()
+              resultPreview: JSON.stringify(functionResult).slice(0, 100) + '...',
+              success: true
             });
             
             // Send the result back to continue the conversation
-            console.log('Sending function result to model:', {
-              function: functionName,
-              timestamp: new Date().toISOString()
-            });
+            console.log('Sending function result to model');
             
             const followUpResult = await chat.sendMessage([{
               functionResponse: {
@@ -397,9 +488,8 @@ export async function getGeminiResponse(
             responseText = followUpResponse.text();
             
             console.log('Model processed function result:', {
-              function: functionName,
               responseLength: responseText.length,
-              timestamp: new Date().toISOString()
+              responsePreview: responseText.slice(0, 100) + '...'
             });
           } catch (err) {
             const error = err as Error;

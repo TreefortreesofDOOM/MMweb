@@ -46,6 +46,40 @@ export function useAnalysis({ onSuccess, onError }: UseAnalysisProps = {}) {
           bioResult.bio || bioResult.error || 'No results',
           bioResult.status === 'success' ? 'success' : 'error'
         )
+        result.results = {
+          summary: bioResult.bio || bioResult.error || 'No results',
+          details: []
+        }
+        console.log('Adding final analysis to context:', result)
+        addAnalysis(result)
+        onSuccess?.(result)
+        return result
+      } else if (type === 'analytics') {
+        const response = await fetch('/api/ai/analytics', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: content })
+        })
+        
+        if (!response.ok) {
+          throw new Error('Failed to analyze data')
+        }
+
+        const analyticsResult = await response.json()
+        console.log('Received analytics result:', analyticsResult)
+        
+        result = createAnalysisResult(
+          type,
+          JSON.stringify(analyticsResult.result, null, 2),
+          'success'
+        )
+        result.results = {
+          summary: analyticsResult.query,
+          details: [
+            `Function: ${analyticsResult.functionCall.functionName}`,
+            `Parameters: ${JSON.stringify(analyticsResult.functionCall.parameters, null, 2)}`
+          ]
+        }
         console.log('Adding final analysis to context:', result)
         addAnalysis(result)
         onSuccess?.(result)

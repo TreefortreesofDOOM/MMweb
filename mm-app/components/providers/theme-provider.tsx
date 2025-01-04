@@ -9,13 +9,13 @@ interface ThemeProviderProps {
 }
 
 function ThemeSync() {
-  const { setTheme } = useTheme();
+  const { setTheme, theme: currentTheme } = useTheme();
 
   React.useEffect(() => {
     const initTheme = async () => {
       try {
         const settings = await getSettings();
-        if (settings?.preferences?.theme) {
+        if (settings?.preferences?.theme && settings.preferences.theme !== currentTheme) {
           setTheme(settings.preferences.theme);
         }
       } catch (error) {
@@ -24,7 +24,7 @@ function ThemeSync() {
     };
 
     initTheme();
-  }, [setTheme]);
+  }, [setTheme, currentTheme]);
 
   return null;
 }
@@ -36,6 +36,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange
+      storageKey="mm-theme"
     >
       <ThemeSync />
       {children}

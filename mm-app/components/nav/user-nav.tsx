@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArtistBadge } from '@/components/ui/artist-badge';
 import Link from 'next/link';
 import { signOutAction } from '@/lib/actions';
-import { Settings } from 'lucide-react';
+import { Settings, User } from 'lucide-react';
 import type { UserRole } from '@/lib/navigation/types';
 
 interface UserNavProps {
@@ -86,6 +86,12 @@ export function UserNav({ userEmail, avatarUrl, fullName, userRole }: UserNavPro
               />
             )}
           </div>
+          <DropdownMenuItem asChild>
+            <Link href="/profile" className="cursor-pointer">
+              <User className="mr-2 h-4 w-4" />
+              <span>View Profile</span>
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/settings" className="cursor-pointer">
               <Settings className="mr-2 h-4 w-4" />

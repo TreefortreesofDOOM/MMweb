@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/supabase-server';
-import { getGeminiResponse, artworkTools } from '@/lib/ai/gemini';
 import { NextResponse } from 'next/server';
 import { generateEmbedding } from '@/lib/ai/embeddings';
 import { Content } from '@google/generative-ai';
@@ -7,6 +6,10 @@ import { buildSystemInstruction } from '@/lib/ai/instructions';
 import { UserContext, ArtworkContext } from '@/lib/ai/types';
 import { findRelevantChatHistory, formatChatContext } from '@/lib/ai/chat-history';
 import { personaMapping } from '@/lib/unified-ai/types';
+import { UnifiedAIClient } from '@/lib/ai/unified-client';
+import { AIFunction } from '@/lib/ai/providers/base';
+import { artworkTools } from '@/lib/ai/gemini';  // TODO: Move these to a provider-agnostic location
+import { env } from '@/lib/env';
 
 type AssistantRole = 'gallery' | 'artist' | 'patron';
 
@@ -105,27 +108,60 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     });
 
-    // Add context message and user message to chat history
-    const updatedChatHistory = [
-      ...(contextMessage ? [contextMessage] : []),
-      ...chatHistory,
-      {
-        role: 'user',
-        parts: [{ text: prompt }]
+    // Initialize AI client
+    const ai = new UnifiedAIClient({
+      primary: {
+        provider: 'gemini',
+        config: {
+          apiKey: env.GOOGLE_AI_API_KEY,
+          temperature: 0.5,
+          maxOutputTokens: 2048,
+        }
       }
-    ];
-
-    // Get response from Gemini
-    const response = await getGeminiResponse(prompt, { 
-      systemInstruction: customInstruction || instruction,
-      imageUrl,
-      temperature: 0.5,
-      chatHistory: updatedChatHistory,
-      context: customContext || JSON.stringify({ userId }),
-      tools: artworkTools.tools
     });
 
-    return NextResponse.json({ response });
+    // Convert function declarations to AIFunctions with implementations
+    const functions: AIFunction[] = artworkTools.tools[0].functionDeclarations.map(fn => ({
+      name: fn.name,
+      description: fn.description,
+      parameters: {
+        type: 'object',
+        properties: {...fn.parameters.properties},
+        required: fn.parameters.required ? [...fn.parameters.required] : []
+      },
+      execute: artworkTools.tools[0].implementation[fn.name]
+    }));
+
+    // Register functions
+    ai.registerFunctions(functions);
+
+    // Convert chat history to unified format
+    const unifiedChatHistory = [
+      ...(contextMessage ? [{
+        role: 'system' as const,
+        content: contextMessage.parts[0].text || ''
+      }] : []),
+      ...chatHistory.map(msg => ({
+        role: msg.role === 'model' ? 'assistant' as const : msg.role as 'user' | 'system',
+        content: msg.parts[0].text || ''
+      }))
+    ];
+
+    // Get response using unified client
+    const response = await ai.sendMessage(prompt, {
+      temperature: 0.5,
+      functions,
+      systemInstruction: customInstruction || instruction,
+      context: customContext || JSON.stringify({ 
+        userId,
+        role,
+        ...userContext 
+      }),
+      imageUrl,
+      chatHistory: unifiedChatHistory
+    });
+
+    return NextResponse.json({ response: response.content });
   } catch (error) {
     console.error('Error in chat endpoint:', error);
     return NextResponse.json(

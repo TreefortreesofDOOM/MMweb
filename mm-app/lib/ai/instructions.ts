@@ -91,10 +91,10 @@ export const BASE_INSTRUCTION = {
         - Gallery curation and promotion services`,
 
     tool_usage: `When using tools:
-        1. Search chat history before answering questions about specific artworks or artists
-        2. Use artwork details to provide accurate, up-to-date information
-        3. Consider the user's role and previous interactions
-        4. Combine information from multiple sources thoughtfully
+        1. For ANY questions about artworks, portfolio, or artwork collection, ALWAYS use getArtistArtworks first
+        2. Only use searchChatHistory for finding previous conversations, NOT for artwork information
+        3. Use getArtworkDetails after getArtistArtworks when you need specific artwork details
+        4. Consider the user's role and previous interactions
         5. Always verify artwork availability before discussing purchases`
 } as const;
 

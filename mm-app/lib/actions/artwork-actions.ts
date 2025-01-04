@@ -3,12 +3,19 @@
 import { createActionClient } from '@/lib/supabase/supabase-action-utils'
 
 export async function getArtistArtworks({ status = "all" }: { status?: "published" | "draft" | "all" }, context?: string) {
+  console.log('getArtistArtworks action called:', { status, context });
+  
   const supabase = await createActionClient()
   const contextData = context ? JSON.parse(context) : {}
   
+  console.log('Context data:', { contextData, hasUserId: !!contextData.userId });
+  
   if (!contextData.userId) {
+    console.error('User ID missing from context');
     throw new Error("User ID is required")
   }
+
+  console.log('Building query for user:', { userId: contextData.userId, status });
 
   let query = supabase
     .from('artworks')
@@ -27,6 +34,13 @@ export async function getArtistArtworks({ status = "all" }: { status?: "publishe
   }
 
   const { data: artworks, error } = await query
+  
+  console.log('Query results:', {
+    success: !error,
+    artworkCount: artworks?.length || 0,
+    error: error?.message
+  });
+
   if (error) throw error
   
   return { artworks }

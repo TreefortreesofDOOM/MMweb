@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 
 const adminNavItems = [
-  { href: '/admin/dashboard', title: 'Overview' },
-  { href: '/admin/applications', title: 'Artist Applications' },
-  { href: '/admin/artists', title: 'Artists' },
-  { href: '/admin/artworks', title: 'Artworks' },
+  { href: '/admin-dashboard', title: 'Overview' },
+  { href: '/applications', title: 'Artist Applications' },
+  { href: '/artists', title: 'Artists' },
+  { href: '/artworks', title: 'Artworks' },
 ];
 
 interface AdminLayoutProps {

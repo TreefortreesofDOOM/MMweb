@@ -6,7 +6,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 
 export function Logo() {
-  const { theme } = useTheme()
+  const { theme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -23,15 +23,18 @@ export function Logo() {
           width={120}
           height={40}
           className="h-8 w-auto"
+          priority
         />
       </Link>
     )
   }
   
+  const isDark = theme === 'dark' || resolvedTheme === 'dark'
+  
   return (
     <Link href="/" className="flex items-center">
       <Image
-        src={theme === 'dark' 
+        src={isDark 
           ? '/images/logos/meaning_machine_logo_white.png'
           : '/images/logos/meaning_machine_logo_black.png'
         }
@@ -39,6 +42,7 @@ export function Logo() {
         width={120}
         height={40}
         className="h-8 w-auto"
+        priority
       />
     </Link>
   )

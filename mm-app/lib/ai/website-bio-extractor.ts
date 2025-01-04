@@ -1,5 +1,5 @@
 import { load } from 'cheerio'
-import { getGeminiResponse } from './gemini'
+import { UnifiedAIClient } from './unified-client'
 
 export interface WebsiteBioExtractorResponse {
   bio: string;
@@ -7,7 +7,10 @@ export interface WebsiteBioExtractorResponse {
   error?: string;
 }
 
-export async function extractBioFromWebsite(url: string): Promise<WebsiteBioExtractorResponse> {
+export async function extractBioFromWebsite(
+  url: string,
+  client: UnifiedAIClient
+): Promise<WebsiteBioExtractorResponse> {
   try {
     // Validate and normalize URL
     let validUrl: URL
@@ -49,7 +52,7 @@ export async function extractBioFromWebsite(url: string): Promise<WebsiteBioExtr
 
     const html = await response.text()
     console.log('Fetched HTML length:', html.length)
-    
+
     const $ = load(html)
 
     // Common selectors where bios are typically found, in order of priority
@@ -98,7 +101,7 @@ export async function extractBioFromWebsite(url: string): Promise<WebsiteBioExtr
     // Try meta tags first
     const metaDescription = $('meta[name="description"]').attr('content')
     const ogDescription = $('meta[property="og:description"]').attr('content')
-    
+
     if (metaDescription || ogDescription) {
       scrapedContent = metaDescription || ogDescription || ''
       foundSelector = metaDescription ? 'meta[name="description"]' : 'meta[property="og:description"]'
@@ -125,7 +128,7 @@ export async function extractBioFromWebsite(url: string): Promise<WebsiteBioExtr
     console.log('Found content using selector:', foundSelector)
     //console.log('Scraped content:', scrapedContent)
 
-    // Use Gemini to analyze and extract the bio
+    // Use UnifiedAIClient to analyze and extract the bio
     if (scrapedContent) {
       const prompt = `
         I have scraped content from a website that might contain a bio or about information. 
@@ -143,16 +146,16 @@ export async function extractBioFromWebsite(url: string): Promise<WebsiteBioExtr
       `
 
       try {
-        const aiGeneratedBio = await getGeminiResponse(prompt, {
+        const response = await client.sendMessage(prompt, {
           temperature: 0.7,
-          maxOutputTokens: 1024
+          maxTokens: 1024
         })
 
-        console.log('AI-generated bio:', aiGeneratedBio)
+        console.log('AI-generated bio:', response.content)
 
-        if (aiGeneratedBio) {
+        if (response.content) {
           return {
-            bio: aiGeneratedBio,
+            bio: response.content,
             status: 'success'
           }
         }

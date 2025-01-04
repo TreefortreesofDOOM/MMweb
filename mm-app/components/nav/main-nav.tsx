@@ -28,7 +28,7 @@ export function MainNav({ userRole }: MainNavProps) {
   const getDashboardLink = () => {
     switch (userRole) {
       case 'admin':
-        return '/admin/dashboard';
+        return '/admin-dashboard';
       case 'verified_artist':
       case 'emerging_artist':
         return '/artist/dashboard';

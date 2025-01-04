@@ -49,7 +49,7 @@ export default async function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">Manage</div>
             <Button variant="link" className="px-0" asChild>
-              <Link href="/admin/featured-artist">
+              <Link href="/featured-artist">
                 Set Featured Artist →
               </Link>
             </Button>
@@ -65,7 +65,7 @@ export default async function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats?.pendingApplications || 0}</div>
             <Button variant="link" className="px-0" asChild>
-              <Link href="/admin/applications">
+              <Link href="/applications">
                 Review Applications →
               </Link>
             </Button>
@@ -81,7 +81,7 @@ export default async function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalArtists || 0}</div>
             <Button variant="link" className="px-0" asChild>
-              <Link href="/admin/artists">
+              <Link href="/artists">
                 Manage Artists →
               </Link>
             </Button>
@@ -99,7 +99,7 @@ export default async function AdminDashboardPage() {
             </p>
           </div>
           <Button variant="outline" asChild>
-            <Link href="/admin/analytics">
+            <Link href="/analytics">
               View Full Analytics →
             </Link>
           </Button>

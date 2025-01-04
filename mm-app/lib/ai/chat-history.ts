@@ -1,6 +1,3 @@
-import { createClient } from '@/lib/supabase/supabase-server';
-import { generateEmbedding } from './embeddings';
-
 interface ChatHistoryMatch {
   message: string;
   response: string;
@@ -15,51 +12,20 @@ interface ArtworkChatHistory {
   context: Record<string, any>;
 }
 
-const SIMILARITY_THRESHOLD = 0.8;
-const MAX_MATCHES = 3;
-
-export const findRelevantChatHistory = async (
+export async function findRelevantChatHistory(
   userId: string,
-  query: string,
+  prompt: string,
   artworkId?: string
 ): Promise<{
   similarConversations: ChatHistoryMatch[];
-  artworkHistory?: ArtworkChatHistory[];
-}> => {
-  const supabase = await createClient();
-  const [queryEmbedding] = await generateEmbedding(query);
-
-  // Find similar conversations using vector search
-  const { data: similarConversations } = await supabase.rpc(
-    'find_similar_conversations',
-    {
-      p_user_id: userId,
-      p_query: query,
-      p_embedding: queryEmbedding,
-      p_match_count: MAX_MATCHES,
-      p_match_threshold: SIMILARITY_THRESHOLD
-    }
-  );
-
-  // If artwork ID provided, get artwork-specific history
-  let artworkHistory;
-  if (artworkId) {
-    const { data: artworkChats } = await supabase.rpc(
-      'find_artwork_conversations',
-      {
-        p_user_id: userId,
-        p_artwork_id: artworkId,
-        p_match_count: MAX_MATCHES
-      }
-    );
-    artworkHistory = artworkChats;
-  }
-
+  artworkHistory: ArtworkChatHistory[];
+}> {
+  // Return empty results
   return {
-    similarConversations: similarConversations || [],
-    artworkHistory: artworkHistory || []
+    similarConversations: [],
+    artworkHistory: []
   };
-};
+}
 
 export const formatChatContext = (
   similarConversations: ChatHistoryMatch[],

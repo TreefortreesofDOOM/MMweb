@@ -34,37 +34,9 @@ function getSupabaseClient() {
 }
 
 export async function generateEmbedding(text: string | string[]): Promise<number[][]> {
-  try {
-    console.log('Generating embedding for:', typeof text === 'string' ? text.substring(0, 50) + '...' : 'array of texts');
-    
-    // Convert input to array if it's a string
-    const textArray = Array.isArray(text) ? text : [text];
-    
-    // Get Gemini client and generate embeddings
-    const client = getGeminiClient();
-    const model = client.getGenerativeModel({ model: "text-embedding-004" });
-    
-    // Process each text input sequentially to get embeddings
-    const embeddings = await Promise.all(
-      textArray.map(async (t) => {
-        const embeddingResult = await model.embedContent(t);
-        
-        // Access the values array from the embedding result
-        const values = embeddingResult.embedding?.values;
-        if (!Array.isArray(values)) {
-          console.error('Unexpected embedding structure:', embeddingResult);
-          throw new Error('Embedding result values is not an array');
-        }
-        
-        return values;
-      })
-    );
-
-    return embeddings;
-  } catch (error) {
-    console.error('Error generating embedding:', error);
-    throw error;
-  }
+  // Return placeholder embeddings
+  const placeholderEmbedding = new Array(768).fill(0);
+  return Array.isArray(text) ? text.map(() => placeholderEmbedding) : [placeholderEmbedding];
 }
 
 interface ArtworkEmbedding {

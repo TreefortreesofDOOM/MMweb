@@ -23,12 +23,13 @@ export const BioAssistant = ({
   const { isAnalyzing, analyze } = useAnalysis({
     onError: (error) => setError(error)
   })
-  const { setOpen, setMode } = useUnifiedAIActions()
+  const { setOpen, setMode, reset } = useUnifiedAIActions()
 
   const handleExtractBio = async () => {
     if (!website) return
     
     setError(undefined)
+    reset()
     
     setMode('analysis')
     setOpen(true)

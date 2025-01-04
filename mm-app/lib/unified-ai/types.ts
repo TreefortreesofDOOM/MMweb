@@ -119,7 +119,8 @@ export const ANALYSIS_TYPES = [
   'content_analysis',
   'style_analysis',
   'theme_analysis',
-  'technical_analysis'
+  'technical_analysis',
+  'analytics'
 ] as const
 
 export type AnalysisType = typeof ANALYSIS_TYPES[number] 
