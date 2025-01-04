@@ -14,9 +14,25 @@ interface UseAnalysisProps {
 export function useAnalysis({ onSuccess, onError }: UseAnalysisProps = {}) {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const { addAnalysis, setMode } = useUnifiedAIActions()
+  const { analysis } = useUnifiedAIContext()
 
   const analyze = async (type: typeof ANALYSIS_TYPES[number], content: string) => {
     try {
+      // Check if we already have a pending or successful analysis for this type and content
+      const existingAnalysis = analysis.find(a => 
+        a.type === type && 
+        a.content === content &&
+        (a.status === 'pending' || a.status === 'success')
+      )
+      if (existingAnalysis) {
+        console.log('Skipping duplicate analysis:', { type, status: existingAnalysis.status })
+        return existingAnalysis
+      }
+
+      // Remove any existing analyses of this type
+      const filteredAnalyses = analysis.filter(a => a.type !== type)
+      filteredAnalyses.forEach(a => addAnalysis(a))
+
       console.log('Starting analysis:', type, content)
       setIsAnalyzing(true)
       setMode('analysis')
@@ -27,6 +43,7 @@ export function useAnalysis({ onSuccess, onError }: UseAnalysisProps = {}) {
 
       let result: AnalysisResult
       
+      // BIO EXTRACTION //
       if (type === 'bio_extraction') {
         const response = await fetch('/api/ai/extract-bio', {
           method: 'POST',
@@ -54,6 +71,8 @@ export function useAnalysis({ onSuccess, onError }: UseAnalysisProps = {}) {
         addAnalysis(result)
         onSuccess?.(result)
         return result
+
+      // CONTENT ANALYSIS //
       } else if (type === 'analytics') {
         const response = await fetch('/api/ai/analytics', {
           method: 'POST',
@@ -84,6 +103,66 @@ export function useAnalysis({ onSuccess, onError }: UseAnalysisProps = {}) {
         addAnalysis(result)
         onSuccess?.(result)
         return result
+
+      // ARTWORK ANALYSIS //
+      } else if (type.startsWith('artwork_')) {
+        console.log('=== Starting artwork analysis in hook ===', { type })
+        const response = await fetch('/api/ai/analyze-artwork', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            imageUrl: content,
+            types: [type]
+          })
+        })
+        
+        if (!response.ok) {
+          console.error('API request failed:', {
+            status: response.status,
+            statusText: response.statusText
+          })
+          throw new Error('Failed to analyze artwork')
+        }
+
+        const artworkResult = await response.json()
+        console.log('=== Raw artwork analysis result ===', JSON.stringify(artworkResult, null, 2))
+        
+        if (artworkResult.error) {
+          console.error('Analysis error:', artworkResult.error)
+          throw new Error(artworkResult.error)
+        }
+
+        // Ensure we only have one result for this type
+        const results = Array.isArray(artworkResult.results) ? artworkResult.results : [artworkResult]
+        console.log('=== Parsed results array ===', results)
+        
+        // Find exact match for this type
+        const matchingResult = results.find((r: { type: string; result: { summary: string; details: string[] } }) => r.type === type)
+        console.log('=== Found matching result ===', matchingResult)
+        
+        if (!matchingResult) {
+          throw new Error('No matching result found for type: ' + type)
+        }
+        
+        result = createAnalysisResult(
+          type,
+          matchingResult.result.summary,
+          'success'
+        )
+        result.results = matchingResult.result
+        console.log('=== Final analysis result ===', {
+          type,
+          status: result.status,
+          content: result.content,
+          summary: result.results.summary,
+          details: result.results.details
+        })
+        
+        addAnalysis(result)
+        onSuccess?.(result)
+        return result
+
+      // DEFAULT //
       } else {
         result = createAnalysisResult(
           type,

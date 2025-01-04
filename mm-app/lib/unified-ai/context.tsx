@@ -49,7 +49,15 @@ function unifiedAIReducer(state: UnifiedAIState, action: UnifiedAIAction): Unifi
         ...state,
         context: {
           ...state.context,
-          analysis: [...state.context.analysis, action.payload]
+          analysis: action.payload.status === 'pending' 
+            ? [...state.context.analysis, action.payload]
+            : [
+                ...state.context.analysis.filter(a => 
+                  a.type !== action.payload.type || 
+                  (a.type === action.payload.type && a.status !== 'pending')
+                ),
+                action.payload
+              ]
         }
       }
     case 'SET_PAGE_CONTEXT':
@@ -61,7 +69,13 @@ function unifiedAIReducer(state: UnifiedAIState, action: UnifiedAIAction): Unifi
         }
       }
     case 'RESET':
-      return initialState
+      return {
+        ...state,
+        context: {
+          ...state.context,
+          analysis: []
+        }
+      }
     default:
       return state
   }

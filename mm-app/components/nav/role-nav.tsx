@@ -95,13 +95,7 @@ export function RoleNav({ role, children }: RoleNavProps) {
       {/* Main Content */}
       <div className="flex-1">
         <div className="flex h-16 items-center border-b px-4 md:px-6">
-          <div className="md:hidden">
-            <MobileNav 
-              config={config}
-              isOpen={isMobileNavOpen}
-              onOpenChange={handleMobileNavToggle}
-            />
-          </div>
+          {/* Removed duplicate MobileNav */}
         </div>
         <main className="flex-1 p-4 md:p-6" role="main">
           {children}

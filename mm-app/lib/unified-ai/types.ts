@@ -24,17 +24,24 @@ export const personaMapping: Record<UserRole, AssistantPersona> = {
 // Context types
 export type ViewContext = 'profile' | 'artwork' | 'gallery' | 'general'
 
-export type AIContext = {
-  route: string
-  pageType: ViewContext
-  persona: AssistantPersona
+export interface AIContext {
+  route?: string
+  pageType?: string
+  persona?: string
+  websiteUrl?: string
+  artworkId?: string
+  galleryId?: string
+  profileId?: string
+  personaContext?: string
+  characterPersonality?: string
   data?: {
     websiteUrl?: string
-    artworkId?: string
-    galleryId?: string
-    profileId?: string
-    personaContext?: string
-    characterPersonality?: string
+    artworkCallbacks?: {
+      onApplyDescription: (description: string) => void
+      onApplyStyles: (styles: string[]) => void
+      onApplyTechniques: (techniques: string[]) => void
+      onApplyKeywords: (keywords: string[]) => void
+    }
   }
 }
 
@@ -120,7 +127,11 @@ export const ANALYSIS_TYPES = [
   'style_analysis',
   'theme_analysis',
   'technical_analysis',
-  'analytics'
+  'analytics',
+  'artwork_description',
+  'artwork_style',
+  'artwork_techniques',
+  'artwork_keywords'
 ] as const
 
 export type AnalysisType = typeof ANALYSIS_TYPES[number] 

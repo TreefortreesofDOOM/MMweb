@@ -60,11 +60,40 @@ export const UnifiedAI = () => {
         })
         window.location.reload()
       }
+      
+      // Handle artwork analysis results
+      if (result.type.startsWith('artwork_') && result.status === 'success') {
+        const callbacks = context.pageContext?.data?.artworkCallbacks
+        if (!callbacks) {
+          console.warn('No artwork callbacks registered')
+          return
+        }
+
+        switch (result.type) {
+          case 'artwork_description':
+            callbacks.onApplyDescription(result.content)
+            break
+          case 'artwork_style':
+            callbacks.onApplyStyles(result.results?.details || [])
+            break
+          case 'artwork_techniques':
+            callbacks.onApplyTechniques(result.results?.details || [])
+            break
+          case 'artwork_keywords':
+            callbacks.onApplyKeywords(result.results?.details || [])
+            break
+        }
+
+        toast({
+          title: "Success",
+          description: "Applied analysis results to artwork form",
+        })
+      }
     } catch (error) {
       console.error('Failed to apply result:', error)
       toast({
         title: "Error",
-        description: "Failed to update bio. Please try again.",
+        description: "Failed to apply results. Please try again.",
         variant: "destructive"
       })
     }

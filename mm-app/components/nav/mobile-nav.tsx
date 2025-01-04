@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { RoleNavigation } from "@/lib/navigation/types";
 import { SideNav } from "./side-nav";
@@ -51,6 +51,9 @@ export function MobileNav({ config, isOpen, onOpenChange }: MobileNavProps) {
         aria-label={`${config.role} navigation menu`}
         id="mobile-nav"
       >
+        <SheetHeader className="p-6 pb-2">
+          <SheetTitle>{config.role === 'user' ? 'Navigation' : `${config.role} Navigation`}</SheetTitle>
+        </SheetHeader>
         <SideNav config={config} />
       </SheetContent>
     </Sheet>

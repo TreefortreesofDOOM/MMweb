@@ -15,6 +15,7 @@ import { ArtworkAIAnalysis } from './artwork-ai-analysis';
 import { createArtwork, updateArtwork } from '@/lib/actions';
 import { toast, Toaster } from 'sonner';
 import { AIMessageBubble } from '@/components/ai/ai-message-bubble';
+import { ArtworkTags } from '@/components/artwork/artwork-tags';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -205,15 +206,17 @@ export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
   };
 
   const handleImagesChange = (images: ArtworkImage[]) => {
-    // Update the current images state
-    setCurrentImages(images);
-    
-    // Update form values
+    // Batch the updates to prevent multiple re-renders
     const urls = images.map((img) => img.url);
     const primaryImage = images.find((img) => img.isPrimary)?.url || '';
     
-    form.setValue('images', urls, { shouldValidate: true });
-    form.setValue('primaryImage', primaryImage, { shouldValidate: true });
+    // Update all values at once
+    form.setValue('images', urls);
+    form.setValue('primaryImage', primaryImage);
+    form.trigger(['images', 'primaryImage']);
+    
+    // Update current images last
+    setCurrentImages(images);
     
     console.log('Images updated:', {
       currentImages: images,
@@ -316,6 +319,52 @@ export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
                 </p>
               )}
             </div>
+
+            {/* Styles, Techniques, and Keywords */}
+            <ArtworkTags
+              label="Styles"
+              tags={form.watch('styles') || []}
+              onRemove={(tag) => {
+                const currentStyles = form.watch('styles') || [];
+                form.setValue('styles', currentStyles.filter(t => t !== tag));
+              }}
+              onAdd={(tag) => {
+                const currentStyles = form.watch('styles') || [];
+                if (!currentStyles.includes(tag)) {
+                  form.setValue('styles', [...currentStyles, tag]);
+                }
+              }}
+            />
+
+            <ArtworkTags
+              label="Techniques"
+              tags={form.watch('techniques') || []}
+              onRemove={(tag) => {
+                const currentTechniques = form.watch('techniques') || [];
+                form.setValue('techniques', currentTechniques.filter(t => t !== tag));
+              }}
+              onAdd={(tag) => {
+                const currentTechniques = form.watch('techniques') || [];
+                if (!currentTechniques.includes(tag)) {
+                  form.setValue('techniques', [...currentTechniques, tag]);
+                }
+              }}
+            />
+
+            <ArtworkTags
+              label="Keywords"
+              tags={form.watch('keywords') || []}
+              onRemove={(tag) => {
+                const currentKeywords = form.watch('keywords') || [];
+                form.setValue('keywords', currentKeywords.filter(t => t !== tag));
+              }}
+              onAdd={(tag) => {
+                const currentKeywords = form.watch('keywords') || [];
+                if (!currentKeywords.includes(tag)) {
+                  form.setValue('keywords', [...currentKeywords, tag]);
+                }
+              }}
+            />
           </CardContent>
           <CardFooter>
             <Button type="submit" disabled={isSubmitting} className="w-full">

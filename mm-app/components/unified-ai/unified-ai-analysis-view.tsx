@@ -125,6 +125,26 @@ export const UnifiedAIAnalysisView = ({
                 >
                   {result.content}
                 </motion.p>
+                {/* Apply buttons for artwork analysis */}
+                {result.status === 'success' && result.type.startsWith('artwork_') && (
+                  <motion.div
+                    layout
+                    className="mt-4 flex justify-end"
+                  >
+                    <Button
+                      onClick={() => {
+                        if (!result.results?.details) return
+                        onApplyResult?.(result)
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      Apply to Artwork
+                    </Button>
+                  </motion.div>
+                )}
+                {/* Bio extraction apply button */}
                 {result.type === 'bio_extraction' && 
                  result.status === 'success' && 
                  onApplyResult && (

@@ -171,11 +171,29 @@ export class GeminiProvider implements AIServiceProvider {
 
     console.log('Sending message to model:', {
       contentLength: messageContent.length,
-      hasSystemInstruction: !!message.systemInstruction
+      hasSystemInstruction: !!message.systemInstruction,
+      hasImage: !!message.metadata?.imageUrl
     });
 
     try {
-      const result = await chat.sendMessage(messageContent);
+      let parts: Part[] = [];
+      
+      // Add image if present
+      if (message.metadata?.imageUrl) {
+        const imageResponse = await fetch(message.metadata.imageUrl);
+        const imageData = await imageResponse.blob();
+        parts.push({
+          inlineData: {
+            data: Buffer.from(await imageData.arrayBuffer()).toString('base64'),
+            mimeType: imageData.type
+          }
+        });
+      }
+      
+      // Add text content
+      parts.push({ text: messageContent });
+
+      const result = await chat.sendMessage(parts);
       const response = await result.response;
       const text = response.text();
 

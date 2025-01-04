@@ -33,17 +33,18 @@ Located in `lib/unified-ai/hooks/use-context-awareness.ts`:
 - Provides profile-specific context data
 - Optimizes for profile management tasks
 
-#### Artwork Pages [TODO]
+#### Artwork Pages [x]
 - Enables artwork analysis mode
 - Shows "Analyze Artwork" action button
 - Includes artwork-specific context data
 - Focuses on artwork-related features
 
 #### Gallery Pages
-- Activates gallery assistant mode
+- Activates gallery assistant mode [discuss]
 - Maintains chat-based interaction
 - Provides gallery-specific context
 - Optimizes for collection management
+- Allows for likeimage analysis [discuss]
 
 #### General Pages
 - Defaults to standard chat interface
@@ -312,21 +313,21 @@ unified-ai/context.tsx needs to handle:
 
 5. **Existing Features to Preserve**
 
-A. **Artwork Analysis**
+A. **Artwork Analysis** [x]
 - Description generation
 - Style detection
 - Technique analysis
 - Keyword generation
 
-B. **Profile Features**
+B. **Profile Features** [x]
 - Bio extraction
 - Website analysis
-- Profile optimization
+- Profile optimization [discuss]
 
 C. **Gallery Features**
 - Artwork recommendations
 - Collection analysis
-- Gallery assistant personality
+- Gallery assistant mode [discuss]
 
 6. **Implementation Priority**
 

@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { analyzeArtwork } from '@/lib/actions';
 import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
-import { useFloatingAssistant } from '@/components/providers/floating-assistant-provider';
+import { useAnalysis } from '@/lib/unified-ai/use-analysis';
+import { useUnifiedAIActions } from '@/lib/unified-ai/hooks';
+import { ANALYSIS_TYPES } from '@/lib/unified-ai/types';
+import { createAnalysisResult } from '@/lib/unified-ai/utils';
+import { useUnifiedAI } from '@/lib/unified-ai/context';
 
 interface ArtworkAIAnalysisProps {
   imageUrl: string;
@@ -23,103 +26,78 @@ export function ArtworkAIAnalysis({
   onApplyTechniques,
   onApplyKeywords,
 }: ArtworkAIAnalysisProps) {
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysis, setAnalysis] = useState<{
-    description?: string;
-    styles?: string[];
-    techniques?: string[];
-    keywords?: string[];
-  }>({});
-  const [applied, setApplied] = useState<{
-    description: boolean;
-    styles: boolean;
-    techniques: boolean;
-    keywords: boolean;
-    bio: boolean;
-  }>({
-    description: false,
-    styles: false,
-    techniques: false,
-    keywords: false,
-    bio: false
-  });
+  const [error, setError] = useState<string>()
+  const { isAnalyzing, analyze } = useAnalysis({
+    onError: (error) => setError(error)
+  })
+  const { setOpen, setMode, reset } = useUnifiedAIActions()
+  const { state, dispatch } = useUnifiedAI()
+  const hasStartedAnalysis = useRef(false)
 
-  const { setAnalysisState } = useFloatingAssistant();
-
-  // Update floating assistant state when local state changes
+  // Register callbacks with unified-ai context
   useEffect(() => {
-    setAnalysisState({
-      isAnalyzing,
-      analysis,
-      onApplyDescription: handleApplyDescription,
-      onApplyStyles: handleApplyStyles,
-      onApplyTechniques: handleApplyTechniques,
-      onApplyKeywords: handleApplyKeywords,
-      applied
-    });
-  }, [isAnalyzing, analysis, applied]);
+    dispatch({
+      type: 'SET_PAGE_CONTEXT',
+      payload: {
+        data: {
+          artworkCallbacks: {
+            onApplyDescription,
+            onApplyStyles,
+            onApplyTechniques,
+            onApplyKeywords
+          }
+        }
+      }
+    })
+  }, [onApplyDescription, onApplyStyles, onApplyTechniques, onApplyKeywords, dispatch])
 
-  // Auto-analyze when imageUrl changes
+  // Only run analysis when imageUrl is first set
   useEffect(() => {
-    if (imageUrl) {
-      handleAnalyze();
+    if (imageUrl && !hasStartedAnalysis.current) {
+      handleAnalyze()
     }
-  }, [imageUrl]);
+  }, [imageUrl])
 
   const handleAnalyze = async () => {
-    setIsAnalyzing(true);
+    if (!imageUrl) return
+    
+    // Reset state and mark analysis as started
+    hasStartedAnalysis.current = true
+    setError(undefined)
+    reset()
+    setMode('analysis')
+    setOpen(true)
+    
     try {
-      const formData = new FormData();
-      formData.append('imageUrl', imageUrl);
-      const result = await analyzeArtwork(formData);
-      if (result.error) {
-        setAnalysis({});
-        return;
+      // Check if any analysis is already in progress
+      const hasExistingAnalysis = state.context.analysis.some((a: { status: string; content: string }) => 
+        a.status === 'pending' || 
+        (a.status === 'success' && a.content === imageUrl)
+      )
+      if (hasExistingAnalysis) {
+        console.log('Analysis already in progress or completed')
+        return
       }
-      setAnalysis(result.analysis ?? { description: '', styles: [], techniques: [], keywords: [] });
-      // Reset applied state when new analysis is performed
-      setApplied({
-        description: false,
-        styles: false,
-        techniques: false,
-        keywords: false,
-        bio: false
-      });
-    } catch (error) {
-      console.error('Error analyzing artwork:', error);
-      setAnalysis({});
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
 
-  const handleApplyDescription = () => {
-    if (analysis.description) {
-      onApplyDescription(analysis.description);
-      setApplied(prev => ({ ...prev, description: true }));
+      // Start all analyses in parallel
+      await Promise.all([
+        analyze('artwork_description', imageUrl),
+        analyze('artwork_style', imageUrl),
+        analyze('artwork_techniques', imageUrl),
+        analyze('artwork_keywords', imageUrl)
+      ])
+    } catch (err) {
+      console.error('Error analyzing artwork:', err)
+      setError('Failed to analyze artwork. Please try again.')
+      hasStartedAnalysis.current = false
     }
-  };
+  }
 
-  const handleApplyStyles = () => {
-    if (analysis.styles?.length) {
-      onApplyStyles(analysis.styles);
-      setApplied(prev => ({ ...prev, styles: true }));
-    }
-  };
-
-  const handleApplyTechniques = () => {
-    if (analysis.techniques?.length) {
-      onApplyTechniques(analysis.techniques);
-      setApplied(prev => ({ ...prev, techniques: true }));
-    }
-  };
-
-  const handleApplyKeywords = () => {
-    if (analysis.keywords?.length) {
-      onApplyKeywords(analysis.keywords);
-      setApplied(prev => ({ ...prev, keywords: true }));
-    }
-  };
+  // Allow manual re-analysis
+  const handleReanalyze = () => {
+    hasStartedAnalysis.current = false
+    handleAnalyze()
+  }
 
   return (
     <Card className="border-2 border-muted shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -130,9 +108,7 @@ export function ArtworkAIAnalysis({
             <p className="text-sm text-muted-foreground">
               {isAnalyzing 
                 ? "Analyzing your artwork..."
-                : analysis && Object.keys(analysis).length > 0
-                ? "Analysis complete! Click the floating assistant in the bottom right to view insights and suggestions."
-                : "Upload an image to get AI-powered suggestions for your artwork"}
+                : "Click the floating assistant in the bottom right to view insights and suggestions."}
             </p>
           </div>
           <div className="min-w-[120px] text-right">
@@ -141,14 +117,33 @@ export function ArtworkAIAnalysis({
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm">Analyzing...</span>
               </div>
-            ) : analysis && Object.keys(analysis).length > 0 ? (
+            ) : (
               <Badge variant="secondary">
                 Ready
               </Badge>
-            ) : null}
+            )}
           </div>
         </div>
       </CardHeader>
+      <CardContent className="space-y-4 pt-4">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleReanalyze}
+            disabled={isAnalyzing || !imageUrl}
+          >
+            {isAnalyzing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              'Analyze'
+            )}
+          </Button>
+        </div>
+      </CardContent>
     </Card>
   );
 } 
