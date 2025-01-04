@@ -135,6 +135,9 @@ class AIServiceFactory {
 - Implemented streaming support
 - Added thread management
 - Integrated vision capabilities
+- Fixed OpenAI model configuration
+- Implemented proper fallback provider logic
+- Added detailed logging for provider operations
 
 ### In Progress 🚧
 - Performance optimization:
@@ -145,6 +148,8 @@ class AIServiceFactory {
   - Error tracking
   - Performance metrics
   - Usage analytics
+- Fine-tuning provider selection logic
+- Optimizing thread management
 
 ### Deferred ⏳
 - Test suite implementation
@@ -158,6 +163,8 @@ class AIServiceFactory {
 - Monitor production performance
 - Gather usage metrics
 - Optimize resource usage
+- Fine-tune fallback triggers
+- Implement more comprehensive error logging
 
 ### 2. Future Enhancements
 - Add caching layer
@@ -170,17 +177,34 @@ class AIServiceFactory {
 // Required environment variables:
 interface ProcessEnv {
   OPENAI_API_KEY: string
-  OPENAI_MODEL: string // defaults to 'gpt-4-turbo-vision'
+  OPENAI_MODEL: string // e.g., 'gpt-4', 'gpt-4-turbo-preview'
   OPENAI_ASSISTANT_ID?: string
   OPENAI_THREAD_EXPIRY?: string // defaults to '24h'
 }
 ```
 
+## Fallback Configuration
+The system now supports automatic fallback between providers with the following configuration:
+
+```typescript
+const fallbackTriggers = [
+  'rate_limit_exceeded',
+  'service_unavailable',
+  'timeout',
+  'context_length_exceeded',
+  'model_not_available',
+  'model_overloaded'
+]
+```
+
+When the primary provider (ChatGPT) encounters any of these errors, the system automatically falls back to the secondary provider (Gemini) while maintaining the same interface and functionality.
+
 ## Notes
-- ChatGPT provider is now fully implemented
+- ChatGPT provider is now the primary provider
 - Both providers support the complete interface
 - Factory supports seamless provider switching
 - Fallback mechanism handles common error cases
 - Thread management ensures efficient resource usage
 - Vision capabilities are fully integrated
-- Streaming support is implemented with proper error handling 
+- Streaming support is implemented with proper error handling
+- Detailed logging added for debugging and monitoring 
