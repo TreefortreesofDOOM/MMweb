@@ -286,4 +286,19 @@ export async function updateProfileBio(bio: string) {
 
   if (error) throw error;
   return { success: true };
+}
+
+export async function updateProfileWebsite(website: string) {
+  const supabase = await createActionClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error('Not authenticated');
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ website })
+    .eq('id', user.id);
+
+  if (error) throw error;
+  return { success: true };
 } 
