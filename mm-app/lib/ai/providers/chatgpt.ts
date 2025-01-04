@@ -162,7 +162,7 @@ export class ChatGPTProvider implements AIServiceProvider {
     const response = await fetch(url)
     const arrayBuffer = await response.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
-    const filename = url.split('/').pop() || 'image.jpg'
+    const filename = (url.split('/').pop() || 'image.jpg').toLowerCase()
     
     // Write buffer to temp file
     const tempPath = join(tmpdir(), `${Date.now()}-${filename}`)

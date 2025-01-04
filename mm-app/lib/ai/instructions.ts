@@ -296,45 +296,53 @@ ${info.best_practices.map(practice => `- ${practice}`).join('\n')}
 
 // Analysis prompts (unchanged)
 export const ANALYSIS_PROMPTS = {
-    description: `Analyze this artwork and provide a detailed, engaging description that covers:
-- Visual elements and composition
-- Artistic style and technique
-- Mood and atmosphere
-- Potential meaning or themes
-Keep the tone professional but accessible.`,
+    description: `
+    
+        Analyze this artwork and provide a detailed, engaging description that covers:
+        - Visual elements and composition
+        - Artistic style and technique
+        - Mood and atmosphere
+        - Potential meaning or themes
+        Keep the tone professional but accessible.
+        do not include any headings or other text other than the description.
+        
+        `,
 
     style: `
     
         Identify and list the primary and secondary artistic styles evident in this artwork. 
-    - **Primary Styles:** The main styles that define the overall appearance.
-    - **Secondary Styles:** Sub-styles or influences that complement or contrast with the primary styles.
-    Consider both traditional and contemporary styles, including any fusion or hybrid styles present.
-    Provide the response as a comma-separated list, specifying primary and secondary styles where applicable.
+        - **Primary Styles:** The main styles that define the overall appearance.
+        - **Secondary Styles:** Sub-styles or influences that complement or contrast with the primary styles.
+        Consider both traditional and contemporary styles, including any fusion or hybrid styles present.
+        Provide the response as a comma-separated list with primary styles first followed by secondary styles if possible.
+        do not include any headings or other text other than the styles in the comma separated list.
 
     `,
 
     techniques: `
     
         Identify and list the primary artistic techniques and mediums utilized in this artwork.
-    - **Techniques:** Specific methods and processes (e.g., impasto, glazing, digital layering).
-    - **Mediums:** Materials and tools used (e.g., oil paint, watercolor, digital software, mixed media).
-    Consider both traditional and digital techniques, as well as any innovative or experimental methods.
-    Provide the response as a comma-separated list, distinguishing between techniques and mediums if possible.
+        - **Techniques:** Specific methods and processes (e.g., impasto, glazing, digital layering).
+        - **Mediums:** Materials and tools used (e.g., oil paint, watercolor, digital software, mixed media).
+        Consider both traditional and digital techniques, as well as any innovative or experimental methods.
+        Provide the response as a comma-separated list, distinguishing between techniques and mediums if possible.
+        do not include any headings or other text other than the techniques and mediums in the comma separated list.
 
     `,
 
     keywords: `
     
-    Generate a comprehensive list of relevant keywords for this artwork, encompassing:
-    - **Subject Matter:** People, objects, nature, abstract elements, etc.
-    - **Artistic Style:** Specific styles and movements.
-    - **Mood and Emotion:** Feelings and atmospheres conveyed.
-    - **Technical Aspects:** Techniques, mediums, tools used.
-    - **Color Palette:** Dominant colors and color schemes.
-    - **Themes and Concepts:** Underlying ideas and messages.
-    - **Cultural and Historical References:** Relevant cultural or historical elements. If Applicable. Don't embelish or make it up. You can leave blank.
-    - **Geographical Influences:** Regions or locations that influence the artwork. If Applicable. Don't embelish or make it up. You can leave blank.
-    Provide the response as a comma-separated list, ensuring a balanced mix of broad and specific keywords to enhance searchability and categorization.
+        Generate a comprehensive list of relevant keywords for this artwork, encompassing:
+        - **Subject Matter:** People, objects, nature, abstract elements, etc.
+        - **Artistic Style:** Specific styles and movements.
+        - **Mood and Emotion:** Feelings and atmospheres conveyed.
+        - **Technical Aspects:** Techniques, mediums, tools used.
+        - **Color Palette:** Dominant colors and color schemes.
+        - **Themes and Concepts:** Underlying ideas and messages.
+        - **Cultural and Historical References:** Relevant cultural or historical elements. If Applicable. Don't embelish or make it up. You can leave blank.
+        - **Geographical Influences:** Regions or locations that influence the artwork. If Applicable. Don't embelish or make it up. You can leave blank.
+        - Provide the response as a comma-separated list, ensuring a balanced mix of broad and specific keywords to enhance searchability and categorization.
+        - Do not include any headings or other text other than the keywords in the comma separated list.
 
     `,
 } as const;

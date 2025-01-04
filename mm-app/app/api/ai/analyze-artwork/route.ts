@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server'
 import { UnifiedAIClient } from '@/lib/ai/unified-client'
 import { env } from '@/lib/env'
-import { ANALYSIS_PROMPTS, AI_TEMPERATURE } from '@/lib/ai/instructions'
+import { AI_TEMPERATURE, ANALYSIS_PROMPTS } from '@/lib/ai/instructions'
+import { getAISettings } from '@/lib/actions/ai-settings-actions'
 
 export async function POST(request: Request) {
   try {
     console.log('=== Starting artwork analysis ===')
     const { imageUrl, types } = await request.json()
-    const type = Array.isArray(types) ? types[0] : types // For backward compatibility
-    console.log('Analysis request:', { types: Array.isArray(types) ? types : [type], hasImageUrl: !!imageUrl })
+    const analysisType = Array.isArray(types) ? types[0] : types // For backward compatibility
+    console.log('Analysis request:', { types: Array.isArray(types) ? types : [analysisType], hasImageUrl: !!imageUrl })
     
     if (!imageUrl) {
       console.log('Error: No image URL provided')
@@ -28,19 +29,30 @@ export async function POST(request: Request) {
 
     // Create client with API key configuration - only create once
     console.log('Initializing UnifiedAIClient')
+    const settingsResult = await getAISettings()
+    const settings = settingsResult?.data
+
     const client = new UnifiedAIClient({
       primary: {
-        provider: 'gemini',
+        provider: settings?.primary_provider || 'gemini',
         config: {
-          apiKey: env.GOOGLE_AI_API_KEY,
+          apiKey: settings?.primary_provider === 'chatgpt' ? env.OPENAI_API_KEY : env.GOOGLE_AI_API_KEY,
           temperature: AI_TEMPERATURE.balanced,
           maxOutputTokens: 1024
         }
-      }
+      },
+      fallback: settings?.fallback_provider ? {
+        provider: settings.fallback_provider,
+        config: {
+          apiKey: settings.fallback_provider === 'chatgpt' ? env.OPENAI_API_KEY : env.GOOGLE_AI_API_KEY,
+          temperature: AI_TEMPERATURE.balanced,
+          maxOutputTokens: 1024
+        }
+      } : undefined
     })
 
     // Process each analysis type
-    const analysisTypes = Array.isArray(types) ? types : [type]
+    const analysisTypes = Array.isArray(types) ? types : [analysisType]
     const results = await Promise.all(analysisTypes.map(async (type) => {
       // Get the appropriate prompt based on type
       let prompt: string
