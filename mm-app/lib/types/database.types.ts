@@ -34,6 +34,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_settings: {
+        Row: {
+          created_at: string
+          fallback_provider: string | null
+          id: string
+          primary_provider: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          fallback_provider?: string | null
+          id?: string
+          primary_provider: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          fallback_provider?: string | null
+          id?: string
+          primary_provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       artist_features: {
         Row: {
           created_at: string
@@ -527,6 +551,103 @@ export type Database = {
           },
         ]
       }
+      ghost_profiles: {
+        Row: {
+          claimed_profile_id: string | null
+          created_at: string | null
+          display_name: string | null
+          email: string
+          id: string
+          is_claimed: boolean | null
+          is_visible: boolean | null
+          last_purchase_date: string | null
+          metadata: Json | null
+          stripe_customer_id: string
+          total_purchases: number | null
+          total_spent: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          claimed_profile_id?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          email: string
+          id?: string
+          is_claimed?: boolean | null
+          is_visible?: boolean | null
+          last_purchase_date?: string | null
+          metadata?: Json | null
+          stripe_customer_id: string
+          total_purchases?: number | null
+          total_spent?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          claimed_profile_id?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          email?: string
+          id?: string
+          is_claimed?: boolean | null
+          is_visible?: boolean | null
+          last_purchase_date?: string | null
+          metadata?: Json | null
+          stripe_customer_id?: string
+          total_purchases?: number | null
+          total_spent?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ghost_profiles_claimed_profile_id_fkey"
+            columns: ["claimed_profile_id"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "ghost_profiles_claimed_profile_id_fkey"
+            columns: ["claimed_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ghost_profiles_claimed_profile_id_fkey"
+            columns: ["claimed_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_settings: {
+        Row: {
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       partial_registrations: {
         Row: {
           created_at: string
@@ -560,7 +681,9 @@ export type Database = {
           artist_approved_at: string | null
           artist_approved_by: string | null
           artist_rejection_reason: string | null
-          artist_status: Database["public"]["Enums"]["artist_application_status"] | null
+          artist_status:
+            | Database["public"]["Enums"]["artist_application_status"]
+            | null
           artist_type: string | null
           avatar_url: string | null
           bio: string | null
@@ -594,7 +717,9 @@ export type Database = {
           artist_approved_at?: string | null
           artist_approved_by?: string | null
           artist_rejection_reason?: string | null
-          artist_status?: Database["public"]["Enums"]["artist_application_status"] | null
+          artist_status?:
+            | Database["public"]["Enums"]["artist_application_status"]
+            | null
           artist_type?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -628,7 +753,9 @@ export type Database = {
           artist_approved_at?: string | null
           artist_approved_by?: string | null
           artist_rejection_reason?: string | null
-          artist_status?: Database["public"]["Enums"]["artist_application_status"] | null
+          artist_status?:
+            | Database["public"]["Enums"]["artist_application_status"]
+            | null
           artist_type?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -743,42 +870,114 @@ export type Database = {
       }
       transactions: {
         Row: {
+          amount_received: number | null
           amount_total: number
           artist_amount: number
           artist_id: string | null
           artwork_id: string | null
           buyer_id: string | null
+          capture_method: string | null
+          card_brand: string | null
+          card_country: string | null
+          card_exp_month: number | null
+          card_exp_year: number | null
+          card_last4: string | null
+          confirmation_method: string | null
           created_at: string | null
+          description: string | null
+          error_code: string | null
+          error_message: string | null
+          ghost_profile_id: string | null
           id: string
+          invoice_id: string | null
+          last_payment_error: Json | null
+          payment_intent_status: string | null
+          payment_method_details: Json | null
+          payment_method_id: string | null
+          payment_method_types: string[] | null
           platform_fee: number
-          status: string
+          statement_descriptor: string | null
+          statement_descriptor_suffix: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          stripe_canceled_at: string | null
+          stripe_created: string | null
           stripe_payment_intent_id: string | null
+          stripe_processing_at: string | null
+          stripe_succeeded_at: string | null
           updated_at: string | null
         }
         Insert: {
+          amount_received?: number | null
           amount_total: number
           artist_amount: number
           artist_id?: string | null
           artwork_id?: string | null
           buyer_id?: string | null
+          capture_method?: string | null
+          card_brand?: string | null
+          card_country?: string | null
+          card_exp_month?: number | null
+          card_exp_year?: number | null
+          card_last4?: string | null
+          confirmation_method?: string | null
           created_at?: string | null
+          description?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          ghost_profile_id?: string | null
           id?: string
+          invoice_id?: string | null
+          last_payment_error?: Json | null
+          payment_intent_status?: string | null
+          payment_method_details?: Json | null
+          payment_method_id?: string | null
+          payment_method_types?: string[] | null
           platform_fee: number
-          status: string
+          statement_descriptor?: string | null
+          statement_descriptor_suffix?: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          stripe_canceled_at?: string | null
+          stripe_created?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_processing_at?: string | null
+          stripe_succeeded_at?: string | null
           updated_at?: string | null
         }
         Update: {
+          amount_received?: number | null
           amount_total?: number
           artist_amount?: number
           artist_id?: string | null
           artwork_id?: string | null
           buyer_id?: string | null
+          capture_method?: string | null
+          card_brand?: string | null
+          card_country?: string | null
+          card_exp_month?: number | null
+          card_exp_year?: number | null
+          card_last4?: string | null
+          confirmation_method?: string | null
           created_at?: string | null
+          description?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          ghost_profile_id?: string | null
           id?: string
+          invoice_id?: string | null
+          last_payment_error?: Json | null
+          payment_intent_status?: string | null
+          payment_method_details?: Json | null
+          payment_method_id?: string | null
+          payment_method_types?: string[] | null
           platform_fee?: number
-          status?: string
+          statement_descriptor?: string | null
+          statement_descriptor_suffix?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          stripe_canceled_at?: string | null
+          stripe_created?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_processing_at?: string | null
+          stripe_succeeded_at?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -787,6 +986,13 @@ export type Database = {
             columns: ["artwork_id"]
             isOneToOne: false
             referencedRelation: "artworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_ghost_profile_id_fkey"
+            columns: ["ghost_profile_id"]
+            isOneToOne: false
+            referencedRelation: "ghost_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -849,6 +1055,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_preferences: {
+        Row: {
+          ai_personality: Database["public"]["Enums"]["ai_personality"] | null
+          created_at: string | null
+          id: string
+          theme: Database["public"]["Enums"]["theme_preference"] | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          ai_personality?: Database["public"]["Enums"]["ai_personality"] | null
+          created_at?: string | null
+          id?: string
+          theme?: Database["public"]["Enums"]["theme_preference"] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          ai_personality?: Database["public"]["Enums"]["ai_personality"] | null
+          created_at?: string | null
+          id?: string
+          theme?: Database["public"]["Enums"]["theme_preference"] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       user_sessions: {
         Row: {
@@ -987,76 +1220,6 @@ export type Database = {
           },
         ]
       }
-      user_preferences: {
-        Row: {
-          id: string
-          user_id: string
-          theme: Database["public"]["Enums"]["theme_preference"]
-          ai_personality: Database["public"]["Enums"]["ai_personality"]
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          theme?: Database["public"]["Enums"]["theme_preference"]
-          ai_personality?: Database["public"]["Enums"]["ai_personality"]
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          theme?: Database["public"]["Enums"]["theme_preference"]
-          ai_personality?: Database["public"]["Enums"]["ai_personality"]
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_preferences_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      notification_settings: {
-        Row: {
-          id: string
-          user_id: string
-          notification_type: Database["public"]["Enums"]["notification_type"]
-          enabled: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          notification_type: Database["public"]["Enums"]["notification_type"]
-          enabled?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          notification_type?: Database["public"]["Enums"]["notification_type"]
-          enabled?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notification_settings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
     }
     Views: {
       artwork_counts: {
@@ -1101,7 +1264,7 @@ export type Database = {
           }
       calculate_engagement_score: {
         Args: {
-          user_id: string
+          target_user_id: string
         }
         Returns: number
       }
@@ -1138,6 +1301,12 @@ export type Database = {
           response: string
           similarity: number
         }[]
+      }
+      get_user_settings: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: Json
       }
       halfvec_avg: {
         Args: {
@@ -1188,6 +1357,12 @@ export type Database = {
         Returns: unknown
       }
       is_artist: {
+        Args: {
+          role_to_check: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: boolean
+      }
+      is_patron: {
         Args: {
           role_to_check: Database["public"]["Enums"]["user_role"]
         }
@@ -1328,6 +1503,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      upsert_user_preferences: {
+        Args: {
+          p_user_id: string
+          p_theme: Database["public"]["Enums"]["theme_preference"]
+          p_ai_personality?: Database["public"]["Enums"]["ai_personality"]
+        }
+        Returns: undefined
+      }
       vector_avg: {
         Args: {
           "": number[]
@@ -1371,20 +1554,33 @@ export type Database = {
         }
         Returns: number
       }
-      get_user_settings: {
-        Args: {
-          p_user_id: string
-        }
-        Returns: Json
-      }
     }
     Enums: {
+      ai_personality: "HAL9000" | "GLADOS" | "JARVIS"
       artist_application_status: "draft" | "pending" | "approved" | "rejected"
+      artist_status: "draft" | "pending" | "approved" | "rejected"
       artwork_status: "draft" | "published" | "sold"
-      user_role: 'user' | 'patron' | 'artist' | 'admin' | 'emerging_artist' | 'verified_artist'
-      notification_type: 'email' | 'new_artwork' | 'new_follower' | 'artwork_favorited' | 'price_alert'
-      theme_preference: 'light' | 'dark' | 'system'
-      ai_personality: 'HAL9000' | 'GLADOS' | 'JARVIS'
+      notification_type:
+        | "email"
+        | "new_artwork"
+        | "new_follower"
+        | "artwork_favorited"
+        | "price_alert"
+      payment_status:
+        | "succeeded"
+        | "processing"
+        | "requires_payment_method"
+        | "requires_confirmation"
+        | "requires_action"
+        | "canceled"
+      theme_preference: "light" | "dark" | "system"
+      user_role:
+        | "user"
+        | "artist"
+        | "admin"
+        | "emerging_artist"
+        | "verified_artist"
+        | "patron"
     }
     CompositeTypes: {
       [_ in never]: never

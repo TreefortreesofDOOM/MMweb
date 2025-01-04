@@ -3,6 +3,10 @@
 ## Overview
 The patron role is designed for art collectors and enthusiasts who want to discover, collect, and engage with artists on the platform.
 
+### Ideas for future features:
+ - settings option to allow patrons to remain anonymous to other users.
+
+
 ## Features
 Reference to features from role-selection-wizard.tsx:
 

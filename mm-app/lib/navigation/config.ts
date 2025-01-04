@@ -10,7 +10,8 @@ import {
   Store,
   Award,
   GalleryVertical,
-  Image as Gallery
+  Image as Gallery,
+  Ghost
 } from 'lucide-react';
 import type { RoleNavigation, UserRole } from './types';
 
@@ -35,6 +36,11 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
             title: 'Featured Artist',
             href: '/featured-artist',
             icon: Award
+          },
+          {
+            title: 'Ghost Profiles',
+            href: '/ghost-profiles',
+            icon: Ghost
           }
         ]
       }

@@ -17,6 +17,9 @@ declare global {
       OPENAI_THREAD_EXPIRY?: string
       AI_PRIMARY_PROVIDER?: string
       AI_FALLBACK_PROVIDER?: string
+      STRIPE_SECRET_KEY: string
+      STRIPE_WEBHOOK_SECRET: string
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: string
     }
   }
 }
@@ -34,7 +37,12 @@ const envSchema = z.object({
   OPENAI_ASSISTANT_ID: z.string().optional(),
   OPENAI_THREAD_EXPIRY: z.string().default('24h'),
   AI_PRIMARY_PROVIDER: z.enum(['chatgpt', 'gemini']).default('chatgpt'),
-  AI_FALLBACK_PROVIDER: z.enum(['chatgpt', 'gemini']).optional()
+  AI_FALLBACK_PROVIDER: z.enum(['chatgpt', 'gemini']).optional(),
+  STRIPE_SECRET_KEY: z.string().min(1),
+  STRIPE_WEBHOOK_SECRET: process.env.NODE_ENV === 'production' 
+    ? z.string().min(1)
+    : z.string().optional(),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1)
 })
 
 export const env = envSchema.parse(process.env) 

@@ -276,3 +276,8 @@ s3_region = "env(S3_REGION)"
 s3_access_key = "env(S3_ACCESS_KEY)"
 # Configures AWS_SECRET_ACCESS_KEY for S3 bucket
 s3_secret_key = "env(S3_SECRET_KEY)"
+
+[local]
+project_id = "local"
+api_url = "http://192.168.86.29:54321"
+db_url = "postgresql://postgres:postgres@192.168.86.29:54322/postgres"
