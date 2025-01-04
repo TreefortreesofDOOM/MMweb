@@ -15,8 +15,8 @@
    - [ ] Add tooltips for requirement details
 
 2. **Layout Structure** *(Current Status: [⚠️])*
-   - [ ] Redesign profile image placement
-   - [ ] Implement proper text wrapping around profile image
+   - [x] Redesign profile image placement
+   - [x] Implement proper text wrapping around profile image
    - [ ] Standardize content area padding/margins
    - [ ] Add clear section dividers
 
