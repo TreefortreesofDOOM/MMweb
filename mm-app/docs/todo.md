@@ -64,7 +64,6 @@
 - [ ] Add earnings dashboard
 
 ### Artist Management
-- [ ] Add portfolio management
 - [ ] Add commission request system
 
 ### Admin Features
