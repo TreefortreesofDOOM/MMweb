@@ -9,8 +9,10 @@ import { FeatureComingSoon } from '@/components/artist/feature-coming-soon';
 import { Progress } from "@/components/ui/progress";
 import { useArtist } from "@/hooks/use-artist";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, AlertCircle } from "lucide-react";
-import { useCallback } from "react";
+import { CheckCircle2, AlertCircle, Eye, Heart, Image, BookOpen, FileText, CreditCard } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { AIArtistAssistant } from '@/components/artist/ai-artist-assistant';
+import { getArtworkStats } from '@/lib/actions/artwork';
 
 interface DashboardClientProps {
   artworks: Array<{
@@ -18,6 +20,7 @@ interface DashboardClientProps {
     status: string;
   }>;
   profile: {
+    id: string;
     stripe_account_id?: string | null;
     stripe_onboarding_complete?: boolean;
     role?: string;
@@ -27,10 +30,29 @@ interface DashboardClientProps {
 
 export default function DashboardClient({ artworks, profile }: DashboardClientProps) {
   const { isVerifiedArtist, isEmergingArtist, getVerificationStatus, getVerificationPercentage } = useArtist();
-  const totalArtworks = artworks.length;
-  const publishedArtworks = artworks.filter(a => a.status === 'published').length;
   const verificationProgress = getVerificationPercentage();
   const verificationStatus = getVerificationStatus();
+  const [stats, setStats] = useState<{
+    totalArtworks: number;
+    publishedArtworks: number;
+    totalViews: number;
+    totalFavorites: number;
+  }>({
+    totalArtworks: artworks.length,
+    publishedArtworks: artworks.filter(a => a.status === 'published').length,
+    totalViews: 0,
+    totalFavorites: 0
+  });
+
+  useEffect(() => {
+    async function fetchStats() {
+      const { stats: artworkStats, error } = await getArtworkStats(profile.id);
+      if (!error && artworkStats) {
+        setStats(artworkStats);
+      }
+    }
+    fetchStats();
+  }, [profile.id]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -40,59 +62,42 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto p-4 space-y-8" role="main" aria-label="Artist Dashboard">
-      <div className="flex items-center justify-between">
+    <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6 md:space-y-8" role="main" aria-label="Artist Dashboard">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">Artist Dashboard</h1>
-            <div className="flex items-center gap-2">
-              {isVerifiedArtist ? (
-                <Badge variant="outline" className="gap-1" role="status" aria-label="Verified Artist Status">
-                  <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                  Verified Artist
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="gap-1" role="status" aria-label="Emerging Artist Status">
-                  <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                  Emerging Artist
-                </Badge>
-              )}
-              {profile.exhibition_badge && (
-                <Badge variant="outline" className="gap-1" role="status" aria-label="Exhibition Badge Status">
-                  <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                  Exhibition Badge
-                </Badge>
-              )}
-            </div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Artist Dashboard</h1>
+          <div className="flex flex-wrap items-center gap-2 mt-1">
+            {isVerifiedArtist && (
+              <Badge variant="outline" className="gap-1" role="status" aria-label="Verified Artist Status">
+                <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                Verified Artist
+              </Badge>
+            )}
+            {isEmergingArtist && (
+              <Badge variant="secondary" className="gap-1" role="status" aria-label="Emerging Artist Status">
+                <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                Emerging Artist
+              </Badge>
+            )}
+            {profile.exhibition_badge && (
+              <Badge variant="outline" className="gap-1" role="status" aria-label="Exhibition Badge Status">
+                <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                Exhibition Badge
+              </Badge>
+            )}
           </div>
-          <p className="text-muted-foreground">
-            Manage your artworks and track your performance
-          </p>
         </div>
-        <Button asChild>
-          <Link 
-            href="/artist/artworks/new" 
-            role="button"
-            aria-label="Upload New Artwork"
-            tabIndex={0}
-            onKeyDown={handleKeyDown}
-          >
-            Upload New Artwork
-          </Link>
-        </Button>
       </div>
 
-      {/* Verification Progress for Emerging Artists */}
+      {/* Verification Progress - Only for Emerging Artists */}
       {isEmergingArtist && (
-        <Card>
-          <CardHeader>
+        <Card className="sm:hover:shadow-lg transition-shadow">
+          <CardHeader className="sm:p-6">
             <CardTitle>Verification Progress</CardTitle>
-            <CardDescription>
-              Complete these steps to become a verified artist and unlock additional features
-            </CardDescription>
+            <CardDescription>Complete these steps to become a verified artist</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="space-y-4 sm:p-6">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Overall Progress</span>
                 <span className="text-sm text-muted-foreground" aria-label={`${verificationProgress}% complete`}>
@@ -133,92 +138,136 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
         </Card>
       )}
 
-      {/* Stripe Setup - Only for Verified Artists */}
-      {isVerifiedArtist && (
+      {/* Stripe Setup - Only for Verified Artists who haven't completed onboarding */}
+      {isVerifiedArtist && (!profile.stripe_account_id || !profile.stripe_onboarding_complete) && (
         <StripeOnboarding 
           stripeAccountId={profile.stripe_account_id || null} 
           onboardingComplete={!!profile.stripe_onboarding_complete} 
         />
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Quick Stats */}
-        <Card>
-          <CardHeader>
+        <Card className="sm:hover:shadow-lg transition-shadow">
+          <CardHeader className="sm:p-6">
             <CardTitle>Quick Stats</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
+          <CardContent className="sm:p-6">
+            <div className="grid grid-cols-2 gap-4 md:gap-6">
+              <div className="p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors">
                 <p className="text-sm text-muted-foreground">Total Artworks</p>
-                <p className="text-2xl font-bold">{totalArtworks}</p>
+                <p className="text-xl sm:text-2xl font-bold">{stats.totalArtworks}</p>
                 {isEmergingArtist && (
                   <p className="text-xs text-muted-foreground mt-1">
                     Limit: 10 artworks for emerging artists
                   </p>
                 )}
               </div>
-              <div>
+              <div className="p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors">
                 <p className="text-sm text-muted-foreground">Published</p>
-                <p className="text-2xl font-bold">{publishedArtworks}</p>
+                <p className="text-xl sm:text-2xl font-bold">{stats.publishedArtworks}</p>
+              </div>
+              <div className="p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Eye className="h-4 w-4" aria-hidden="true" />
+                  Total Views
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">{stats.totalViews}</p>
+              </div>
+              <div className="p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Heart className="h-4 w-4" aria-hidden="true" />
+                  Total Favorites
+                </p>
+                <p className="text-xl sm:text-2xl font-bold">{stats.totalFavorites}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Quick Actions */}
-        <Card>
-          <CardHeader>
+        <Card className="sm:hover:shadow-lg transition-shadow">
+          <CardHeader className="sm:p-6">
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2 sm:space-y-3 sm:p-6">
             <Button 
               asChild 
-              className="w-full"
-              disabled={isEmergingArtist && totalArtworks >= 10}
+              className="w-full justify-start text-left font-medium hover:bg-primary/90 h-11"
+              disabled={isEmergingArtist && stats.totalArtworks >= 10}
             >
               <Link 
                 href="/artist/artworks/new"
                 role="button"
-                aria-label={isEmergingArtist && totalArtworks >= 10 ? "Upload limit reached for emerging artists" : "Upload New Artwork"}
-                tabIndex={0}
-                onKeyDown={handleKeyDown}
+                aria-label={isEmergingArtist && stats.totalArtworks >= 10 ? "Upload limit reached for emerging artists" : "Upload New Artwork"}
+                className="flex items-center gap-2 px-4"
               >
+                <Image className="h-4 w-4" aria-hidden="true" />
                 Upload New Artwork
               </Link>
             </Button>
-            <Button asChild variant="outline" className="w-full">
+            <Button 
+              asChild 
+              variant="secondary" 
+              className="w-full justify-start text-left font-medium hover:bg-secondary/90 h-11"
+            >
               <Link 
                 href="/artist/portfolio"
                 role="button"
                 aria-label="View Your Portfolio"
-                tabIndex={0}
-                onKeyDown={handleKeyDown}
+                className="flex items-center gap-2 px-4"
               >
+                <BookOpen className="h-4 w-4" aria-hidden="true" />
                 View Portfolio
               </Link>
             </Button>
-            <Button asChild variant="outline" className="w-full">
+            <Button 
+              asChild 
+              variant="secondary" 
+              className="w-full justify-start text-left font-medium hover:bg-secondary/90 h-11"
+            >
               <Link 
                 href="/artist/artworks"
                 role="button"
                 aria-label="Manage Your Artworks"
-                tabIndex={0}
-                onKeyDown={handleKeyDown}
+                className="flex items-center gap-2 px-4"
               >
+                <FileText className="h-4 w-4" aria-hidden="true" />
                 Manage Artworks
               </Link>
             </Button>
             {isEmergingArtist && (
-              <Button asChild variant="outline" className="w-full">
+              <Button 
+                asChild 
+                variant="secondary" 
+                className="w-full justify-start text-left font-medium hover:bg-secondary/90 h-11"
+              >
                 <Link 
                   href="/artist/verification"
                   role="button"
                   aria-label="Start Verification Journey"
-                  tabIndex={0}
-                  onKeyDown={handleKeyDown}
+                  className="flex items-center gap-2 px-4"
                 >
+                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                   Verification Journey
+                </Link>
+              </Button>
+            )}
+            {isVerifiedArtist && profile.stripe_account_id && profile.stripe_onboarding_complete && (
+              <Button 
+                asChild 
+                className="w-full justify-start text-left font-medium h-11 bg-gradient-to-r from-emerald-400/90 to-emerald-600/90 hover:from-emerald-400 hover:to-emerald-600 text-white"
+              >
+                <Link 
+                  href={`https://dashboard.stripe.com/${profile.stripe_account_id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  role="button"
+                  aria-label="View Stripe Dashboard"
+                  className="flex items-center gap-2 px-4"
+                >
+                  <CreditCard className="h-4 w-4" aria-hidden="true" />
+                  View Stripe Dashboard
                 </Link>
               </Button>
             )}
@@ -226,18 +275,7 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
         </Card>
 
         {/* AI Artist Assistant - Available to all artists */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>AI Artist Assistant</CardTitle>
-            <CardDescription>
-              Get help with portfolio management, artwork descriptions, and professional development
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            </div>
-          </CardContent>
-        </Card>
+        <AIArtistAssistant className="col-span-1 md:col-span-2 sm:hover:shadow-lg transition-shadow" />
 
         {/* Verified-Only Features */}
         {isVerifiedArtist ? (
