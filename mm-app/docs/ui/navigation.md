@@ -40,13 +40,23 @@ flowchart LR
         subgraph VA_OverviewSection["Overview"]
             direction LR
             VA_Dashboard["/artist/dashboard"]
+            %% Quick Stats: Total Artworks, Published, Views, Favorites
+            %% Quick Actions: Upload, Portfolio, Artworks, Stripe
             VA_Portfolio["/artist/portfolio"]
             VA_Artworks["/artist/artworks"]
+        end
+
+        subgraph VA_AISection["AI Features"]
+            direction LR
+            VA_Bio["/artist/bio"]
+            VA_Analysis["/artist/analysis"]
+            VA_Assistant["/artist/assistant"]
         end
 
         subgraph VA_SalesSection["Sales"]
             direction LR
             VA_Store["/artist/store"]
+            VA_Stripe["/artist/stripe"]
             VA_Analytics["/artist/analytics"]
         end
 
@@ -57,6 +67,7 @@ flowchart LR
         end
 
         VerifiedArtist --> VA_OverviewSection
+        VerifiedArtist --> VA_AISection
         VerifiedArtist --> VA_SalesSection
         VerifiedArtist --> VA_CommunitySection
     end
@@ -69,8 +80,17 @@ flowchart LR
         subgraph EA_OverviewSection["Overview"]
             direction LR
             EA_Dashboard["/artist/dashboard"]
+            %% Quick Stats: Total Artworks (max 10), Published
+            %% Quick Actions: Upload, Portfolio, Artworks, Verification
             EA_Portfolio["/artist/portfolio"]
             EA_Artworks["/artist/artworks"]
+        end
+
+        subgraph EA_AISection["AI Features"]
+            direction LR
+            EA_Bio["/artist/bio"]
+            EA_Analysis["/artist/analysis"]
+            EA_Assistant["/artist/assistant"]
         end
 
         subgraph EA_ArtistSection["Artist"]
@@ -84,6 +104,7 @@ flowchart LR
         end
 
         EmergingArtist --> EA_OverviewSection
+        EmergingArtist --> EA_AISection
         EmergingArtist --> EA_ArtistSection
         EmergingArtist --> EA_CommunitySection
     end
@@ -105,8 +126,8 @@ flowchart LR
     
     class Root root
     class Admin,VerifiedArtist,EmergingArtist,User role
-    class AdminDash,Apps,Featured,VA_Dashboard,VA_Portfolio,VA_Artworks,VA_Store,VA_Analytics,VA_Messages,VA_QR,EA_Dashboard,EA_Portfolio,EA_Artworks,EA_Verify,EA_QR,UserProfile,UserSettings route
-    class VA_OverviewSection,VA_SalesSection,VA_CommunitySection,EA_OverviewSection,EA_ArtistSection,EA_CommunitySection section
+    class AdminDash,Apps,Featured,VA_Dashboard,VA_Portfolio,VA_Artworks,VA_Store,VA_Stripe,VA_Analytics,VA_Messages,VA_QR,EA_Dashboard,EA_Portfolio,EA_Artworks,EA_Verify,EA_QR,UserProfile,UserSettings route
+    class VA_OverviewSection,VA_AISection,VA_SalesSection,VA_CommunitySection,EA_OverviewSection,EA_AISection,EA_ArtistSection,EA_CommunitySection section
 ```
 
 ## Overview
@@ -205,11 +226,21 @@ Dashboard access is now streamlined:
   - Upload/edit works
   - Unlimited uploads
 
+**AI Features**
+- Bio (`/artist/bio`)
+  - Artist biography
+- Analysis (`/artist/analysis`)
+  - Performance analysis
+- Assistant (`/artist/assistant`)
+  - AI-powered assistance
+
 **Sales Section**
 - Store (`/artist/store`)
   - Sales management
   - Pricing controls
   - Transaction history
+- Stripe (`/artist/stripe`)
+  - Stripe integration
 - Analytics (`/artist/analytics`)
   - Performance tracking
   - Engagement metrics
@@ -239,6 +270,14 @@ Dashboard access is now streamlined:
   - Basic artwork management
   - Limited upload quota
   - Essential features
+
+**AI Features**
+- Bio (`/artist/bio`)
+  - Artist biography
+- Analysis (`/artist/analysis`)
+  - Performance analysis
+- Assistant (`/artist/assistant`)
+  - AI-powered assistance
 
 **Artist Section**
 - Get Verified (`/artist/verification`)
