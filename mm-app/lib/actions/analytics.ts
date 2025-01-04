@@ -282,12 +282,16 @@ export async function trackOnboardingStep(userId: string, step: string) {
   })
 }
 
-export async function trackProfileCompletion(userId: string, completedFields: string[]) {
+export async function trackProfileCompletion({ fieldName, completed, metadata }: { 
+  fieldName: string, 
+  completed: boolean, 
+  metadata: { userId: string } 
+}) {
   await trackEvent({
-    userId,
+    userId: metadata.userId,
     eventType: 'profile',
     eventName: 'profile_completion',
-    eventData: { completedFields }
+    eventData: { field: fieldName, completed }
   })
 }
 
