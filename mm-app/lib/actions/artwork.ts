@@ -563,4 +563,54 @@ export async function getArtworkDetails(id: string) {
   }
 
   return { artwork };
+}
+
+export async function getArtworkStats(artistId: string) {
+  const supabase = await createActionClient();
+
+  try {
+    // Get total artworks and published artworks
+    const { data: artworks, error: artworksError } = await supabase
+      .from('artworks')
+      .select('id, status')
+      .eq('artist_id', artistId);
+
+    if (artworksError) throw artworksError;
+
+    const totalArtworks = artworks?.length || 0;
+    const publishedArtworks = artworks?.filter(a => a.status === 'published').length || 0;
+
+    // Get total favorites
+    const { data: favorites, error: favoritesError } = await supabase
+      .from('artwork_favorites')
+      .select('artwork_id')
+      .in('artwork_id', artworks?.map(a => a.id) || []);
+
+    if (favoritesError) throw favoritesError;
+
+    const totalFavorites = favorites?.length || 0;
+
+    // Get total views from analytics
+    const { data: views, error: viewsError } = await supabase
+      .from('user_events')
+      .select('*')
+      .eq('event_type', 'artwork_view')
+      .in('event_data->artwork_id', artworks?.map(a => a.id) || []);
+
+    if (viewsError) throw viewsError;
+
+    const totalViews = views?.length || 0;
+
+    return {
+      stats: {
+        totalArtworks,
+        publishedArtworks,
+        totalViews,
+        totalFavorites
+      }
+    };
+  } catch (error: any) {
+    console.error('Error fetching artwork stats:', error);
+    return { error: error.message };
+  }
 } 
