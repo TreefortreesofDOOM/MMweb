@@ -303,6 +303,52 @@ export async function trackArtistVerificationProgress(userId: string, step: stri
   })
 }
 
+export async function trackArtistView(data: {
+  artistId: string
+  artistType: string
+  position: number
+  totalArtists: number
+  interactionType: 'click' | 'keyboard'
+}) {
+  const supabase = await createActionClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return
+
+  await trackEvent({
+    userId: user.id,
+    eventType: 'gallery_interaction',
+    eventName: 'view_artist_profile',
+    eventData: {
+      artist_id: data.artistId,
+      artist_type: data.artistType,
+      position: data.position,
+      total_artists: data.totalArtists,
+      interaction_type: data.interactionType
+    }
+  })
+}
+
+export async function trackArtistDirectoryView(data: {
+  initialCount: number
+  hasMore: boolean
+}) {
+  const supabase = await createActionClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return
+
+  await trackEvent({
+    userId: user.id,
+    eventType: 'gallery_interaction',
+    eventName: 'artist_directory_view',
+    eventData: {
+      initial_count: data.initialCount,
+      has_more: data.hasMore
+    }
+  })
+}
+
 // Main analytics functions
 export async function getAdminAnalytics(): Promise<{ data?: AnalyticsData; error?: string }> {
   const supabase = await createActionClient()
