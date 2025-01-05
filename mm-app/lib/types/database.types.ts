@@ -332,6 +332,97 @@ export type Database = {
           },
         ]
       }
+      collection_items: {
+        Row: {
+          added_at: string
+          artwork_id: string
+          collection_id: string
+          notes: string | null
+        }
+        Insert: {
+          added_at?: string
+          artwork_id: string
+          collection_id: string
+          notes?: string | null
+        }
+        Update: {
+          added_at?: string
+          artwork_id?: string
+          collection_id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_items_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_private: boolean | null
+          metadata: Json | null
+          name: string
+          patron_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_private?: boolean | null
+          metadata?: Json | null
+          name: string
+          patron_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_private?: boolean | null
+          metadata?: Json | null
+          name?: string
+          patron_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_patron_id_fkey"
+            columns: ["patron_id"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "collections_patron_id_fkey"
+            columns: ["patron_id"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collections_patron_id_fkey"
+            columns: ["patron_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feature_usage: {
         Row: {
           created_at: string
@@ -562,7 +653,7 @@ export type Database = {
           is_visible: boolean | null
           last_purchase_date: string | null
           metadata: Json | null
-          stripe_customer_id: string
+          stripe_customer_id: string | null
           total_purchases: number | null
           total_spent: number | null
           updated_at: string | null
@@ -577,7 +668,7 @@ export type Database = {
           is_visible?: boolean | null
           last_purchase_date?: string | null
           metadata?: Json | null
-          stripe_customer_id: string
+          stripe_customer_id?: string | null
           total_purchases?: number | null
           total_spent?: number | null
           updated_at?: string | null
@@ -592,7 +683,7 @@ export type Database = {
           is_visible?: boolean | null
           last_purchase_date?: string | null
           metadata?: Json | null
-          stripe_customer_id?: string
+          stripe_customer_id?: string | null
           total_purchases?: number | null
           total_spent?: number | null
           updated_at?: string | null
@@ -693,17 +784,21 @@ export type Database = {
           exhibition_badge: boolean | null
           first_name: string | null
           full_name: string | null
+          ghost_profile_claimed: boolean | null
           id: string
           instagram: string | null
           last_name: string | null
           last_notification_sent: string | null
           last_notification_type: string | null
+          last_purchase_date: string | null
           location: string | null
           medium: string[] | null
           name: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           stripe_account_id: string | null
           stripe_onboarding_complete: boolean | null
+          total_purchases: number | null
+          total_spent: number | null
           updated_at: string
           verification_progress: number | null
           verification_requirements: Json | null
@@ -729,17 +824,21 @@ export type Database = {
           exhibition_badge?: boolean | null
           first_name?: string | null
           full_name?: string | null
+          ghost_profile_claimed?: boolean | null
           id: string
           instagram?: string | null
           last_name?: string | null
           last_notification_sent?: string | null
           last_notification_type?: string | null
+          last_purchase_date?: string | null
           location?: string | null
           medium?: string[] | null
           name?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           stripe_account_id?: string | null
           stripe_onboarding_complete?: boolean | null
+          total_purchases?: number | null
+          total_spent?: number | null
           updated_at?: string
           verification_progress?: number | null
           verification_requirements?: Json | null
@@ -765,17 +864,21 @@ export type Database = {
           exhibition_badge?: boolean | null
           first_name?: string | null
           full_name?: string | null
+          ghost_profile_claimed?: boolean | null
           id?: string
           instagram?: string | null
           last_name?: string | null
           last_notification_sent?: string | null
           last_notification_type?: string | null
+          last_purchase_date?: string | null
           location?: string | null
           medium?: string[] | null
           name?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           stripe_account_id?: string | null
           stripe_onboarding_complete?: boolean | null
+          total_purchases?: number | null
+          total_spent?: number | null
           updated_at?: string
           verification_progress?: number | null
           verification_requirements?: Json | null
@@ -875,6 +978,15 @@ export type Database = {
           artist_amount: number
           artist_id: string | null
           artwork_id: string | null
+          billing_address_city: string | null
+          billing_address_country: string | null
+          billing_address_line1: string | null
+          billing_address_line2: string | null
+          billing_address_postal_code: string | null
+          billing_address_state: string | null
+          billing_email: string | null
+          billing_name: string | null
+          billing_phone: string | null
           buyer_id: string | null
           capture_method: string | null
           card_brand: string | null
@@ -894,8 +1006,12 @@ export type Database = {
           payment_intent_status: string | null
           payment_method_details: Json | null
           payment_method_id: string | null
+          payment_method_type: string | null
           payment_method_types: string[] | null
           platform_fee: number
+          refund_reason: string | null
+          refund_status: string | null
+          refunded: boolean | null
           statement_descriptor: string | null
           statement_descriptor_suffix: string | null
           status: Database["public"]["Enums"]["payment_status"]
@@ -912,6 +1028,15 @@ export type Database = {
           artist_amount: number
           artist_id?: string | null
           artwork_id?: string | null
+          billing_address_city?: string | null
+          billing_address_country?: string | null
+          billing_address_line1?: string | null
+          billing_address_line2?: string | null
+          billing_address_postal_code?: string | null
+          billing_address_state?: string | null
+          billing_email?: string | null
+          billing_name?: string | null
+          billing_phone?: string | null
           buyer_id?: string | null
           capture_method?: string | null
           card_brand?: string | null
@@ -931,8 +1056,12 @@ export type Database = {
           payment_intent_status?: string | null
           payment_method_details?: Json | null
           payment_method_id?: string | null
+          payment_method_type?: string | null
           payment_method_types?: string[] | null
           platform_fee: number
+          refund_reason?: string | null
+          refund_status?: string | null
+          refunded?: boolean | null
           statement_descriptor?: string | null
           statement_descriptor_suffix?: string | null
           status: Database["public"]["Enums"]["payment_status"]
@@ -949,6 +1078,15 @@ export type Database = {
           artist_amount?: number
           artist_id?: string | null
           artwork_id?: string | null
+          billing_address_city?: string | null
+          billing_address_country?: string | null
+          billing_address_line1?: string | null
+          billing_address_line2?: string | null
+          billing_address_postal_code?: string | null
+          billing_address_state?: string | null
+          billing_email?: string | null
+          billing_name?: string | null
+          billing_phone?: string | null
           buyer_id?: string | null
           capture_method?: string | null
           card_brand?: string | null
@@ -968,8 +1106,12 @@ export type Database = {
           payment_intent_status?: string | null
           payment_method_details?: Json | null
           payment_method_id?: string | null
+          payment_method_type?: string | null
           payment_method_types?: string[] | null
           platform_fee?: number
+          refund_reason?: string | null
+          refund_status?: string | null
+          refunded?: boolean | null
           statement_descriptor?: string | null
           statement_descriptor_suffix?: string | null
           status?: Database["public"]["Enums"]["payment_status"]

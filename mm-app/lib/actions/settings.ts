@@ -7,7 +7,7 @@ export const getSettings = async () => {
   const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
   
-  if (!user) throw new Error('Not authenticated');
+  if (!user) return null;
 
   const { data, error } = await supabase
     .rpc('get_user_settings', {

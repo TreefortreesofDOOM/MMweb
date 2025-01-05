@@ -67,21 +67,36 @@ export default async function RootLayout({
       </head>
       <body className={cn('min-h-screen bg-background font-sans antialiased', inter.className)}>
         <ThemeProvider>
-          <SettingsProvider>
-            <UnifiedAIProvider>
+          {user ? (
+            <SettingsProvider>
+              <UnifiedAIProvider>
+                <div suppressHydrationWarning>
+                  <SiteHeader
+                    userRole={userRole}
+                    userEmail={user.email}
+                    userAvatarUrl={userProfile?.avatar_url}
+                    userFullName={userProfile?.full_name}
+                  />
+                  <main>{children}</main>
+                  <UnifiedAI />
+                </div>
+                <Toaster />
+              </UnifiedAIProvider>
+            </SettingsProvider>
+          ) : (
+            <>
               <div suppressHydrationWarning>
                 <SiteHeader
-                  userRole={userRole}
-                  userEmail={user?.email}
-                  userAvatarUrl={userProfile?.avatar_url}
-                  userFullName={userProfile?.full_name}
+                  userRole={null}
+                  userEmail={null}
+                  userAvatarUrl={null}
+                  userFullName={null}
                 />
                 <main>{children}</main>
-                <UnifiedAI />
               </div>
               <Toaster />
-            </UnifiedAIProvider>
-          </SettingsProvider>
+            </>
+          )}
         </ThemeProvider>
       </body>
     </html>

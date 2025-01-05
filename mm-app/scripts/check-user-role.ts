@@ -1,5 +1,5 @@
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
-import { Database } from '@/lib/database.types';
+import { Database } from '@/lib/types/database.types';
 
 type UserRole = Database['public']['Enums']['user_role'];
 

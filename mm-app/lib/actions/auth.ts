@@ -5,6 +5,7 @@ import { encodedRedirect } from "@/lib/utils/common-utils";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { trackOnboardingStep } from '@/lib/actions/analytics';
+import { getGhostProfileByEmail, claimGhostProfile } from '@/lib/actions/ghost-profiles';
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -37,14 +38,19 @@ export const signUpAction = async (formData: FormData) => {
   }
 
   // Track successful signup
-  await trackOnboardingStep({
-    step: 'signup',
-    completed: true,
-    metadata: {
-      userId: data.user.id,
-      email: data.user.email,
+  await trackOnboardingStep(data.user.id, 'signup');
+
+  // Check for ghost profile after successful sign-up
+  try {
+    const ghostProfile = await getGhostProfileByEmail(email);
+    if (ghostProfile) {
+      // Claim the ghost profile silently
+      await claimGhostProfile(ghostProfile.id, data.user.id);
     }
-  });
+  } catch (error) {
+    // Log error but don't block the flow
+    console.error("Error claiming ghost profile:", error);
+  }
 
   return redirect("/role-selection");
 };

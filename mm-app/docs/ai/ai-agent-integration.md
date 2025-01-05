@@ -27,7 +27,7 @@ Located in `lib/unified-ai/hooks/use-context-awareness.ts`:
 
 ### Adaptive Behaviors
 
-#### Profile Pages
+#### Profile Pages [x]
 - Automatically switches to bio extraction mode
 - Displays "Extract Bio" action button
 - Provides profile-specific context data
@@ -39,18 +39,12 @@ Located in `lib/unified-ai/hooks/use-context-awareness.ts`:
 - Includes artwork-specific context data
 - Focuses on artwork-related features
 
-#### Gallery Pages
+#### Gallery Page
 - Activates gallery assistant mode [discuss]
 - Maintains chat-based interaction
 - Provides gallery-specific context
 - Optimizes for collection management
 - Allows for likeimage analysis [discuss]
-
-#### General Pages
-- Defaults to standard chat interface
-- Offers general AI assistance
-- Maintains consistent core features
-- Adapts to user needs
 
 ### Integration Points
 

@@ -1,4 +1,5 @@
 import { createActionClient } from '@/lib/supabase/supabase-action-utils'
+import { createServiceRoleClient } from '@/lib/supabase/service-role'
 import { stripe } from '@/lib/stripe/stripe-server-utils'
 import type { GhostProfile, StripeTransaction, PaymentStatus } from '@/lib/types/ghost-profiles'
 import { toGhostProfile, toTransaction } from '@/lib/types/ghost-profiles'
@@ -38,7 +39,7 @@ export async function getGhostProfile(id: string) {
 }
 
 export async function getGhostProfileByEmail(email: string) {
-  const supabase = await createActionClient()
+  const supabase = createServiceRoleClient()
   
   const { data: profile, error } = await supabase
     .from('ghost_profiles')
@@ -114,9 +115,19 @@ export async function claimGhostProfile(
   ghostProfileId: string,
   profileId: string
 ) {
-  const supabase = await createActionClient()
+  const supabase = createServiceRoleClient()
   
-  // Start a transaction
+  // Get the ghost profile first
+  const { data: ghostProfile, error: fetchError } = await supabase
+    .from('ghost_profiles')
+    .select('*')
+    .eq('id', ghostProfileId)
+    .single()
+
+  if (fetchError) throw fetchError
+  if (!ghostProfile) throw new Error('Ghost profile not found')
+
+  // Start a transaction to update both tables
   const { data: profile, error: profileError } = await supabase
     .from('ghost_profiles')
     .update({
@@ -128,6 +139,19 @@ export async function claimGhostProfile(
     .single()
 
   if (profileError) throw profileError
+
+  // Update the user's profile with the ghost profile data
+  const { error: userProfileError } = await supabase
+    .from('profiles')
+    .update({
+      total_purchases: ghostProfile.total_purchases,
+      total_spent: ghostProfile.total_spent,
+      ghost_profile_claimed: true,
+      last_purchase_date: ghostProfile.last_purchase_date,
+    })
+    .eq('id', profileId)
+
+  if (userProfileError) throw userProfileError
 
   // Update all transactions to link to the claimed profile
   const { error: transactionError } = await supabase

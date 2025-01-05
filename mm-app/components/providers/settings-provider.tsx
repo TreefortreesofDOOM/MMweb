@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useTheme } from 'next-themes';
 import { getSettings, updatePreferences } from '@/lib/actions/settings';
 import type { UserSettings } from '@/lib/types/settings-types';
+import { useAuth } from '@/hooks/use-auth';
 
 interface SettingsContextType {
   settings: UserSettings | null;
@@ -31,9 +32,15 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | null>(null);
   const { setTheme } = useTheme();
+  const { user } = useAuth();
 
   React.useEffect(() => {
     const loadSettings = async () => {
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const data = await getSettings();
         setSettings(data);
@@ -48,9 +55,11 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     };
 
     loadSettings();
-  }, [setTheme]);
+  }, [setTheme, user]);
 
   const updateTheme = React.useCallback(async (theme: UserSettings['preferences']['theme']) => {
+    if (!user) return;
+    
     try {
       await updatePreferences({ theme });
       setTheme(theme);
@@ -65,7 +74,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
       setError(err instanceof Error ? err : new Error('Failed to update theme'));
       throw err;
     }
-  }, [setTheme]);
+  }, [setTheme, user]);
 
   const value = React.useMemo(() => ({
     settings,

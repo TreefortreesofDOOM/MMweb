@@ -5,16 +5,7 @@ import { navigationConfig } from './config';
  * Type guard to check if a value is a valid UserRole
  */
 export function isValidUserRole(role: unknown): role is UserRole {
-  const validRoles = [
-    'user',
-    'patron',           // Add patron role
-    'artist',
-    'admin',
-    'emerging_artist',
-    'verified_artist'
-  ];
-  
-  return typeof role === 'string' && validRoles.includes(role as string);
+  return typeof role === 'string' && Object.keys(navigationConfig).includes(role);
 }
 
 /**
@@ -58,24 +49,22 @@ export function validateDynamicUrl(url: string, id: string | undefined | null): 
  * Get safe navigation config for a role
  */
 export function getSafeNavigationConfig(role: unknown): RoleNavigation {
-  if (!isValidUserRole(role)) {
-    console.error(`Invalid user role: ${String(role)}`);
+  // For unauthenticated users (role is null), return empty navigation without logging error
+  if (role === null) {
     return {
-      role: 'user', // Fallback to user role
+      role: 'user',
       navigation: []
     };
   }
 
-  const config = navigationConfig[role];
-  
-  // Validate each section and item
-  return {
-    role,
-    navigation: config.navigation
-      .filter(isValidNavigationSection)
-      .map(section => ({
-        ...section,
-        items: section.items.filter(isValidNavigationItem)
-      }))
-  };
+  // Only log error for invalid non-null roles
+  if (!isValidUserRole(role)) {
+    console.error(`Invalid user role: ${String(role)}`);
+    return {
+      role: 'user',
+      navigation: []
+    };
+  }
+
+  return navigationConfig[role as UserRole];
 } 

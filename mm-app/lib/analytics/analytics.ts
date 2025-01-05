@@ -1,5 +1,4 @@
 import { createActionClient } from '@/lib/supabase/supabase-action-utils';
-import { cookies } from 'next/headers';
 import { v4 as uuidv4 } from 'uuid';
 
 export type EventType = 

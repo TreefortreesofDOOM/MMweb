@@ -1,3 +1,10 @@
+-- Add ghost profile fields to profiles table
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS total_purchases INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS total_spent INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS last_purchase_date TIMESTAMP WITH TIME ZONE,
+  ADD COLUMN IF NOT EXISTS ghost_profile_claimed BOOLEAN DEFAULT FALSE;
+
 -- Create ghost profiles table
 CREATE TABLE IF NOT EXISTS ghost_profiles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -24,6 +31,8 @@ ALTER TABLE ghost_profiles ENABLE ROW LEVEL SECURITY;
 -- Drop existing policies if they exist
 DROP POLICY IF EXISTS "Admins have full access to ghost profiles" ON ghost_profiles;
 DROP POLICY IF EXISTS "Public can view visible ghost profiles" ON ghost_profiles;
+DROP POLICY IF EXISTS "Users can view their own ghost profiles" ON ghost_profiles;
+DROP POLICY IF EXISTS "Users can view their claimed ghost profiles" ON ghost_profiles;
 
 -- Admins can do everything (using service role)
 CREATE POLICY "Service role has full access to ghost profiles"
@@ -37,6 +46,24 @@ CREATE POLICY "Public can view visible ghost profiles"
   ON ghost_profiles
   FOR SELECT
   USING (is_visible = true);
+
+-- Users can view ghost profiles with their email
+CREATE POLICY "Users can view their own ghost profiles"
+  ON ghost_profiles
+  FOR SELECT
+  USING (
+    auth.jwt() IS NOT NULL AND
+    email = (SELECT email FROM auth.users WHERE id = auth.uid())
+  );
+
+-- Users can view their claimed ghost profiles
+CREATE POLICY "Users can view their claimed ghost profiles"
+  ON ghost_profiles
+  FOR SELECT
+  USING (
+    auth.jwt() IS NOT NULL AND
+    claimed_profile_id = auth.uid()
+  );
 
 -- Add indexes for performance
 CREATE INDEX idx_ghost_profiles_email ON ghost_profiles(email);
