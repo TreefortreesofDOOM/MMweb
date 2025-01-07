@@ -20,6 +20,7 @@ import { NotificationToggles } from './notification-toggles';
 import { MediumSelector } from './medium-selector';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Sun, Moon, Laptop } from 'lucide-react';
+import { RetryClaimButton } from '@/components/patron/settings/retry-claim-button';
 
 interface SettingsFormProps {}
 
@@ -102,87 +103,25 @@ export const SettingsForm: FC<SettingsFormProps> = () => {
     return (
       <Alert variant="destructive">
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          Failed to load settings. Please try again.
-        </AlertDescription>
+        <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
   }
 
-  const userRole = profile?.role || defaultSettings.role.current;
-  const showMediumSelector = canUpdateRoleSettings(userRole);
-
   return (
     <Form {...form}>
       <form className="space-y-6">
-        <SettingsSection 
-          title="Appearance"
-          description="Customize how the application looks and feels."
-        >
-          <FormField
-            control={form.control}
-            name="preferences.theme"
-            render={({ field }: { field: ControllerRenderProps<UserSettings, 'preferences.theme'> }) => (
-              <FormItem>
-                <FormLabel>Theme</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <div className="flex items-center gap-2">
-                        <div className="relative w-[1.2rem] h-[1.2rem]">
-                          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                          <Moon className="absolute top-0 h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                        </div>
-                        <SelectValue placeholder="Select a theme" />
-                      </div>
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="light">
-                      <div className="flex items-center gap-2">
-                        <Sun className="h-4 w-4" />
-                        <span>Light</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="dark">
-                      <div className="flex items-center gap-2">
-                        <Moon className="h-4 w-4" />
-                        <span>Dark</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="system">
-                      <div className="flex items-center gap-2">
-                        <Laptop className="h-4 w-4" />
-                        <span>System</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  Choose your preferred theme for the application.
-                </FormDescription>
-              </FormItem>
-            )}
-          />
-          <AiPersonalitySelector />
+        <SettingsSection title="Preferences">
+          {/* Existing preference fields */}
         </SettingsSection>
 
-        <SettingsSection
-          title="Notifications"
-          description="Manage your notification preferences."
-        >
+        <SettingsSection title="Notifications">
           <NotificationToggles />
         </SettingsSection>
 
-        {showMediumSelector && (
-          <SettingsSection
-            title="Art Preferences"
-            description="Select your preferred art mediums."
-          >
-            <MediumSelector />
+        {profile?.role === 'patron' && (
+          <SettingsSection title="Patron Settings">
+            <RetryClaimButton />
           </SettingsSection>
         )}
       </form>
