@@ -1,6 +1,9 @@
 # Save as update_directory.ps1
-$projectRoot = "../"
-$outputFile = "../.notes/directory_structure.md"
+# Get the script's directory and set paths relative to mm-app root
+$scriptPath = $PSScriptRoot
+$projectRoot = Join-Path $scriptPath ".."
+$notesDir = Join-Path $projectRoot ".notes"
+$outputFile = Join-Path $notesDir "directory_structure.md"
 
 # Generate directory listing
 function Get-FormattedDirectory {
@@ -13,6 +16,10 @@ function Get-FormattedDirectory {
     $content = ""
 
     foreach ($item in Get-ChildItem -Path $path -Force) {
+        # Skip .next directory
+        if ($item.Name -eq ".next") {
+            continue
+        }
         # Skip node_modules directory
         if ($item.Name -eq "node_modules") {
             continue

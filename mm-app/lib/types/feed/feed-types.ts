@@ -13,6 +13,7 @@ export interface FeedItem {
   content: Artwork
   creator: Profile
   timestamp: string
+  isSystemContent?: boolean  // Flag for MM AI content
 }
 
 export interface FeedView {

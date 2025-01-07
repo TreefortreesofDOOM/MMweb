@@ -9,7 +9,8 @@
     "seed:ghost": "tsx scripts/seed-ghost-profiles.ts",
     "seed:ghost:cleanup": "tsx scripts/seed-ghost-profiles.ts cleanup",
     "import:stripe": "tsx scripts/import-stripe-data.ts",
-    "match-transactions": "tsx scripts/match-stripe-transactions.ts"
+    "match-transactions": "tsx scripts/match-stripe-transactions.ts",
+    "update-docs": "pwsh scripts/update_docs.ps1"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

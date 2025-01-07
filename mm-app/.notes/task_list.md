@@ -4,6 +4,22 @@
 
 - [ ] Instead of Collection Age, on collection page in the collection data detail, show time since last transaction. We want to subtly encourage them to add more art to their collection. Rekindle their art buying habits.
 
+### Default Platform Follow Implementation
+1. Database & Backend
+   - [x] Create Meaning Machine AI profile with admin role
+   - [x] Add migration for automatic follow relationship
+   - [x] Implement trigger for new user registration to auto-follow MM AI
+   - [x] Add RLS policies for system-managed follows
+
+2. Frontend Integration
+   - [x] Add visual indicator for MM AI content in feed
+   - [x] Add proper error handling for feed loading
+
+3. Testing & Validation
+   - [ ] Add integration tests for auto-follow system
+   - [ ] Verify proper follow relationship creation
+   - [ ] Test edge cases (user deletion, role changes)
+
 ### Patron Collection View Improvements
 1. Error Handling
    - [ ] Implement ErrorBoundary wrapper for CollectionDetail
