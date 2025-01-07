@@ -2,6 +2,8 @@
 
 ## High Priority
 
+- [ ] Instead of Collection Age, on collection page in the collection data detail, show time since last transaction. We want to subtly encourage them to add more art to their collection. Rekindle their art buying habits.
+
 ### Patron Collection View Improvements
 1. Error Handling
    - [ ] Implement ErrorBoundary wrapper for CollectionDetail
