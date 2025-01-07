@@ -1,20 +1,20 @@
-import type { Database } from '@/lib/database.types';
-import type { LucideIcon } from 'lucide-react';
+import { LucideIcon } from 'lucide-react'
 
-export type UserRole = Database['public']['Enums']['user_role'];
+export type UserRole = 'admin' | 'verified_artist' | 'emerging_artist' | 'artist' | 'patron' | 'user'
 
-export interface NavigationItem {
-  title: string;
-  href: string;
-  icon: LucideIcon;
+export interface NavItem {
+  title: string
+  href: string
+  icon?: LucideIcon
+  isExternal?: boolean
 }
 
-export interface NavigationSection {
-  title: string;
-  items: NavigationItem[];
+export interface NavSection {
+  title: string
+  items: NavItem[]
 }
 
 export interface RoleNavigation {
-  role: UserRole;
-  navigation: NavigationSection[];
+  role: string
+  navigation: NavSection[]
 } 

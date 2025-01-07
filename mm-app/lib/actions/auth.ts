@@ -43,8 +43,8 @@ export const signUpAction = async (formData: FormData) => {
   // Check for ghost profile after successful sign-up
   try {
     const ghostProfile = await getGhostProfileByEmail(email);
-    if (ghostProfile) {
-      // Claim the ghost profile silently
+    if (ghostProfile && !ghostProfile.isClaimed) {
+      // Silently claim the ghost profile using our new implementation
       await claimGhostProfile(ghostProfile.id, data.user.id);
     }
   } catch (error) {

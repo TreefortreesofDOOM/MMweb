@@ -3,7 +3,7 @@
 import { createBrowserClient } from '@/lib/supabase/supabase-client';
 import { useEffect, useState } from 'react';
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
-import type { Database } from '@/lib/database.types';
+import type { Database } from '@/lib/types/database.types';
 import { 
   ARTIST_ROLES, 
   type ArtistProfile, 
@@ -21,6 +21,7 @@ export interface AuthState {
   isArtist: boolean;
   isVerifiedArtist: boolean;
   isEmergingArtist: boolean;
+  isLoaded: boolean;
 }
 
 export function useAuth(): AuthState {
@@ -147,5 +148,6 @@ export function useAuth(): AuthState {
     isArtist,
     isVerifiedArtist,
     isEmergingArtist,
+    isLoaded: !isLoading,
   };
 } 

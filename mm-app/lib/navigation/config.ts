@@ -11,7 +11,9 @@ import {
   Award,
   GalleryVertical,
   Image as Gallery,
-  Ghost
+  Ghost,
+  Clock,
+  Activity
 } from 'lucide-react';
 import type { RoleNavigation, UserRole } from './types';
 
@@ -88,6 +90,11 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
         title: 'Community',
         items: [
           {
+            title: 'Feed',
+            href: '/artist/feed',
+            icon: Activity
+          },
+          {
             title: 'Messages',
             href: '/artist/messages',
             icon: MessageSquare
@@ -138,6 +145,11 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
         title: 'Community',
         items: [
           {
+            title: 'Feed',
+            href: '/artist/feed',
+            icon: Activity
+          },
+          {
             title: 'QR Code',
             href: '/artist/qr-code',
             icon: QrCode
@@ -161,6 +173,11 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
             title: 'Settings',
             href: '/settings',
             icon: Settings
+          },
+          {
+            title: 'Feed',
+            href: '/feed',
+            icon: Activity
           }
         ]
       }
@@ -174,22 +191,57 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
     role: 'patron',
     navigation: [
       {
-        title: 'Collecting',
+        title: 'Overview',
         items: [
           {
-            title: 'Browse Art',
-            href: '/browse',
-            icon: Store
+            title: 'Dashboard',
+            href: '/patron/dashboard',
+            icon: LayoutDashboard
           },
           {
-            title: 'My Collection',
-            href: '/collection',
+            title: 'Collections',
+            href: '/patron/collections',
             icon: Gallery
           },
           {
+            title: 'Favorites',
+            href: '/patron/favorites',
+            icon: Store
+          }
+        ]
+      },
+      {
+        title: 'Analytics',
+        items: [
+          {
+            title: 'Insights',
+            href: '/patron/insights',
+            icon: LineChart
+          },
+          {
+            title: 'History',
+            href: '/patron/history',
+            icon: Clock
+          }
+        ]
+      },
+      {
+        title: 'Community',
+        items: [
+          {
             title: 'Following',
-            href: '/following',
+            href: '/patron/following',
             icon: Users
+          },
+          {
+            title: 'Messages',
+            href: '/patron/messages',
+            icon: MessageSquare
+          },
+          {
+            title: 'Feed',
+            href: '/patron/feed',
+            icon: Activity
           }
         ]
       }
