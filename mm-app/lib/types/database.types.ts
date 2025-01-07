@@ -423,7 +423,6 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
-          ghost_profile_id: string | null
           id: string
           is_private: boolean | null
           is_purchased: boolean | null
@@ -436,7 +435,6 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
-          ghost_profile_id?: string | null
           id?: string
           is_private?: boolean | null
           is_purchased?: boolean | null
@@ -449,7 +447,6 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
-          ghost_profile_id?: string | null
           id?: string
           is_private?: boolean | null
           is_purchased?: boolean | null
@@ -460,13 +457,6 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "collections_ghost_profile_id_fkey"
-            columns: ["ghost_profile_id"]
-            isOneToOne: false
-            referencedRelation: "ghost_profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "collections_patron_id_fkey"
             columns: ["patron_id"]
@@ -1071,6 +1061,7 @@ export type Database = {
           invoice_id: string | null
           is_gallery_entry: boolean | null
           last_payment_error: Json | null
+          metadata: Json | null
           payment_intent_status: string | null
           payment_method_details: Json | null
           payment_method_id: string | null
@@ -1122,6 +1113,7 @@ export type Database = {
           invoice_id?: string | null
           is_gallery_entry?: boolean | null
           last_payment_error?: Json | null
+          metadata?: Json | null
           payment_intent_status?: string | null
           payment_method_details?: Json | null
           payment_method_id?: string | null
@@ -1173,6 +1165,7 @@ export type Database = {
           invoice_id?: string | null
           is_gallery_entry?: boolean | null
           last_payment_error?: Json | null
+          metadata?: Json | null
           payment_intent_status?: string | null
           payment_method_details?: Json | null
           payment_method_id?: string | null
@@ -1459,6 +1452,12 @@ export type Database = {
         }
         Relationships: []
       }
+      user_accessible_ghost_profiles: {
+        Row: {
+          ghost_profile_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       binary_quantize:
@@ -1479,6 +1478,13 @@ export type Database = {
           target_user_id: string
         }
         Returns: number
+      }
+      claim_ghost_profile: {
+        Args: {
+          ghost_profile_id: string
+          claiming_user_id: string
+        }
+        Returns: undefined
       }
       cleanup_expired_registrations: {
         Args: Record<PropertyKey, never>
@@ -1665,6 +1671,12 @@ export type Database = {
           p_source_collection_id: string
           p_target_collection_id: string
           p_artwork_ids: string[]
+        }
+        Returns: undefined
+      }
+      revert_claimed_ghost_profile: {
+        Args: {
+          target_ghost_profile_id: string
         }
         Returns: undefined
       }
