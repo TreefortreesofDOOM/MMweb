@@ -9,6 +9,7 @@ import { ErrorBoundary } from '../../error-boundary'
 import { Suspense } from 'react'
 import Loading from './loading'
 import type { Metadata } from 'next'
+import { FollowButton } from "@/components/social/follow-button"
 
 interface PageProps {
   params: Promise<{ id: string }> | { id: string }
@@ -37,6 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PortfolioPage({ params }: PageProps) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   
   try {
     console.log('Portfolio page params:', params)

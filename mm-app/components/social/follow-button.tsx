@@ -15,13 +15,13 @@ interface FollowButtonProps {
 export function FollowButton({ artistId, className }: FollowButtonProps) {
   const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
+  const { user, isLoaded } = useAuth();
 
   useEffect(() => {
     let isMounted = true;
 
     const checkFollowStatus = async () => {
-      if (!user) {
+      if (!isLoaded || !user) {
         if (isMounted) {
           setIsFollowing(false);
         }
@@ -46,9 +46,11 @@ export function FollowButton({ artistId, className }: FollowButtonProps) {
     return () => {
       isMounted = false;
     };
-  }, [artistId, user]);
+  }, [artistId, user, isLoaded]);
 
   const handleClick = async () => {
+    if (!isLoaded) return;
+    
     if (!user) {
       toast.error('Please sign in to follow artists');
       return;
@@ -56,14 +58,11 @@ export function FollowButton({ artistId, className }: FollowButtonProps) {
 
     setIsLoading(true);
     try {
-      // Optimistic update
       setIsFollowing(!isFollowing);
-
       const action = isFollowing ? unfollowArtist : followArtist;
       const { success, error } = await action(artistId);
 
       if (!success) {
-        // Revert optimistic update on failure
         setIsFollowing(isFollowing);
         throw new Error(error);
       }

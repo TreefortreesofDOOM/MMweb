@@ -98,6 +98,10 @@ export function PortfolioClient({ artistId, initialArtworks }: PortfolioClientPr
   // Initialize artworks in useEffect to avoid blocking render
   useEffect(() => {
     try {
+      if (!initialArtworks) {
+        setArtworks([])
+        return
+      }
       const transformedArtworks = initialArtworks.map(transformArtwork)
       setArtworks(transformedArtworks)
     } catch (error) {
@@ -106,7 +110,7 @@ export function PortfolioClient({ artistId, initialArtworks }: PortfolioClientPr
     } finally {
       setIsLoading(false)
     }
-  }, [initialArtworks, transformArtwork])
+  }, [initialArtworks])
 
   // Calculate price range from initial artworks - memoized
   const priceRange = useMemo(() => ({
