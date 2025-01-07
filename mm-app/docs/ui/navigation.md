@@ -17,6 +17,7 @@ flowchart LR
     %% Main nodes
     Root["/"] --> Admin
     Root --> Artist
+    Root --> Patron
     Root --> User
 
     %% Admin Navigation
@@ -26,6 +27,35 @@ flowchart LR
         Admin --> AdminDash["/admin-dashboard"]
         Admin --> Apps["/applications"]
         Admin --> Featured["/featured-artist"]
+    end
+
+    %% Patron Navigation
+    subgraph PatronSection["Patron Section"]
+        direction LR
+        Patron[("Patron")]
+        
+        subgraph P_OverviewSection["Overview"]
+            direction LR
+            P_Dashboard["/patron/dashboard"]
+            P_Collections["/patron/collections"]
+            P_Favorites["/patron/favorites"]
+        end
+
+        subgraph P_AnalyticsSection["Analytics"]
+            direction LR
+            P_Insights["/patron/insights"]
+            P_History["/patron/history"]
+        end
+
+        subgraph P_CommunitySection["Community"]
+            direction LR
+            P_Following["/patron/following"]
+            P_Messages["/patron/messages"]
+        end
+
+        Patron --> P_OverviewSection
+        Patron --> P_AnalyticsSection
+        Patron --> P_CommunitySection
     end
 
     %% Artist Navigation
@@ -107,6 +137,35 @@ flowchart LR
         EmergingArtist --> EA_AISection
         EmergingArtist --> EA_ArtistSection
         EmergingArtist --> EA_CommunitySection
+    end
+
+    %% 4. Patron Navigation
+    subgraph PatronSection["Patron Section"]
+        direction LR
+        Patron[("Patron")]
+        
+        subgraph P_OverviewSection["Overview"]
+            direction LR
+            P_Dashboard["/patron/dashboard"]
+            P_Collections["/patron/collections"]
+            P_Favorites["/patron/favorites"]
+        end
+
+        subgraph P_AnalyticsSection["Analytics"]
+            direction LR
+            P_Insights["/patron/insights"]
+            P_History["/patron/history"]
+        end
+
+        subgraph P_CommunitySection["Community"]
+            direction LR
+            P_Following["/patron/following"]
+            P_Messages["/patron/messages"]
+        end
+
+        Patron --> P_OverviewSection
+        Patron --> P_AnalyticsSection
+        Patron --> P_CommunitySection
     end
 
     %% User Navigation
@@ -291,7 +350,42 @@ Dashboard access is now streamlined:
   - Portfolio access
   - Event sharing
 
-### 4. User Navigation
+### 4. Patron Navigation
+**Overview Section**
+- Dashboard (`/patron/dashboard`)
+  - Collection statistics
+  - Recent activity
+  - Quick access to collections
+- Collections (`/patron/collections`)
+  - Collection management
+  - Artwork organization
+  - Collection sharing
+- Favorites (`/patron/favorites`)
+  - Saved artworks
+  - Quick collection adding
+  - Artist bookmarks
+
+**Analytics Section**
+- Insights (`/patron/insights`)
+  - Collection value tracking
+  - Artist distribution
+  - Purchase history analytics
+- History (`/patron/history`)
+  - View history
+  - Purchase records
+  - Collection changes
+
+**Community Section**
+- Following (`/patron/following`)
+  - Artist following
+  - Collection subscriptions
+  - Activity feed
+- Messages (`/patron/messages`)
+  - Artist communications
+  - Purchase inquiries
+  - Collection sharing
+
+### 5. User Navigation
 **Overview Section**
 - Profile (`/profile`)
   - Basic profile management

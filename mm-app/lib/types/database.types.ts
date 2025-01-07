@@ -337,19 +337,25 @@ export type Database = {
           added_at: string
           artwork_id: string
           collection_id: string
+          display_order: number | null
           notes: string | null
+          transaction_id: string | null
         }
         Insert: {
           added_at?: string
           artwork_id: string
           collection_id: string
+          display_order?: number | null
           notes?: string | null
+          transaction_id?: string | null
         }
         Update: {
           added_at?: string
           artwork_id?: string
           collection_id?: string
+          display_order?: number | null
           notes?: string | null
+          transaction_id?: string | null
         }
         Relationships: [
           {
@@ -366,40 +372,101 @@ export type Database = {
             referencedRelation: "collections"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "collection_items_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: true
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collection_views: {
+        Row: {
+          collection_id: string
+          created_at: string
+          id: string
+          referrer: string | null
+          source: string
+          viewed_at: string
+          viewer_id: string | null
+        }
+        Insert: {
+          collection_id: string
+          created_at?: string
+          id?: string
+          referrer?: string | null
+          source?: string
+          viewed_at?: string
+          viewer_id?: string | null
+        }
+        Update: {
+          collection_id?: string
+          created_at?: string
+          id?: string
+          referrer?: string | null
+          source?: string
+          viewed_at?: string
+          viewer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_views_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
         ]
       }
       collections: {
         Row: {
           created_at: string
           description: string | null
+          ghost_profile_id: string | null
           id: string
           is_private: boolean | null
+          is_purchased: boolean | null
           metadata: Json | null
           name: string
           patron_id: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           description?: string | null
+          ghost_profile_id?: string | null
           id?: string
           is_private?: boolean | null
+          is_purchased?: boolean | null
           metadata?: Json | null
           name: string
           patron_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           description?: string | null
+          ghost_profile_id?: string | null
           id?: string
           is_private?: boolean | null
+          is_purchased?: boolean | null
           metadata?: Json | null
           name?: string
           patron_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "collections_ghost_profile_id_fkey"
+            columns: ["ghost_profile_id"]
+            isOneToOne: false
+            referencedRelation: "ghost_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "collections_patron_id_fkey"
             columns: ["patron_id"]
@@ -1002,6 +1069,7 @@ export type Database = {
           ghost_profile_id: string | null
           id: string
           invoice_id: string | null
+          is_gallery_entry: boolean | null
           last_payment_error: Json | null
           payment_intent_status: string | null
           payment_method_details: Json | null
@@ -1052,6 +1120,7 @@ export type Database = {
           ghost_profile_id?: string | null
           id?: string
           invoice_id?: string | null
+          is_gallery_entry?: boolean | null
           last_payment_error?: Json | null
           payment_intent_status?: string | null
           payment_method_details?: Json | null
@@ -1102,6 +1171,7 @@ export type Database = {
           ghost_profile_id?: string | null
           id?: string
           invoice_id?: string | null
+          is_gallery_entry?: boolean | null
           last_payment_error?: Json | null
           payment_intent_status?: string | null
           payment_method_details?: Json | null
@@ -1444,6 +1514,12 @@ export type Database = {
           similarity: number
         }[]
       }
+      get_collection_stats: {
+        Args: {
+          collection_id: string
+        }
+        Returns: Json
+      }
       get_user_settings: {
         Args: {
           p_user_id: string
@@ -1583,6 +1659,14 @@ export type Database = {
           artwork_id: string
           similarity: number
         }[]
+      }
+      move_collection_items: {
+        Args: {
+          p_source_collection_id: string
+          p_target_collection_id: string
+          p_artwork_ids: string[]
+        }
+        Returns: undefined
       }
       search_profiles: {
         Args: {

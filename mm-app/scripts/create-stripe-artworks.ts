@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@/lib/database.types';
+import type { Database } from '@/lib/types/database.types';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
 import path from 'path';

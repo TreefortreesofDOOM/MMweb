@@ -1,0 +1,794 @@
+# Current Directory Structure
+
+## Core Directories
+
+### `app/` - Next.js App Router
+- `(admin)/` - Protected admin routes and dashboard
+- `(auth)/` - Authentication flow and user onboarding
+- `(protected)/` - Protected user features and profile
+- `(public)/` - Public pages and gallery
+- `api/` - API routes and endpoints
+
+### `components/` - React Components
+- Feature-specific directories (admin, ai, artist, etc.)
+- `unified-ai/` - Unified AI component system
+- `ui/` - Shared UI components
+- `typography/` - Typography-specific components
+- No loose components at root level
+- Follows consistent naming patterns
+
+### `lib/` - Core Business Logic
+- `actions/` - Server actions for all features
+- `ai/` - AI implementation (Gemini, embeddings)
+- `analytics/` - Tracking and reporting
+- `auth/` - Authentication utilities
+- `stripe/` - Payment integration
+- `supabase/` - Database client
+- `utils/` - Common utilities
+- `vertex-ai/` - AI integration
+
+### Supporting Directories
+- `types/` - Global TypeScript types and interfaces
+- `hooks/` - Custom React hooks
+- `context/` - React contexts
+- `public/` - Static assets
+- `supabase/` - Database migrations and config
+- `reference/` - Reference documentation and examples
+- `.google/` - Google Cloud configuration
+
+## File Naming Standards
+
+### Utility Files
+- Use kebab-case with `-utils` suffix
+- Examples:
+  - `common-utils.ts`
+  - `search-utils.ts`
+  - `auth-utils.ts`
+  - `navigation-utils.ts`
+
+### Domain-Specific Files
+- Add domain prefix for clarity
+- Examples:
+  - `stripe-client-utils.ts`
+  - `stripe-server-utils.ts`
+  - `supabase-client.ts`
+  - `vertex-client.ts`
+
+### Component Files
+- Use kebab-case for file names
+- Examples:
+  - `artwork-card.tsx`
+  - `profile-avatar-form.tsx`
+  - `featured-artist-manager.tsx`
+  - `auth-form.tsx`
+- Group by feature
+- Include type definitions
+- Export PascalCase component names
+
+## Recent Updates ✅
+
+### Added
+- `unified-ai/` components directory
+- `.google/` configuration directory
+- `reference/` documentation directory
+- Root level `types/` directory
+
+### Consolidated
+- All global types in `/types`
+- AI components in `unified-ai`
+- Utils in feature directories
+- Analytics in proper directories
+
+### Standardized
+- Utility file naming
+- Component organization
+- Route structure
+- Configuration files
+
+## Configuration
+
+### Core Config Files
+- `next.config.js` - Next.js configuration
+- `tsconfig.json` - TypeScript settings
+- `tailwind.config.ts` - Styling
+- `components.json` - UI components
+- `.google/` - Google Cloud settings
+
+### Environment
+- `.env` - Base variables
+- `.env.local` - Local overrides
+- `.cursorrules` - Project standards
+
+## Best Practices
+
+1. **Component Organization**
+   - Group by feature
+   - Maintain clear boundaries
+   - Follow naming conventions
+   - Use unified AI components where applicable
+
+2. **Route Structure**
+   - Use route groups
+   - Protect sensitive routes
+   - Maintain layouts
+
+3. **Code Organization**
+   - Business logic in actions
+   - Utils in proper directories
+   - Types centralized in `/types`
+   - Clear separation of concerns
+   - AI functionality in unified system
+   
+## Core Components
+
+`
+- **.google/**
+    - mm-web-445818-44be61e33338.json
+- **.next/**
+    - **cache/**
+        - **webpack/**
+            - **client-development/**
+                - 0.pack.gz
+                - index.pack.gz
+        - .rscinfo
+    - **server/**
+        - app-paths-manifest.json
+        - interception-route-rewrite-manifest.js
+        - middleware-build-manifest.js
+        - middleware-manifest.json
+        - middleware-react-loadable-manifest.js
+        - next-font-manifest.js
+        - next-font-manifest.json
+        - pages-manifest.json
+        - server-reference-manifest.js
+        - server-reference-manifest.json
+    - **static/**
+        - **chunks/**
+            - polyfills.js
+        - **development/**
+            - _buildManifest.js
+            - _ssgManifest.js
+    - **types/**
+        - cache-life.d.ts
+        - package.json
+    - app-build-manifest.json
+    - build-manifest.json
+    - package.json
+    - react-loadable-manifest.json
+    - trace
+- **.notes/**
+    - directory_structure.md
+    - project_overview.md
+    - task_list.md
+- **app/**
+    - **(admin)/**
+        - **admin-dashboard/**
+            - page.tsx
+        - **ai-settings/**
+            - page.tsx
+        - **analytics/**
+            - page.tsx
+        - **applications/**
+            - page.tsx
+        - **featured-artist/**
+            - page.tsx
+        - **ghost-profiles/**
+            - **[id]/**
+            - page.tsx
+        - layout.tsx
+    - **(auth)/**
+        - **callback/**
+            - route.ts
+        - **email/**
+            - smtp-message.tsx
+        - **forgot-password/**
+            - page.tsx
+        - **onboarding/**
+            - **complete/**
+                - page.tsx
+            - **refresh/**
+                - page.tsx
+        - **reset-password/**
+            - page.tsx
+        - **role-selection/**
+            - page.tsx
+        - **sign-in/**
+            - page.tsx
+        - **sign-up/**
+            - page.tsx
+        - layout.tsx
+    - **(protected)/**
+        - **artist/**
+            - **analytics/**
+                - page.tsx
+            - **artworks/**
+                - **[id]/**
+                - **new/**
+                    - page.tsx
+                - artworks-client.tsx
+                - page.tsx
+            - **dashboard/**
+                - dashboard-client.tsx
+                - page.tsx
+            - **portfolio/**
+                - page.tsx
+            - **qr-code/**
+                - page.tsx
+            - **verification/**
+                - page.tsx
+        - **patron/**
+            - **collections/**
+                - **[id]/**
+                - **new/**
+                    - page.tsx
+                - page.tsx
+            - **dashboard/**
+                - page.tsx
+        - **profile/**
+            - **application/**
+                - page.tsx
+            - **edit/**
+                - page.tsx
+            - **validation/**
+                - page.tsx
+            - page.tsx
+        - **settings/**
+            - page.tsx
+        - layout.tsx
+    - **(public)/**
+        - **artists/**
+            - **[id]/**
+            - artist-card.tsx
+            - artists-client.tsx
+            - error-boundary.tsx
+            - loading.tsx
+            - page.tsx
+        - **artwork/**
+            - **[id]/**
+        - **gallery/**
+            - page.tsx
+        - **vertex-test/**
+            - page.tsx
+        - layout.tsx
+        - page.tsx
+    - **api/**
+        - **ai/**
+            - **analytics/**
+                - route.ts
+            - **analyze-artwork/**
+                - route.ts
+            - **chat/**
+                - route.ts
+            - **extract-bio/**
+                - route.ts
+        - **artworks/**
+            - **[id]/**
+        - **gallery/**
+            - **visit/**
+                - **[userId]/**
+        - **stripe/**
+            - **connect/**
+                - route.ts
+            - **login-link/**
+                - route.ts
+            - **payment-link/**
+                - route.ts
+        - **test-email/**
+            - route.ts
+        - **verification/**
+            - **refresh/**
+        - **vertex-ai/**
+            - **search/**
+                - route.ts
+            - **setup/**
+                - route.ts
+            - **setup-bigquery/**
+                - route.ts
+            - **test/**
+                - route.ts
+            - **test-setup/**
+                - route.ts
+        - **webhooks/**
+            - **stripe/**
+                - route.ts
+    - **collections/**
+        - **[id]/**
+    - favicon.ico
+    - globals.css
+    - layout.tsx
+- **components/**
+    - **admin/**
+        - ai-settings-form.tsx
+        - application-list.tsx
+        - application-review.tsx
+        - featured-artist-manager.tsx
+        - ghost-profiles-list.tsx
+    - **ai/**
+        - ai-artist-search.tsx
+        - ai-message-bubble.tsx
+        - floating-assistant.tsx
+        - test-chat.tsx
+    - **analytics/**
+        - **ui/**
+            - analytics-chart.tsx
+            - empty-state.tsx
+            - metrics-card.tsx
+        - admin-dashboard.tsx
+        - artist-dashboard.tsx
+        - dashboard.tsx
+        - page-view-tracker.tsx
+    - **artist/**
+        - ai-artist-assistant.tsx
+        - artist-profile-card.tsx
+        - feature-coming-soon.tsx
+        - featured-artist.tsx
+        - stripe-onboarding.tsx
+    - **artwork/**
+        - **sortable-image-grid/**
+            - image-item.tsx
+            - index.tsx
+            - sortable-artwork-card.tsx
+            - sortable-artwork-grid.tsx
+        - artwork-ai-analysis.tsx
+        - artwork-card.tsx
+        - artwork-form.tsx
+        - artwork-gallery.tsx
+        - artwork-grid.tsx
+        - artwork-modal.tsx
+        - artwork-qr.tsx
+        - artwork-tags.tsx
+        - artwork-upload.tsx
+    - **auth/**
+        - auth-form.tsx
+        - signup-form.tsx
+        - submit-button.tsx
+        - terms-modal.tsx
+    - **ghost-profiles/**
+        - ghost-profile-banner.tsx
+        - ghost-profile-notification.tsx
+    - **layout/**
+        - admin-layout.tsx
+        - artist-layout.tsx
+        - sidebar-nav.tsx
+    - **nav/**
+        - logo.tsx
+        - main-nav.tsx
+        - mobile-nav.tsx
+        - role-nav.tsx
+        - side-nav.tsx
+        - site-header.tsx
+        - user-nav.tsx
+    - **patron/**
+        - **collections/**
+            - artwork-selection-dialog.tsx
+            - batch-operations-menu.tsx
+            - bulk-notes-dialog.tsx
+            - collection-artwork-card.tsx
+            - collection-card.tsx
+            - collection-detail.tsx
+            - collection-item-grid.tsx
+            - collection-list.tsx
+            - collection-privacy-settings.tsx
+            - collection-share-dialog.tsx
+            - collection-stats.tsx
+            - delete-collection-dialog.tsx
+            - edit-collection-form.tsx
+            - edit-notes-dialog.tsx
+            - move-items-dialog.tsx
+            - new-collection-form.tsx
+            - public-collection-view.tsx
+        - **dashboard/**
+            - dashboard-client.tsx
+    - **portfolio/**
+        - portfolio-filters.tsx
+        - portfolio-sort.tsx
+    - **profile/**
+        - avatar-upload.tsx
+        - bio-assistant.tsx
+        - medium-input.tsx
+        - profile-avatar-form.tsx
+        - profile-medium-form.tsx
+        - qr-error-boundary.tsx
+        - user-qr.tsx
+        - website-input.tsx
+    - **providers/**
+        - artist-provider.tsx
+        - floating-assistant-provider.tsx
+        - query-provider.tsx
+        - settings-provider.tsx
+        - theme-provider.tsx
+    - **role/**
+        - role-selection-wizard.tsx
+    - **settings/**
+        - ai-personality-selector.tsx
+        - medium-selector.tsx
+        - notification-toggles.tsx
+        - settings-form.tsx
+        - settings-section.tsx
+    - **social/**
+        - favorite-button.tsx
+        - follow-button.tsx
+        - index.ts
+    - **typography/**
+        - inline-code.tsx
+    - **ui/**
+        - **data-table/**
+        - accordion.tsx
+        - alert-dialog.tsx
+        - alert.tsx
+        - artist-badge.tsx
+        - avatar.tsx
+        - badge.tsx
+        - button.tsx
+        - calendar.tsx
+        - card.tsx
+        - checkbox.tsx
+        - collapsible.tsx
+        - command.tsx
+        - copy-button.tsx
+        - dialog.tsx
+        - dropdown-menu.tsx
+        - exhibition-badge.tsx
+        - feature-gate.tsx
+        - form-message.tsx
+        - form.tsx
+        - hero.tsx
+        - input.tsx
+        - label.tsx
+        - popover.tsx
+        - progress.tsx
+        - scroll-area.tsx
+        - select.tsx
+        - sheet.tsx
+        - skeleton.tsx
+        - slider.tsx
+        - spinner.tsx
+        - switch.tsx
+        - table.tsx
+        - tabs.tsx
+        - textarea.tsx
+        - toast.tsx
+        - toaster.tsx
+        - toggle-group.tsx
+        - toggle.tsx
+        - tooltip.tsx
+        - use-toast.tsx
+    - **unified-ai/**
+        - index.ts
+        - unified-ai-analysis-view.tsx
+        - unified-ai-button.tsx
+        - unified-ai-chat-view.tsx
+        - unified-ai-container.tsx
+        - unified-ai-panel.tsx
+        - unified-ai-provider.tsx
+        - unified-ai-transition.tsx
+        - unified-ai.tsx
+        - UnifiedAIButton.tsx
+    - **validation/**
+        - validation-tracker.tsx
+    - **verification/**
+        - requirements-list.tsx
+        - verification-banner.tsx
+- **context/**
+    - auth-context.tsx
+- **docs/**
+    - **ai/**
+        - ai-agent-integration.md
+        - ai-agent-ui.md
+        - ai-provider-migration.md
+        - ai-provider-strategy.md
+        - ai-todos.md
+    - **api/**
+        - api-doc.md
+    - **features/**
+        - feed-system.md
+        - qr-code-feature.md
+    - **implementation/**
+        - implementation.md
+        - implementationBackup.md
+        - implementationPriority.md
+        - multi-upload-queue.md
+        - role-system.md
+        - settings-system.md
+    - **pages/**
+        - portfolio.md
+    - **roles/**
+        - admin-features.md
+        - artists-page.md
+        - patron-role.md
+        - role-features.md
+    - **ui/**
+        - artist-dashboard.md
+        - navigation.md
+        - uxTodo2.md
+    - @ghost-accounts.md
+    - current-directory-structure.md
+    - ghost-accounts.md
+    - masterAiroadmap.md
+    - masterRoadmap.md
+    - oldMasterRoadmap.md
+    - progressReport.md
+    - registration-flow.md
+    - rf.backup.md
+    - roadmap2.md
+    - todo.md
+    - verification-system.md
+- **hooks/**
+    - use-analytics.ts
+    - use-artist.ts
+    - use-auth.ts
+    - use-debounce.ts
+    - use-favorites.ts
+    - use-feature-access.ts
+    - use-navigation.ts
+    - use-settings.ts
+    - use-toast.ts
+    - use-user.ts
+    - use-verification.ts
+- **lib/**
+    - **actions/**
+        - **patron/**
+            - collection-actions.ts
+            - collection-analytics.ts
+            - following-actions.ts
+            - gallery-actions.ts
+        - admin.ts
+        - ai-search.ts
+        - ai-settings-actions.ts
+        - ai.ts
+        - analytics.ts
+        - artist.ts
+        - artwork-actions.ts
+        - artwork.ts
+        - auth.ts
+        - featured-artist.ts
+        - ghost-profiles.ts
+        - helpers.ts
+        - index.ts
+        - profile.ts
+        - registration.ts
+        - role.ts
+        - settings.ts
+        - social.ts
+        - update-avatar.ts
+        - verification.ts
+    - **ai/**
+        - **adapters/**
+            - analytics.ts
+            - base.ts
+            - gemini.ts
+        - **providers/**
+            - base.ts
+            - chatgpt.ts
+            - gemini.ts
+        - chat-history.ts
+        - embeddings.ts
+        - factory.ts
+        - gemini.ts
+        - instructions.ts
+        - personalities.ts
+        - prompts.ts
+        - types.ts
+        - unified-client.ts
+        - website-bio-extractor.ts
+    - **analytics/**
+        - analytics.ts
+        - track.ts
+    - **auth/**
+        - auth-utils.ts
+    - **constants/**
+        - mediums.ts
+    - **emails/**
+        - artist-notifications.ts
+    - **navigation/**
+        - config.ts
+        - navigation-utils.ts
+        - types.ts
+    - **stripe/**
+        - stripe-client-utils.ts
+        - stripe-products.ts
+        - stripe-server-utils.ts
+    - **supabase/**
+        - action.ts
+        - check-env-vars.ts
+        - client.ts
+        - middleware.ts
+        - service-role.ts
+        - supabase-action-utils.ts
+        - supabase-client.ts
+        - supabase-server.ts
+    - **types/**
+        - ai-settings.ts
+        - analytics.types.ts
+        - custom-types.ts
+        - database.types.ts
+        - ghost-profiles.ts
+        - patron-types.ts
+        - settings-types.ts
+        - supabase.types.ts
+    - **unified-ai/**
+        - **hooks/**
+            - use-context-awareness.ts
+        - animations.ts
+        - context.tsx
+        - hooks.ts
+        - index.ts
+        - types.ts
+        - use-analysis.ts
+        - use-chat.ts
+        - utils.ts
+    - **utils/**
+        - class-utils.ts
+        - common-utils.ts
+        - date-utils.ts
+        - format-utils.ts
+        - patron-utils.ts
+        - search-utils.ts
+        - settings-utils.ts
+    - **vertex-ai/**
+        - bigquery-setup.ts
+        - data-extraction-utils.ts
+        - format-utils.ts
+        - test-extraction.ts
+        - types.ts
+        - vertex-client.ts
+    - env.ts
+    - ghost-profiles-actions.ts
+    - utils.ts
+- **public/**
+    - **images/**
+        - **favicons/**
+            - android-chrome-192x192.png
+            - android-chrome-512x512.png
+            - apple-touch-icon.png
+            - favicon-16x16.png
+            - favicon-32x32.png
+            - favicon.ico
+            - site.webmanifest
+        - **logos/**
+            - meaning_machine_logo_black.png
+            - meaning_machine_logo_white.png
+- **reference/**
+    - **gallery-visit/**
+        - gallery-visit-client.tsx
+        - page.tsx
+- **scripts/**
+    - apply-product-mapping.ts
+    - check-embeddings.ts
+    - check-user-role.ts
+    - clear-embeddings.ts
+    - create-missing-collections.ts
+    - create-stripe-artists.ts
+    - create-stripe-artworks.ts
+    - create-test-artists.ts
+    - create-test-users.ts
+    - fetch-stripe-artists.ts
+    - fetch-stripe-products.ts
+    - import-stripe-data.ts
+    - match-stripe-transactions.ts
+    - match-transactions.ps1
+    - match-transactions.sh
+    - migrate-embeddings.ts
+    - payment_links.csv
+    - products.csv
+    - seed-ghost-profiles.ts
+    - test-similarity.ts
+    - unified_payments.csv
+    - update_directory.ps1
+- **supabase/**
+    - **.branches/**
+        - _current_branch
+    - **.temp/**
+        - cli-latest
+        - gotrue-version
+        - pooler-url
+        - postgres-version
+        - project-ref
+        - rest-version
+        - storage-version
+    - **migrations/**
+        - 0004_add_profile_view_count_and_exhibition_badge.sql
+        - 0005_add_profile_avatar_url.sql
+        - 20231226_simplify_stripe_fields.sql
+        - 20240000000000_create_analytics_tables.sql
+        - 20240000000001_modify_analytics_tables.sql
+        - 20240101_create_ai_settings.sql
+        - 20240101000000_initial_schema.sql
+        - 20240101000003_create_email_function.sql
+        - 20240108000001_add_collections.sql
+        - 20240123000000_create_updated_at_function.sql
+        - 20240124000000_enable_extensions.sql
+        - 20240124000001_create_updated_at_function.sql
+        - 20240124000002_create_artworks.sql
+        - 20240124000003_create_artwork_storage.sql
+        - 20240124000004_update_artworks_image_urls.sql
+        - 20240124000005_add_artwork_images.sql
+        - 20240124000006_add_stripe_fields.sql
+        - 20240125000000_decimal_prices.sql
+        - 20240125000000_setup_vector_database.sql
+        - 20240125000001_add_artwork_metadata.sql
+        - 20240125000001_test_users.sql
+        - 20240125000002_test_artworks.sql
+        - 20240225000000_add_display_order.sql
+        - 20240225000001_add_artwork_order_function.sql
+        - 20240225000002_initialize_artwork_order.sql
+        - 20240320000000_add_name_fields.sql
+        - 20240320000001_add_chat_history.sql
+        - 20240321000000_add_artworks_relationship.sql
+        - 20240321000001_add_analytics_tables.sql
+        - 20240327000000_add_social_features.sql
+        - 20240327000001_add_gallery_visits.sql
+        - 20240327000002_add_emerging_artist_role.sql
+        - 20240327000003_add_artist_role_view.sql
+        - 20240327000004_update_artist_rls.sql
+        - 20240327000005_add_verification_requirements.sql
+        - 20240327000005_update_follow_policies.sql
+        - 20240327000006_add_location_field.sql
+        - 20240327000006_add_verification_fields.sql
+        - 20240327000007_add_avatar_storage.sql
+        - 20240327000008_add_featured_artist.sql
+        - 20240328000000_add_patron_role.sql
+        - 20240328000000_add_purchased_collection.sql
+        - 20240328000001_add_display_order.sql
+        - 20240328000001_add_engagement_score_system.sql
+        - 20240328000001_add_medium_to_profiles.sql
+        - 20240328000001_add_partial_registration.sql
+        - 20240328000001_add_patron_helper.sql
+        - 20240328000002_add_collection_views.sql
+        - 20240328000002_fix_engagement_score_view_count.sql
+        - 20240328000002_update_patron_policies.sql
+        - 20240329000001_add_analytics_tables.sql
+        - 20240329000002_add_admin_analytics_policies.sql
+        - 20240329000002_add_gemini_embeddings.sql
+        - 20240330000001_add_search_indexes.sql
+        - 20240331000001_add_settings_system.sql
+        - 20240331000002_fix_settings_function.sql
+        - 20240331000003_add_upsert_settings_function.sql
+        - 20240404000001_add_ghost_profiles.sql
+        - 20240404000002_enhance_transactions.sql
+        - 20240404000003_allow_null_stripe_customer.sql
+        - 20240404000004_enhance_transactions.sql
+        - 20240404000005_fix_ghost_profiles_rls.sql
+        - 20240404000006_fix_ghost_profiles_recursion.sql
+        - 20240404000006_fix_transaction_amounts.sql
+        - 20240404000007_cleanup_ghost_profiles_rls.sql
+        - 20240404000008_simplify_ghost_profiles_rls.sql
+        - 20240404000009_add_ghost_profile_fields.sql
+        - 20240404000010_add_follows_foreign_keys.sql
+        - 20240405000000_add_collection_stats_function.sql
+        - 20240405000001_migrate_ghost_transactions.sql
+        - 20240405000002_add_ghost_profile_to_collections.sql
+        - 20240405000002_match_transactions_products.sql
+        - 20240405000003_fix_collection_stats.sql
+        - 20240405000004_add_move_collection_items.sql
+        - 20240405000005_fix_collection_stats_return.sql
+        - 20240405000006_add_amount_paid_to_collection_items.sql
+        - 20240405000007_simplify_collections.sql
+        - 20241224140133_enable_storage_rls.sql
+        - 20241224140420_ensure_artwork_bucket.sql
+        - 20241224144027_remote_schema.sql
+        - 20241224144129_remote_schema.sql
+        - 20241224150210_update_storage_policies.sql
+        - 20241224151820_ensure_artworks_table.sql
+    - **seed/**
+        - analytics_test_data.sql
+    - .gitignore
+    - config.toml
+- **types/**
+- .cursorrules
+- .env
+- .env.local
+- .gitignore
+- components.json
+- middleware.ts
+- next-env.d.ts
+- next.config.js
+- package-lock.json
+- package.json
+- postcss.config.js
+- README.md
+- tailwind.config.ts
+- tsconfig.json
+
+`
+
