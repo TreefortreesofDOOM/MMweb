@@ -1,6 +1,7 @@
 import { headers } from 'next/headers'
 import { stripe } from '@/lib/stripe/stripe-server-utils'
 import { createGhostProfile, getGhostProfileByEmail } from '@/lib/actions/ghost-profiles'
+import { createClient } from '@/lib/supabase/supabase-server'
 import { NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 
@@ -23,6 +24,23 @@ export async function POST(req: Request) {
     switch (event.type) {
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent
+        
+        // Retrieve full payment intent with line items
+        const fullPaymentIntent = await stripe.paymentIntents.retrieve(
+          paymentIntent.id,
+          {
+            expand: ['payment_method', 'line_items']
+          }
+        ) as Stripe.PaymentIntent & {
+          line_items?: {
+            data: Array<{
+              price?: {
+                product?: Stripe.Product | string;
+              };
+            }>;
+          };
+        }
+
         const customerResponse = await stripe.customers.retrieve(
           paymentIntent.customer as string
         )
@@ -54,7 +72,42 @@ export async function POST(req: Request) {
           )
         }
 
-        // Transaction will be created/updated by the database trigger
+        // Get artwork ID from line items
+        let artworkId: string | null = null
+        if (fullPaymentIntent.line_items?.data) {
+          for (const lineItem of fullPaymentIntent.line_items.data) {
+            if (lineItem.price?.product && typeof lineItem.price.product !== 'string') {
+              artworkId = lineItem.price.product.metadata.artwork_id
+              if (artworkId) break
+            }
+          }
+        }
+
+        // Create transaction with artwork ID
+        const supabase = await createClient()
+        const { error: transactionError } = await supabase
+          .from('transactions')
+          .upsert({
+            stripe_payment_intent_id: paymentIntent.id,
+            ghost_profile_id: ghostProfile.id,
+            artwork_id: artworkId,
+            amount_total: paymentIntent.amount,
+            status: 'succeeded',
+            stripe_created: new Date(paymentIntent.created * 1000).toISOString(),
+            stripe_succeeded_at: new Date().toISOString(),
+            payment_method: paymentIntent.payment_method,
+            metadata: {
+              ...paymentIntent.metadata,
+              stripe_customer_id: customer.id,
+              environment: process.env.NODE_ENV
+            }
+          })
+
+        if (transactionError) {
+          console.error('Error creating transaction:', transactionError)
+          return new NextResponse('Transaction creation failed', { status: 500 })
+        }
+
         return new NextResponse(null, { status: 200 })
       }
 
@@ -86,5 +139,5 @@ export async function GET(req: Request) {
         'ngrok-skip-browser-warning': '1'
       }
     }
-  );
+  )
 } 

@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/components/providers/settings-provider';
 import { UnifiedAIProvider } from '@/lib/unified-ai/context';
 import { UnifiedAI } from '@/components/unified-ai/unified-ai';
+import { QueryProvider } from '@/components/providers/query-provider';
 import { cn } from '@/lib/utils/common-utils';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -69,19 +70,21 @@ export default async function RootLayout({
         <ThemeProvider>
           {user ? (
             <SettingsProvider>
-              <UnifiedAIProvider>
-                <div suppressHydrationWarning>
-                  <SiteHeader
-                    userRole={userRole}
-                    userEmail={user.email}
-                    userAvatarUrl={userProfile?.avatar_url}
-                    userFullName={userProfile?.full_name}
-                  />
-                  <main>{children}</main>
-                  <UnifiedAI />
-                </div>
-                <Toaster />
-              </UnifiedAIProvider>
+              <QueryProvider>
+                <UnifiedAIProvider>
+                  <div suppressHydrationWarning>
+                    <SiteHeader
+                      userRole={userRole}
+                      userEmail={user.email}
+                      userAvatarUrl={userProfile?.avatar_url}
+                      userFullName={userProfile?.full_name}
+                    />
+                    <main>{children}</main>
+                    <UnifiedAI />
+                  </div>
+                  <Toaster />
+                </UnifiedAIProvider>
+              </QueryProvider>
             </SettingsProvider>
           ) : (
             <>

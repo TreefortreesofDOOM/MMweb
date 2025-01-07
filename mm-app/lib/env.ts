@@ -20,6 +20,7 @@ declare global {
       STRIPE_SECRET_KEY: string
       STRIPE_WEBHOOK_SECRET: string
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: string
+      SERVICE_ROLE_KEY: string
     }
   }
 }
@@ -42,7 +43,8 @@ const envSchema = z.object({
   STRIPE_WEBHOOK_SECRET: process.env.NODE_ENV === 'production' 
     ? z.string().min(1)
     : z.string().optional(),
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1)
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1),
+  SERVICE_ROLE_KEY: z.string().min(1)
 })
 
 export const env = envSchema.parse(process.env) 

@@ -1,11 +1,13 @@
 import { createClient } from '@/lib/supabase/supabase-server';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
 import { PageViewTracker } from '@/components/analytics/page-view-tracker';
+import { ArtworkCard } from '@/components/artwork/artwork-card';
 
 export const revalidate = 3600; // Revalidate every hour
 
 export default async function GalleryPage() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   // Fetch published artworks with artist information
   const { data: artworks } = await supabase

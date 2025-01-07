@@ -3,11 +3,13 @@ import { createClient } from '@/lib/supabase/supabase-server';
 import { ArtworkGallery } from '@/components/artwork/artwork-gallery';
 import { FeaturedArtist } from '@/components/artist/featured-artist';
 import { PageViewTracker } from '@/components/analytics/page-view-tracker';
+import { ArtistProfileCard } from '@/components/artist/artist-profile-card';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   // Fetch featured artist
   const { data: featuredArtistData } = await supabase
@@ -16,7 +18,7 @@ export default async function Home() {
       *,
       artist:profiles!featured_artist_artist_id_fkey (
         id,
-        name,
+        name: full_name,
         bio,
         avatar_url
       )
@@ -86,16 +88,35 @@ export default async function Home() {
   const transformedFeaturedArtworks = transformArtworks(featuredArtworks || []);
   const transformedArtworks = transformArtworks(artworks || []);
 
+  // Transform the featured artist data to match ArtistProfileCard interface
+  const transformedFeaturedArtist = featuredArtist ? {
+    id: featuredArtist.id,
+    full_name: featuredArtist.name,
+    avatar_url: featuredArtist.avatar_url,
+    bio: featuredArtist.bio,
+    website: null,
+    instagram: null,
+    location: null,
+    artist_type: 'verified' as const,
+    medium: []
+  } : null;
+
   return (
-    <>
+    <div className="container max-w-7xl mx-auto px-4 py-8">
       <PageViewTracker pathname="/" />
       <Hero />
       <main className="flex-1 flex flex-col gap-12 max-w-7xl mx-auto px-4 py-8">
-        {featuredArtist && (
-          <FeaturedArtist 
-            artist={featuredArtist} 
-            artworks={transformedFeaturedArtworks} 
-          />
+        {transformedFeaturedArtist && (
+          <div className="mb-12">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-2">Featured Artist</h2>
+              <ArtistProfileCard artist={transformedFeaturedArtist} />
+            </div>
+            <FeaturedArtist 
+              artist={featuredArtist} 
+              artworks={transformedFeaturedArtworks} 
+            />
+          </div>
         )}
 
         <div>
@@ -106,6 +127,6 @@ export default async function Home() {
           <ArtworkGallery artworks={transformedArtworks} />
         </div>
       </main>
-    </>
+    </div>
   );
 }
