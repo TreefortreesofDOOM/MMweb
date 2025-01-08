@@ -100,11 +100,6 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
             icon: Activity
           },
           {
-            title: 'Messages',
-            href: '/artist/messages',
-            icon: MessageSquare
-          },
-          {
             title: 'QR Code',
             href: '/artist/qr-code',
             icon: QrCode
@@ -125,24 +120,14 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
             icon: LayoutDashboard
           },
           {
-            title: 'Portfolio',
-            href: '/artist/portfolio',
-            icon: Palette
-          },
-          {
             title: 'Artworks',
             href: '/artist/artworks',
             icon: GalleryVertical
-          }
-        ]
-      },
-      {
-        title: 'Artist',
-        items: [
+          },
           {
-            title: 'Get Verified',
-            href: '/artist/verification',
-            icon: BadgeCheck
+            title: 'Portfolio',
+            href: '/artist/portfolio',
+            icon: Palette
           }
         ]
       },
@@ -158,6 +143,16 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
             title: 'QR Code',
             href: '/artist/qr-code',
             icon: QrCode
+          }
+        ]
+      },
+      {
+        title: 'Artist',
+        items: [
+          {
+            title: 'Get Verified',
+            href: '/artist/verification',
+            icon: BadgeCheck
           }
         ]
       }
@@ -216,6 +211,21 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
         ]
       },
       {
+        title: 'Community',
+        items: [
+          {
+            title: 'Feed',
+            href: '/patron/feed',
+            icon: Activity
+          },
+          {
+            title: 'Following',
+            href: '/patron/following',
+            icon: Users
+          }
+        ]
+      },
+      {
         title: 'Analytics',
         items: [
           {
@@ -227,26 +237,6 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
             title: 'History',
             href: '/patron/history',
             icon: Clock
-          }
-        ]
-      },
-      {
-        title: 'Community',
-        items: [
-          {
-            title: 'Following',
-            href: '/patron/following',
-            icon: Users
-          },
-          {
-            title: 'Messages',
-            href: '/patron/messages',
-            icon: MessageSquare
-          },
-          {
-            title: 'Feed',
-            href: '/patron/feed',
-            icon: Activity
           }
         ]
       }

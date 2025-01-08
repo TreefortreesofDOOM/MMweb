@@ -166,6 +166,7 @@ export async function getFeed(
         title,
         images,
         created_at,
+        ai_generated,
         artist:profiles!artist_id (
           id,
           name,
@@ -284,10 +285,12 @@ export async function getFeed(
           id: item.id,
           title: item.title || 'Untitled',
           images,
-          created_at: item.created_at
+          created_at: item.created_at,
+          ai_generated: item.ai_generated
         },
         creator: artist,
-        timestamp: item.created_at
+        timestamp: item.created_at,
+        isSystemContent: item.ai_generated === true || item.artist.id === MM_AI_PROFILE_ID
       }
     }).filter((item): item is NonNullable<typeof item> => item !== null) || []
 

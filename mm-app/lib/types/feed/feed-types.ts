@@ -5,7 +5,7 @@ type DbArtwork = Database['public']['Tables']['artworks']['Row']
 
 export interface Profile extends Pick<DbProfile, 'id' | 'name' | 'avatar_url'> {}
 
-export interface Artwork extends Pick<DbArtwork, 'id' | 'title' | 'images' | 'created_at'> {}
+export interface Artwork extends Pick<DbArtwork, 'id' | 'title' | 'images' | 'created_at' | 'ai_generated'> {}
 
 export interface FeedItem {
   id: string

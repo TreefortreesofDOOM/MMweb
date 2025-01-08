@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type SupabaseClient } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
-import { Database } from "@/lib/database.types";
+import { type Database } from "@/lib/types/database.types";
 
 type UpdateSessionResult = {
   response: NextResponse;

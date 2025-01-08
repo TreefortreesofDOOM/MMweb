@@ -134,21 +134,21 @@ export function FeedView({ patronId, artistId }: FeedViewProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div role="feed" aria-busy={isLoading}>
+    <div className="space-y-4 max-w-3xl mx-auto">
+      <div role="feed" aria-busy={isLoading} className="space-y-4">
         {feed.items.map(item => (
           <FeedItem key={item.id} item={item} />
         ))}
       </div>
       
       {isLoading && page > 1 && (
-        <div role="status" aria-label="Loading more items">
+        <div role="status" aria-label="Loading more items" className="py-2">
           <FeedSkeleton />
         </div>
       )}
       
       {feed.hasMore && !isLoading && (
-        <div ref={ref} className="flex justify-center">
+        <div ref={ref} className="flex justify-center py-2">
           <Button 
             onClick={() => setPage(p => p + 1)}
             variant="outline"

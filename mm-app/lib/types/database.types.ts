@@ -214,6 +214,10 @@ export type Database = {
       }
       artworks: {
         Row: {
+          ai_context: Json | null
+          ai_generated: boolean | null
+          ai_metadata: Json | null
+          analysis_results: Json[] | null
           artist_id: string
           created_at: string | null
           description: string | null
@@ -229,6 +233,10 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          ai_context?: Json | null
+          ai_generated?: boolean | null
+          ai_metadata?: Json | null
+          analysis_results?: Json[] | null
           artist_id: string
           created_at?: string | null
           description?: string | null
@@ -244,6 +252,10 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          ai_context?: Json | null
+          ai_generated?: boolean | null
+          ai_metadata?: Json | null
+          analysis_results?: Json[] | null
           artist_id?: string
           created_at?: string | null
           description?: string | null

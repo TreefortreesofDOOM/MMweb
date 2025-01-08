@@ -15,12 +15,18 @@
    - [x] Add visual indicator for MM AI content in feed
    - [x] Add proper error handling for feed loading
 
-3. Testing & Validation
+3. Testing & Validation [deferred]
    - [ ] Add integration tests for auto-follow system
    - [ ] Verify proper follow relationship creation
    - [ ] Test edge cases (user deletion, role changes)
 
 ### Patron Collection View Improvements
+- There is no way to browse or follow collectors. We should think about how to implement this.
+   **Recommendation Engine**
+   - We should recommend patrons to artists they might like based on an analysis of their collection and artist's content.
+   - We should also recommend artists to patrons they might like based on an analysis of their collection and artist's content.
+   - We should also recommend patrons to each other based on an analysis of their collection and each other's content.
+
 1. Error Handling
    - [ ] Implement ErrorBoundary wrapper for CollectionDetail
    - [ ] Add granular error handling for collection operations
