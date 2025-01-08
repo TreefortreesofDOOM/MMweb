@@ -17,6 +17,7 @@ export const personaMapping: Record<UserRole, AssistantPersona> = {
   admin: 'advisor',
   emerging_artist: 'mentor',
   verified_artist: 'mentor',
+  artist: 'mentor',
   patron: 'collector',
   user: 'collector'
 } as const
@@ -24,6 +25,20 @@ export const personaMapping: Record<UserRole, AssistantPersona> = {
 // Context types
 export type ViewContext = 'profile' | 'artwork' | 'gallery' | 'general'
 
+/**
+ * Parameters used for image generation
+ */
+export interface GenerationParameters {
+  size?: '1024x1024' | '1024x1792' | '1792x1024'
+  quality?: 'standard' | 'hd'
+  style?: 'vivid' | 'natural'
+  model?: 'dall-e-3' | 'dall-e-2'
+  [key: string]: unknown // Allow for additional model-specific parameters
+}
+
+/**
+ * Context information about how the AI generated the content
+ */
 export interface AIContext {
   route?: string
   pageType?: string
@@ -43,6 +58,30 @@ export interface AIContext {
       onApplyKeywords: (keywords: string[]) => void
     }
   }
+  // Optional generation fields
+  model?: string
+  prompt?: string
+  parameters?: GenerationParameters
+  negativePrompt?: string
+  modelVersion?: string
+  [key: string]: unknown // Allow for additional context fields
+}
+
+/**
+ * Metadata about the generated content
+ */
+export interface AIMetadata {
+  confidence: number
+  model: string
+  generation: {
+    prompt: string
+    parameters: GenerationParameters
+  }
+  accessibility: {
+    altText: string
+    description: string
+  }
+  [key: string]: unknown // Allow for additional metadata
 }
 
 export interface AnalysisResult {
