@@ -43,6 +43,11 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
             title: 'Ghost Profiles',
             href: '/ghost-profiles',
             icon: Ghost
+          },
+          {
+            title: 'Post Artwork',
+            href: '/post-artwork',
+            icon: Ghost
           }
         ]
       }

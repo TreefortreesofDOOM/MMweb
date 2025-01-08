@@ -92,6 +92,7 @@ export interface AIServiceProvider {
   // Multimodal
   analyzeImage(image: ImageData): Promise<Analysis>
   generateImageDescription(image: ImageData): Promise<string>
+  generateImage(prompt: string, options?: any): Promise<string>
   
   // Embeddings
   generateEmbeddings(text: string): Promise<Vector>

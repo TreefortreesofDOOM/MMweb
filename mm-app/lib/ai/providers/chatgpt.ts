@@ -31,6 +31,13 @@ export interface ChatGPTConfig {
   threadExpiry?: string
 }
 
+export interface ImageGenerationOptions {
+  size?: '1024x1024' | '1024x1792' | '1792x1024' | '512x512' | '256x256'
+  quality?: 'standard' | 'hd'
+  style?: 'vivid' | 'natural'
+  model?: 'dall-e-3' | 'dall-e-2'
+}
+
 export class ChatGPTProvider implements AIServiceProvider {
   private client: OpenAI
   private model: string
@@ -627,5 +634,28 @@ export class ChatGPTProvider implements AIServiceProvider {
 
   setMaxTokens(maxTokens: number): void {
     this.maxTokens = maxTokens
+  }
+
+  async generateImage(prompt: string, options: ImageGenerationOptions = {}): Promise<string> {
+    try {
+      const response = await this.client.images.generate({
+        model: options.model || 'dall-e-3',
+        prompt,
+        n: 1,
+        size: options.size || '1024x1024',
+        quality: options.quality || 'standard',
+        style: options.style || 'vivid',
+        response_format: 'url'
+      })
+
+      if (!response.data?.[0]?.url) {
+        throw new Error('No image URL returned from OpenAI')
+      }
+
+      return response.data[0].url
+    } catch (error) {
+      console.error('Error generating image:', error)
+      throw error
+    }
   }
 } 

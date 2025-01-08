@@ -143,6 +143,103 @@ This document provides comprehensive documentation for the MM Web API endpoints.
 - **Description**: Updates role-specific settings for artists/patrons
 - **Implementation**: Role settings management (38 lines)
 
+### 9. MM AI Agent (`/api/agent/mm-ai/`)
+
+#### Post Artwork
+- **Endpoint**: `/agent/mm-ai`
+- **Method**: POST
+- **Description**: Creates AI-generated artwork posts
+- **Authentication**: Bearer token (MM_AI_AGENT_KEY)
+- **Request Headers**:
+  ```
+  Authorization: Bearer <MM_AI_AGENT_KEY>
+  Content-Type: application/json
+  x-request-id: <optional-request-id>
+  ```
+- **Request Body**:
+  ```typescript
+  {
+    // Required fields
+    title: string;          // Max 100 characters
+    images: Array<{
+      url: string;         // Valid image URL
+      alt: string;         // Required for accessibility
+    }>;
+    aiGenerated: true;     // Must be true
+    aiContext: {           // UnifiedAI context
+      model: string;
+      prompt: string;
+      parameters: Record<string, unknown>;
+    };
+
+    // Optional fields
+    description?: string;  // Max 1000 characters
+    tags?: string[];      // Max 10 tags, each max 30 characters
+    analysisResults?: Array<{
+      type: string;
+      data: unknown;
+    }>;
+    metadata?: {
+      confidence: number;
+      model: string;
+      generation: {
+        prompt: string;
+        parameters: Record<string, unknown>;
+      };
+      accessibility: {
+        altText: string;
+        description: string;
+      };
+    };
+  }
+  ```
+- **Success Response** (201 Created):
+  ```json
+  {
+    "id": "123e4567-e89b-12d3-a456-426614174000"
+  }
+  ```
+- **Error Responses**:
+  - 401 Unauthorized:
+    ```json
+    {
+      "error": {
+        "code": "UNAUTHORIZED",
+        "message": "Missing authorization header"
+      }
+    }
+    ```
+  - 400 Bad Request:
+    ```json
+    {
+      "error": {
+        "code": "INVALID_INPUT",
+        "message": "Title must be less than 100 characters",
+        "details": {
+          "field": "title",
+          "maxLength": 100
+        }
+      }
+    }
+    ```
+  - 500 Internal Server Error:
+    ```json
+    {
+      "error": {
+        "code": "UNEXPECTED_ERROR",
+        "message": "An unexpected error occurred"
+      }
+    }
+    ```
+- **Implementation**: Server action with validation (156 lines)
+- **Rate Limits**: 100 requests per minute
+- **Security**:
+  - Bearer token authentication
+  - Input validation
+  - RLS policies
+  - Image URL validation
+  - Content type verification
+
 ## Authentication
 
 Most API endpoints require authentication through:
