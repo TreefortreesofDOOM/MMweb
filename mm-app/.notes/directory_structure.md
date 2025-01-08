@@ -6,9 +6,13 @@
 - **.google/**
     - mm-web-445818-44be61e33338.json
 - **.notes/**
-    - database_schema_20250107_095951.md
+    - database_schema_20250107_135628.md
+    - database_schema_20250107_164819.md
     - directory_structure.md
+    - feed-system.md
     - meeting_notes.md
+    - mm-ai-api.md
+    - mm-ai-posting-system.md
     - patron-role.md
     - project_overview.md
     - task_list.md
@@ -26,6 +30,9 @@
             - page.tsx
         - **ghost-profiles/**
             - **[id]/**
+            - page.tsx
+        - **mm-ai/**
+        - **post-artwork/**
             - page.tsx
         - layout.tsx
     - **(auth)/**
@@ -114,6 +121,9 @@
         - layout.tsx
         - page.tsx
     - **api/**
+        - **agent/**
+            - **mm-ai/**
+                - route.ts
         - **ai/**
             - **analytics/**
                 - route.ts
@@ -122,6 +132,8 @@
             - **chat/**
                 - route.ts
             - **extract-bio/**
+                - route.ts
+            - **generate-image/**
                 - route.ts
         - **artworks/**
             - **[id]/**
@@ -403,6 +415,9 @@
     - use-verification.ts
 - **lib/**
     - **actions/**
+        - **admin/**
+            - generate-artwork.ts
+            - mm-ai-actions.ts
         - **artist/**
             - artist-actions.ts
         - **feed/**
@@ -458,6 +473,8 @@
         - analytics.ts
         - track.ts
     - **auth/**
+        - admin.ts
+        - agent.ts
         - auth-utils.ts
     - **constants/**
         - mediums.ts
@@ -480,6 +497,8 @@
         - supabase-client.ts
         - supabase-server.ts
     - **types/**
+        - **admin/**
+            - mm-ai-types.ts
         - **feed/**
             - feed-types.ts
         - ai-settings.ts
@@ -491,12 +510,19 @@
         - patron-types.ts
         - settings-types.ts
     - **unified-ai/**
+        - **docs/**
+            - mm-ai-api.md
+            - mm-ai-posting-system.md
         - **hooks/**
             - use-context-awareness.ts
         - animations.ts
+        - artwork-types.ts
         - context.tsx
+        - generate-post.ts
         - hooks.ts
         - index.ts
+        - post-artwork.ts
+        - post-mm-ai.ts
         - types.ts
         - use-analysis.ts
         - use-chat.ts
@@ -507,7 +533,9 @@
         - date-utils.ts
         - error-utils.ts
         - format-utils.ts
+        - mm-ai-validation.ts
         - patron-utils.ts
+        - result.ts
         - search-utils.ts
         - settings-utils.ts
     - **vertex-ai/**
@@ -555,6 +583,7 @@
     - match-transactions.ps1
     - match-transactions.sh
     - migrate-embeddings.ts
+    - Pullman+Yards+2024-44.jpg
     - seed-ghost-profiles.ts
     - test-similarity.ts
     - update_directory.ps1
@@ -650,6 +679,7 @@
         - 20240405000007_simplify_collections.sql
         - 20240406000001_update_collection_functions.sql
         - 20240406000002_revert_claimed_ghost_profile.sql
+        - 20240407000001_add_mm_ai_profile.sql
         - 20241224140133_enable_storage_rls.sql
         - 20241224140420_ensure_artwork_bucket.sql
         - 20241224144027_remote_schema.sql
