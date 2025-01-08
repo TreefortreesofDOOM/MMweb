@@ -4,6 +4,7 @@ import { createActionClient } from '@/lib/supabase/action'
 import { logError } from '@/lib/utils/error-utils'
 import type { FeedView, Profile, Artwork } from '@/lib/types/feed/feed-types'
 import type { Json } from '@/lib/types/database.types'
+import { MM_AI_PROFILE_ID } from '@/lib/types/admin/mm-ai-types'
 
 type ImageObject = {
   url: string
@@ -171,7 +172,7 @@ export async function getFeed(
           avatar_url
         )
       `)
-      .in('artist_id', followedIds)
+      .or(`artist_id.in.(${followedIds.join(',')}),artist_id.eq.${MM_AI_PROFILE_ID}`)
       .eq('status', 'published')
       .order('created_at', { ascending: false })
       .range((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
