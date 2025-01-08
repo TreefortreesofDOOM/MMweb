@@ -27,7 +27,7 @@ $PGHOST="192.168.86.29"  # Updated to match local config
 $PGPORT="54322"
 $PGDATABASE="postgres"
 $PGUSER="postgres"
-$PGPASSWORD="postgres"
+$env:PGPASSWORD="postgres"  # Set as environment variable
 
 # Get the script's directory and set paths relative to mm-app root
 $scriptPath = $PSScriptRoot
@@ -48,7 +48,7 @@ function Invoke-PsqlCommand {
     "``````sql" | Out-File -FilePath $outputFile -Append -Encoding utf8
     
     # Execute the query and append results
-    $result = $query | psql -h 192.168.86.29 -p 54322 -U postgres -d postgres -A -t
+    $result = $query | psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -A -t
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Failed to execute query for section: $section"
         return
@@ -84,7 +84,7 @@ Write-Host "Connecting to Supabase at 192.168.86.29:54322..."
 Write-Host "Testing database connection..."
 
 # Test connection
-$testConnection = "SELECT 1;" | psql -h 192.168.86.29 -p 54322 -U postgres -d postgres -A -t
+"SELECT 1;" | psql -h 192.168.86.29 -p 54322 -U postgres -d postgres -A -t
 if ($LASTEXITCODE -eq 0) {
     Write-Host "Database connection successful"
 } else {
