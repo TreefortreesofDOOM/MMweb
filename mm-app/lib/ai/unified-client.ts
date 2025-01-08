@@ -187,4 +187,9 @@ export class UnifiedAIClient {
       this.provider.setSafetySettings(settings)
     }
   }
+
+  async generateImage(prompt: string, options?: any): Promise<string> {
+    const provider = await this.ensureProvider()
+    return provider.generateImage(prompt, options)
+  }
 } 
