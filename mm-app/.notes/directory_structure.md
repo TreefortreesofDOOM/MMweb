@@ -1,13 +1,11 @@
 # Current Directory Structure
 
 ## Core Components
-
 `
 - **.google/**
     - mm-web-445818-44be61e33338.json
 - **.notes/**
-    - database_schema_20250107_135628.md
-    - database_schema_20250107_164819.md
+    - database_schema_20250107_195332.md
     - directory_structure.md
     - feed-system.md
     - meeting_notes.md
@@ -297,10 +295,7 @@
         - favorite-button.tsx
         - follow-button.tsx
         - index.ts
-    - **typography/**
-        - inline-code.tsx
     - **ui/**
-        - **data-table/**
         - accordion.tsx
         - alert-dialog.tsx
         - alert.tsx
@@ -490,7 +485,6 @@
         - stripe-server-utils.ts
     - **supabase/**
         - action.ts
-        - check-env-vars.ts
         - middleware.ts
         - service-role.ts
         - supabase-action-utils.ts
@@ -583,7 +577,6 @@
     - match-transactions.ps1
     - match-transactions.sh
     - migrate-embeddings.ts
-    - Pullman+Yards+2024-44.jpg
     - seed-ghost-profiles.ts
     - test-similarity.ts
     - update_directory.ps1
@@ -706,4 +699,5 @@
 - tailwind.config.ts
 - tsconfig.json
 
-`
+`
+
