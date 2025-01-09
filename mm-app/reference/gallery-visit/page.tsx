@@ -15,7 +15,7 @@ export default async function GalleryVisitPage({ params }: GalleryVisitPageProps
   // Get the current user's session
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
-    redirect('/login?redirect=' + encodeURIComponent('/gallery/visit/' + userId));
+    return redirect('/login?redirect=' + encodeURIComponent('/gallery/visit/' + userId));
   }
 
   // Get the user's profile
