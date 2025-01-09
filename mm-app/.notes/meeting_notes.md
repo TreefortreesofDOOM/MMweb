@@ -190,3 +190,122 @@ Organized changes into 9 focused commits:
 - Maintained clean commit history
 - Enhanced system documentation
 - Improved code organization
+
+## 2024-04-08: Feed System Fixes and UI Improvements
+
+### Participants
+- Developer
+- AI Assistant
+
+### Summary
+Fixed issues with MM AI post identification in the feed system and improved the feed UI layout. Addressed type mismatches and container sizing issues.
+
+### Changes Made
+Organized changes into focused updates:
+
+1. `fix(feed): correct MM AI post identification`
+   - Added `ai_generated` field to feed query
+   - Updated feed item transformation
+   - Fixed type definitions for artwork content
+
+2. `style(feed): improve feed container sizing`
+   - Reduced container spacing
+   - Added max-width constraint
+   - Improved mobile responsiveness
+
+### Key Achievements
+1. **Feed System Fixes**
+   - Successfully fixed MM AI post identification
+   - Ensured proper type safety across the system
+   - Improved feed item transformation logic
+
+2. **UI Improvements**
+   - More compact feed layout
+   - Better responsive behavior
+   - Improved visual hierarchy
+
+### Lessons Learned
+1. **Type Safety**
+   - Keep interface definitions synchronized with database schema
+   - Ensure complete type coverage in transformations
+   - Handle nullable fields appropriately
+
+2. **UI Design**
+   - Use appropriate container constraints
+   - Consider responsive behavior
+   - Maintain consistent spacing
+
+3. **Feed System**
+   - Include all necessary fields in database queries
+   - Transform data consistently
+   - Handle special content types properly
+
+### Next Steps
+- Monitor feed performance
+- Gather user feedback on new layout
+- Consider additional UI improvements
+
+### Notes
+- Successfully fixed type issues
+- Improved feed layout
+- Maintained code quality and type safety
+
+## 2024-04-08: Feed System and MM AI Integration
+- Fixed feed system issues with MM AI post identification
+- Added ai_generated flag to feed query and transformation
+- Improved feed layout and UI spacing
+- Documented changes and lessons learned
+
+## 2024-04-08: Network Configuration and Supabase
+- Updated IP address configuration in .env.local
+- Resolved image timeout issues with local Supabase instance
+- Documented proper restart procedure for Supabase after network changes
+
+## 2024-04-08: Hydration and Portfolio Filters
+- Added suppressHydrationWarning to components affected by Dashlane
+- Fixed debounce implementation in portfolio filters
+- Improved type safety in filter components
+
+## 2024-04-09: Similarity Search and AI Functions
+Discussion:
+- Reviewed similarity search implementation in artwork discovery
+- Clarified client/server architecture for AI functions
+- Identified confusion in AI's usage of findSimilarArtworks
+
+Changes Made:
+- Moved server-side Gemini tools out of client-side hook
+- Properly separated client/server concerns in chat implementation
+- Maintained clean architecture following .cursorrules
+
+Key Findings:
+- findSimilarArtworks only needs descriptive query text, not specific title/artist
+- Similarity search parameters:
+  - queryText: Any descriptive text
+  - match_threshold (default: 0.7)
+  - match_count (default: 10)
+
+Lessons Learned:
+1. Client/Server Separation:
+   - Keep AI tools and implementations server-side
+   - Use API routes for AI operations
+   - Maintain clean separation of concerns
+
+2. Function Registration:
+   - AI functions are registered through UnifiedAIClient
+   - Both ChatGPT and Gemini can use same backend functions
+   - Keep function implementations server-side
+
+3. AI Instructions:
+   - Be explicit about function parameter requirements
+   - Clarify when specific fields aren't needed
+   - Document default values and behavior
+
+Next Steps:
+- Update AI instructions for clearer similarity search usage
+- Monitor AI function usage patterns
+- Consider adding more detailed logging for similarity searches
+
+## Action Items
+- [ ] Update AI instructions for similarity search
+- [ ] Add monitoring for similarity search usage
+- [ ] Review other AI functions for similar clarity issues
