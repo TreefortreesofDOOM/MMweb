@@ -55,7 +55,14 @@ export function PortfolioFilters({
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null])
 
   // Debounce search input
-  const debouncedSearch = useDebounce(search, 300)
+  const debouncedSetSearch = useDebounce((value: string) => {
+    onFilterChange({
+      search: value,
+      medium: medium === 'all' ? '' : medium,
+      priceRange: price,
+      dateRange
+    })
+  }, 300)
 
   // Handle price range change
   const handlePriceChange = (value: number[]) => {
@@ -67,15 +74,15 @@ export function PortfolioFilters({
     setDateRange([range?.from ?? null, range?.to ?? null])
   }
 
-  // Update filters when any value changes
+  // Update filters when non-search values change
   useEffect(() => {
     onFilterChange({
-      search: debouncedSearch,
+      search: search,
       medium: medium === 'all' ? '' : medium,
       priceRange: price,
       dateRange
     })
-  }, [debouncedSearch, medium, price, dateRange, onFilterChange])
+  }, [medium, price, dateRange, onFilterChange, search])
 
   // Reset all filters
   const handleReset = () => {
@@ -95,34 +102,41 @@ export function PortfolioFilters({
           onClick={handleReset}
           className="h-7 px-2"
         >
-          Reset
+          <span suppressHydrationWarning>Reset</span>
           <X className="ml-2 h-3 w-3" />
         </Button>
       </CardHeader>
       <CardContent className="grid gap-3 p-3">
         <div className="grid gap-3 sm:grid-cols-4">
           {/* Search Input */}
-          <Input
-            placeholder="Search artworks..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-8"
-          />
+          <div suppressHydrationWarning>
+            <Input
+              placeholder="Search artworks..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                debouncedSetSearch(e.target.value)
+              }}
+              className="h-8"
+            />
+          </div>
 
           {/* Medium Select */}
-          <Select value={medium} onValueChange={setMedium}>
-            <SelectTrigger className="h-8">
-              <SelectValue placeholder="Medium" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All mediums</SelectItem>
-              {mediums.map((m) => (
-                <SelectItem key={m} value={m}>
-                  {m}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div suppressHydrationWarning>
+            <Select value={medium} onValueChange={setMedium}>
+              <SelectTrigger className="h-8">
+                <SelectValue placeholder="Medium" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All mediums</SelectItem>
+                {mediums.map((m) => (
+                  <SelectItem key={m} value={m}>
+                    {m}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Price Range */}
           <div className="flex flex-col space-y-1">
@@ -142,27 +156,29 @@ export function PortfolioFilters({
           {/* Date Range */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "h-8 justify-start text-left font-normal",
-                  !dateRange[0] && !dateRange[1] && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-3 w-3" />
-                {dateRange[0] ? (
-                  dateRange[1] ? (
-                    <>
-                      {format(dateRange[0], "LLL dd, y")} -{" "}
-                      {format(dateRange[1], "LLL dd, y")}
-                    </>
+              <div suppressHydrationWarning>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "h-8 justify-start text-left font-normal",
+                    !dateRange[0] && !dateRange[1] && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-3 w-3" />
+                  {dateRange[0] ? (
+                    dateRange[1] ? (
+                      <>
+                        {format(dateRange[0], "LLL dd, y")} -{" "}
+                        {format(dateRange[1], "LLL dd, y")}
+                      </>
+                    ) : (
+                      format(dateRange[0], "LLL dd, y")
+                    )
                   ) : (
-                    format(dateRange[0], "LLL dd, y")
-                  )
-                ) : (
-                  "Date range"
-                )}
-              </Button>
+                    "Date range"
+                  )}
+                </Button>
+              </div>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
