@@ -1,11 +1,12 @@
 # Current Directory Structure
 
 ## Core Components
+
 `
 - **.google/**
     - mm-web-445818-44be61e33338.json
 - **.notes/**
-    - database_schema_20250107_195332.md
+    - database_schema_20250108_194733.md
     - directory_structure.md
     - feed-system.md
     - meeting_notes.md
@@ -29,7 +30,6 @@
         - **ghost-profiles/**
             - **[id]/**
             - page.tsx
-        - **mm-ai/**
         - **post-artwork/**
             - page.tsx
         - layout.tsx
@@ -180,8 +180,6 @@
     - **ai/**
         - ai-artist-search.tsx
         - ai-message-bubble.tsx
-        - floating-assistant.tsx
-        - test-chat.tsx
     - **analytics/**
         - **ui/**
             - analytics-chart.tsx
@@ -228,12 +226,7 @@
             - feed-skeleton.tsx
         - feed-view.tsx
     - **ghost-profiles/**
-        - ghost-profile-banner.tsx
         - ghost-profile-notification.tsx
-    - **layout/**
-        - admin-layout.tsx
-        - artist-layout.tsx
-        - sidebar-nav.tsx
     - **nav/**
         - logo.tsx
         - main-nav.tsx
@@ -270,16 +263,13 @@
         - portfolio-sort.tsx
     - **profile/**
         - avatar-upload.tsx
-        - bio-assistant.tsx
         - medium-input.tsx
         - profile-avatar-form.tsx
         - profile-medium-form.tsx
-        - qr-error-boundary.tsx
         - user-qr.tsx
         - website-input.tsx
     - **providers/**
         - artist-provider.tsx
-        - floating-assistant-provider.tsx
         - query-provider.tsx
         - settings-provider.tsx
         - theme-provider.tsx
@@ -346,7 +336,6 @@
         - unified-ai-provider.tsx
         - unified-ai-transition.tsx
         - unified-ai.tsx
-        - UnifiedAIButton.tsx
     - **validation/**
         - validation-tracker.tsx
     - **verification/**
@@ -699,5 +688,4 @@
 - tailwind.config.ts
 - tsconfig.json
 
-`
-
+`
