@@ -8,7 +8,11 @@ import { useAuth } from '@/hooks/use-auth'
 
 interface UseChatOptions {
   onError?: (error: Error) => void
-  context?: string
+  context?: {
+    data?: {
+      artworkId?: string
+    }
+  }
   systemInstruction?: string
   role?: string
   artworkId?: string
@@ -93,7 +97,7 @@ export function useChat(options: UseChatOptions = {}) {
 
       return assistantMessage
     } catch (error) {
-      options.onError?.(error as Error)
+      console.error('Chat error:', error)
       throw error
     } finally {
       setIsLoading(false)
