@@ -5,13 +5,14 @@ import { Content } from '@google/generative-ai';
 import { buildSystemInstruction } from '@/lib/ai/instructions';
 import { UserContext, ArtworkContext } from '@/lib/ai/types';
 import { findRelevantChatHistory, formatChatContext } from '@/lib/ai/chat-history';
-import { personaMapping } from '@/lib/unified-ai/types';
+import { personaMapping, type AssistantPersona } from '@/lib/unified-ai/types';
 import { UnifiedAIClient } from '@/lib/ai/unified-client';
 import { AIFunction } from '@/lib/ai/providers/base';
 import { artworkTools } from '@/lib/ai/gemini';  // TODO: Move these to a provider-agnostic location
 import { env } from '@/lib/env';
+import type { UserRole } from '@/lib/navigation/types';
 
-type AssistantRole = 'gallery' | 'artist' | 'patron';
+type AssistantRole = UserContext['role'];
 
 interface SimilarityMatch {
   id: string;
@@ -27,13 +28,8 @@ interface ChatRequest {
   chatHistory?: Content[];
   context?: string;
   systemInstruction?: string;
-  userContext?: {
-    id: string;
+  userContext?: Omit<UserContext, 'role'> & {
     role: AssistantRole;
-    name?: string;
-    bio?: string;
-    artist_type?: string;
-    website?: string;
   };
 }
 
@@ -100,13 +96,23 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     // Build system instruction with context
-    const { instruction, contextMessage } = buildSystemInstruction(personaMapping[role], {
-      artwork: artworkContext?.artwork,
-      user: userContext || {
-        id: userId,
-        role
+    const { instruction, contextMessage } = buildSystemInstruction(
+      personaMapping[role === 'gallery' ? 'admin' : 
+                    role === 'artist' ? 'artist' : 
+                    role === 'patron' ? 'patron' : 'user'], 
+      {
+        artwork: artworkContext?.artwork,
+        user: userContext ? {
+          ...userContext,
+          role: userContext.role === 'gallery' ? 'gallery' : 
+                userContext.role === 'artist' ? 'artist' : 'patron'
+        } : {
+          id: userId,
+          role: role === 'gallery' ? 'gallery' : 
+                role === 'artist' ? 'artist' : 'patron'
+        }
       }
-    });
+    );
 
     // Initialize AI client
     const ai = new UnifiedAIClient({
