@@ -5,7 +5,6 @@ import type { CollectionWithItems } from '@/lib/types/patron-types'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArtworkCard } from '@/components/artwork/artwork-card'
 import { CollectionStats } from './collection-stats'
-import { formatDate } from '@/lib/utils/date-utils'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
@@ -41,8 +40,12 @@ export const PublicCollectionView: FC<PublicCollectionViewProps> = ({ collection
 
       <div className="space-y-1">
         <h1 className="text-3xl font-bold tracking-tight">{collection.name}</h1>
-        <p className="text-muted-foreground">
-          Created {formatDate(collection.created_at)}
+        <p className="text-sm text-muted-foreground">
+          Created {new Date(collection.created_at).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })}
         </p>
       </div>
 
@@ -67,7 +70,19 @@ export const PublicCollectionView: FC<PublicCollectionViewProps> = ({ collection
               <CardContent className="p-4">
                 <div className="relative">
                   <ArtworkCard
-                    artwork={item.artworks}
+                    artwork={{
+                      ...item.artworks,
+                      images: item.artworks.images.map((url: string) => ({
+                        url,
+                        isPrimary: false,
+                        order: 0
+                      })),
+                      profiles: item.artworks.profiles ? {
+                        id: item.artworks.artist_id,
+                        name: item.artworks.profiles.full_name || '',
+                        avatar_url: ''
+                      } : null
+                    }}
                     showFavorite={false}
                   />
                 </div>

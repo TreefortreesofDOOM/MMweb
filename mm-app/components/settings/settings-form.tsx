@@ -1,25 +1,20 @@
 'use client';
 
 import { FC, useCallback } from 'react';
-import { useForm, ControllerRenderProps, FieldValues } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSettings } from '@/hooks/use-settings';
 import { useAuth } from '@/hooks/use-auth';
 import { UserSettings, userSettingsSchema } from '@/lib/types/settings-types';
 import { defaultSettings, canUpdateRoleSettings } from '@/lib/utils/settings-utils';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
+import { Form } from '@/components/ui/form';
 import { SettingsSection } from './settings-section';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AiPersonalitySelector } from './ai-personality-selector';
 import { NotificationToggles } from './notification-toggles';
-import { MediumSelector } from './medium-selector';
 import { useDebounce } from '@/hooks/use-debounce';
-import { Sun, Moon, Laptop } from 'lucide-react';
 import { RetryClaimButton } from '@/components/patron/settings/retry-claim-button';
 
 interface SettingsFormProps {}

@@ -8,7 +8,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Pencil, Lock, Globe } from 'lucide-react'
 import Link from 'next/link'
-import { formatDate } from '@/lib/utils/date-utils'
 import { CollectionItemGrid } from './collection-item-grid'
 import { CollectionPrivacySettings } from './collection-privacy-settings'
 import { CollectionStats } from './collection-stats'
@@ -104,8 +103,12 @@ const CollectionDetailContent: FC<CollectionDetailContentProps> = ({ collection 
               <Globe className="h-4 w-4 text-muted-foreground" />
             )}
           </div>
-          <p className="text-muted-foreground">
-            Created {formatDate(collection.created_at)}
+          <p className="text-sm text-muted-foreground">
+            Created {new Date(collection.created_at).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
           </p>
         </div>
         <div className="flex items-center gap-2">

@@ -1,12 +1,11 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import type { Collection } from '@/lib/types/patron-types'
-import { formatDate } from '@/lib/utils/date-utils'
+import type { CollectionWithCount } from '@/lib/types/patron-types'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { FC } from 'react'
 
 interface CollectionCardProps {
-  collection: Collection;
+  collection: CollectionWithCount;
   isPurchased?: boolean;
 }
 
@@ -31,7 +30,11 @@ export const CollectionCard: FC<CollectionCardProps> = ({
             </div>
             <div className="text-sm text-muted-foreground">
               <p>{itemCount} {itemCount === 1 ? 'artwork' : 'artworks'}</p>
-              <p>Created {formatDate(collection.created_at)}</p>
+              <p>Created {new Date(collection.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}</p>
               {isPurchased && (
                 <Badge variant="secondary" className="mt-2">
                   Purchased Works

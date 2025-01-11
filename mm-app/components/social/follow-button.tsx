@@ -21,7 +21,11 @@ export function FollowButton({ artistId, className }: FollowButtonProps) {
     let isMounted = true;
 
     const checkFollowStatus = async () => {
-      if (!isLoaded || !user) {
+      // Don't check if user isn't loaded yet
+      if (!isLoaded) return;
+      
+      // If no user, we know they're not following
+      if (!user) {
         if (isMounted) {
           setIsFollowing(false);
         }
@@ -48,7 +52,10 @@ export function FollowButton({ artistId, className }: FollowButtonProps) {
     };
   }, [artistId, user, isLoaded]);
 
-  const handleClick = async () => {
+  const handleClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!isLoaded) return;
     
     if (!user) {
@@ -58,15 +65,14 @@ export function FollowButton({ artistId, className }: FollowButtonProps) {
 
     setIsLoading(true);
     try {
-      setIsFollowing(!isFollowing);
       const action = isFollowing ? unfollowArtist : followArtist;
       const { success, error } = await action(artistId);
 
       if (!success) {
-        setIsFollowing(isFollowing);
         throw new Error(error);
       }
 
+      setIsFollowing(!isFollowing);
       toast.success(isFollowing ? 'Unfollowed artist' : 'Following artist');
     } catch (error: any) {
       toast.error(error.message || 'Failed to update follow status');
@@ -75,16 +81,17 @@ export function FollowButton({ artistId, className }: FollowButtonProps) {
     }
   };
 
-  // Show loading state while we don't know the follow status
+  // Show a loading placeholder while we determine the initial state
   if (isFollowing === null) {
     return (
       <Button
-        variant="ghost"
+        variant="secondary"
         size="sm"
-        className={className}
+        className={`${className} opacity-50`}
         disabled
       >
-        <Loader2 className="h-4 w-4 animate-spin" />
+        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+        Loading...
       </Button>
     );
   }
@@ -93,7 +100,7 @@ export function FollowButton({ artistId, className }: FollowButtonProps) {
     <Button
       variant={isFollowing ? 'secondary' : 'default'}
       size="sm"
-      className={className}
+      className={`${className} transition-all duration-200`}
       onClick={handleClick}
       disabled={isLoading}
       aria-label={isFollowing ? 'Unfollow artist' : 'Follow artist'}
@@ -101,7 +108,8 @@ export function FollowButton({ artistId, className }: FollowButtonProps) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          handleClick();
+          e.stopPropagation();
+          handleClick(e as any);
         }
       }}
     >

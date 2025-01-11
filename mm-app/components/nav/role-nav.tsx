@@ -5,11 +5,9 @@ import { SideNav } from './side-nav';
 import { MobileNav } from './mobile-nav';
 import { useArtist } from '@/hooks/use-artist';
 import { useNavigation } from '@/hooks/use-navigation';
-import { cn } from '@/lib/utils/common-utils';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import type { UserRole } from '@/lib/navigation/types';
 
 interface RoleNavProps {
   role: unknown;
@@ -18,8 +16,7 @@ interface RoleNavProps {
 
 export function RoleNav({ role, children }: RoleNavProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { isVerifiedArtist, isEmergingArtist, getVerificationStatus, getVerificationPercentage } = useArtist();
+  const { isEmergingArtist, getVerificationStatus, getVerificationPercentage } = useArtist();
   
   const handleMobileNavToggle = useCallback((open: boolean) => {
     setIsMobileNavOpen(open);

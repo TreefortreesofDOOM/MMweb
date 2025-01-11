@@ -23,8 +23,8 @@ export const UnifiedAIChatView = ({
   const { profile } = useAuth()
 
   // Get active personality info
-  const activeCharacter = pageContext.data?.characterPersonality || 'JARVIS'
-  const contextSuggestion = pageContext.data?.personaContext || ''
+  const activeCharacter = pageContext.characterPersonality || 'JARVIS'
+  const contextSuggestion = pageContext.personaContext || ''
   const activePersona = profile?.artist_type === 'verified' ? 'mentor' : 
                        profile?.artist_type === 'emerging' ? 'mentor' : 
                        'collector'
