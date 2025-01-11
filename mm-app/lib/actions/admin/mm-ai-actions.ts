@@ -1,6 +1,6 @@
 'use server'
 
-import { createActionClient } from '@/lib/supabase/action'
+import { createActionClient } from '@/lib/supabase/supabase-action-utils'
 import { logError } from '@/lib/utils/error-utils'
 import { ok, err, type Result } from '@/lib/utils/result'
 import { validateParams } from '@/lib/utils/mm-ai-validation'

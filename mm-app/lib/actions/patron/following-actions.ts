@@ -1,4 +1,4 @@
-import { createActionClient } from '@/lib/supabase/action'
+import { createActionClient } from '@/lib/supabase/supabase-action'
 import { revalidatePath } from 'next/cache'
 import type { FollowingArtist } from '@/lib/types/patron-types'
 import type { Database } from '@/lib/types/database.types'

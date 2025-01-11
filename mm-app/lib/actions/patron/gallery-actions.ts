@@ -1,4 +1,4 @@
-import { createActionClient } from '@/lib/supabase/action'
+import { createActionClient } from '@/lib/supabase/supabase-action'
 import { revalidatePath } from 'next/cache'
 
 interface GalleryVisit {

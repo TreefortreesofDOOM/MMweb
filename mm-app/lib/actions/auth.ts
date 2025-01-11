@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { trackOnboardingStep } from '@/lib/actions/analytics';
 import { getGhostProfileByEmail, claimGhostProfile } from '@/lib/actions/ghost-profiles';
+import { logAuthError } from '@/lib/utils/error-utils';
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -14,62 +15,81 @@ export const signUpAction = async (formData: FormData) => {
   const origin = (await headers()).get("origin");
 
   if (!email || !password) {
-    return encodedRedirect(
-      "error",
-      "/sign-up",
-      "Email and password are required",
-    );
+    logAuthError('AUTH_MISSING_CREDENTIALS', 'Email and password are required', 'signUpAction');
+    return encodedRedirect("error", "/sign-up", "Email and password are required");
   }
 
-  // Sign up the user
   const { data, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
   });
 
   if (signUpError) {
-    console.error("Signup error:", signUpError);
+    logAuthError('AUTH_SIGNUP_FAILED', signUpError.message, 'signUpAction', { error: signUpError });
     return encodedRedirect("error", "/sign-up", signUpError.message);
   }
 
   if (!data?.session || !data.user) {
-    console.error("No session or user returned from signUp");
+    logAuthError('AUTH_NO_SESSION', 'No session or user returned from signUp', 'signUpAction');
     return encodedRedirect("error", "/sign-up", "Failed to create account");
   }
 
-  // Track successful signup
   await trackOnboardingStep(data.user.id, 'signup');
 
-  // Check for ghost profile after successful sign-up
   try {
     const ghostProfile = await getGhostProfileByEmail(email);
     if (ghostProfile && !ghostProfile.isClaimed) {
-      // Silently claim the ghost profile using our new implementation
       await claimGhostProfile(ghostProfile.id, data.user.id);
     }
   } catch (error) {
-    // Log error but don't block the flow
-    console.error("Error claiming ghost profile:", error);
+    logAuthError(
+      'AUTH_GHOST_PROFILE_ERROR',
+      error instanceof Error ? error.message : 'Error claiming ghost profile',
+      'signUpAction',
+      { error },
+      data.user.id
+    );
   }
 
   return redirect("/role-selection");
 };
 
 export const signInAction = async (formData: FormData) => {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const supabase = await createActionClient();
+  try {
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const supabase = await createActionClient();
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+    if (!email || !password) {
+      logAuthError('AUTH_MISSING_CREDENTIALS', 'Email and password are required', 'signInAction');
+      return encodedRedirect("error", "/sign-in", "Email and password are required");
+    }
 
-  if (error) {
-    return encodedRedirect("error", "/sign-in", error.message);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      logAuthError('AUTH_SIGNIN_FAILED', error.message, 'signInAction', { error });
+      return encodedRedirect("error", "/sign-in", error.message);
+    }
+
+    if (!data?.session) {
+      logAuthError('AUTH_NO_SESSION', 'Failed to create session', 'signInAction');
+      return encodedRedirect("error", "/sign-in", "Failed to create session");
+    }
+
+    return redirect("/profile");
+  } catch (error) {
+    logAuthError(
+      'AUTH_UNEXPECTED_ERROR',
+      error instanceof Error ? error.message : 'An unexpected error occurred',
+      'signInAction',
+      { error }
+    );
+    return encodedRedirect("error", "/sign-in", "An unexpected error occurred");
   }
-
-  return redirect("/profile");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {

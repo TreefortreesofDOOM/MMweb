@@ -1,6 +1,6 @@
 'use server'
 
-import { createActionClient } from '@/lib/supabase/action'
+import { createActionClient } from '@/lib/supabase/supabase-action'
 import { logError } from '@/lib/utils/error-utils'
 import type { FeedView, Profile, Artwork } from '@/lib/types/feed/feed-types'
 import type { Json } from '@/lib/types/database.types'

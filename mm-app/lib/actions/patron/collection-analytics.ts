@@ -1,6 +1,6 @@
 'use server'
 
-import { createActionClient } from '@/lib/supabase/action'
+import { createActionClient } from '@/lib/supabase/supabase-action'
 import { createServiceRoleClient } from '@/lib/supabase/service-role'
 
 interface ViewEvent {

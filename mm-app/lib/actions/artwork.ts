@@ -590,12 +590,12 @@ export async function getArtworkStats(artistId: string) {
 
     const totalFavorites = favorites?.length || 0;
 
-    // Get total views from analytics
+    // Get total views from analytics - using a different approach for JSON field
     const { data: views, error: viewsError } = await supabase
       .from('user_events')
-      .select('*')
+      .select('id')
       .eq('event_type', 'artwork_view')
-      .in('event_data->artwork_id', artworks?.map(a => a.id) || []);
+      .contains('event_data', { artwork_id: artworks?.map(a => a.id) });
 
     if (viewsError) throw viewsError;
 
