@@ -14,7 +14,6 @@ import { ArtworkUpload, type ArtworkImage } from './artwork-upload';
 import { ArtworkAIAnalysis } from './artwork-ai-analysis';
 import { createArtwork, updateArtwork } from '@/lib/actions';
 import { toast, Toaster } from 'sonner';
-import { AIMessageBubble } from '@/components/ai/ai-message-bubble';
 import { ArtworkTags } from '@/components/artwork/artwork-tags';
 
 const formSchema = z.object({
@@ -107,20 +106,12 @@ export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
     // Show a single toast with all error messages
     if (errorMessages.length > 0) {
       const firstError = errorMessages[0];
-      toast.custom((id) => (
-        <AIMessageBubble 
-          message={firstError.message}
-          type="error"
-          onDismiss={() => toast.dismiss(id)}
-          onClick={() => {
-            if (firstError.fieldId) {
-              document.getElementById(firstError.fieldId)?.focus();
-            }
-            toast.dismiss(id);
-          }}
-        />
-      ), {
+      toast.error(firstError.message, {
         duration: 4000,
+        action: firstError.fieldId ? {
+          label: "Focus Field",
+          onClick: () => document.getElementById(firstError.fieldId)?.focus()
+        } : undefined
       });
     }
   };
@@ -155,13 +146,7 @@ export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
       // Handle any errors
       if (result.error) {
         console.error('Error saving artwork:', result.error);
-        toast.custom((id) => (
-          <AIMessageBubble 
-            message={result.error}
-            type="error"
-            onDismiss={() => toast.dismiss(id)}
-          />
-        ));
+        toast.error(result.error);
         return;
       }
 
@@ -170,22 +155,10 @@ export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
       router.refresh(); // Force a refresh of the page data
 
       // Show success message after navigation
-      toast.custom((id) => (
-        <AIMessageBubble 
-          message={`Artwork ${artwork?.id ? 'updated' : 'created'} successfully`}
-          type="success"
-          onDismiss={() => toast.dismiss(id)}
-        />
-      ));
+      toast.success(`Artwork ${artwork?.id ? 'updated' : 'created'} successfully`);
     } catch (error) {
       console.error('Error saving artwork:', error);
-      toast.custom((id) => (
-        <AIMessageBubble 
-          message="Failed to save artwork"
-          type="error"
-          onDismiss={() => toast.dismiss(id)}
-        />
-      ));
+      toast.error("Failed to save artwork");
     } finally {
       setIsSubmitting(false);
     }
@@ -227,7 +200,10 @@ export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
       />
       <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>{artwork ? 'Edit Artwork' : 'Create New Artwork'}</CardTitle>
+          <CardTitle>{artwork ? 'Edit Artwork' : 'Upload New Artwork'}</CardTitle>
+          <p className="text-sm text-muted-foreground mt-2">
+            Upload your artwork and our AI will automatically analyze it to suggest descriptions, tags, and other details to help showcase your work.
+          </p>
         </CardHeader>
         <form onSubmit={form.handleSubmit(onSubmit, onError)}>
           <CardContent className="space-y-6">
