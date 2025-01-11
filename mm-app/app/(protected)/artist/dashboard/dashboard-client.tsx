@@ -32,6 +32,7 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
   const { isVerifiedArtist, isEmergingArtist, getVerificationStatus, getVerificationPercentage } = useArtist();
   const verificationProgress = getVerificationPercentage();
   const verificationStatus = getVerificationStatus();
+  const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<{
     totalArtworks: number;
     publishedArtworks: number;
@@ -46,13 +47,30 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
 
   useEffect(() => {
     async function fetchStats() {
-      const { stats: artworkStats, error } = await getArtworkStats(profile.id);
-      if (!error && artworkStats) {
-        setStats(artworkStats);
+      if (!profile?.id) {
+        console.warn('Profile ID not available');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const { stats: artworkStats, error } = await getArtworkStats(profile.id);
+        if (error) {
+          console.error('Error fetching artwork stats:', error);
+          return;
+        }
+        if (artworkStats) {
+          setStats(artworkStats);
+        }
+      } catch (err) {
+        console.error('Error in fetchStats:', err);
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchStats();
-  }, [profile.id]);
+  }, [profile?.id]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -156,7 +174,9 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
             <div className="grid grid-cols-2 gap-4 md:gap-6">
               <div className="p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors">
                 <p className="text-sm text-muted-foreground">Total Artworks</p>
-                <p className="text-xl sm:text-2xl font-bold">{stats.totalArtworks}</p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  {isLoading ? '-' : stats.totalArtworks}
+                </p>
                 {isEmergingArtist && (
                   <p className="text-xs text-muted-foreground mt-1">
                     Limit: 10 artworks for emerging artists
@@ -165,21 +185,27 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
               </div>
               <div className="p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors">
                 <p className="text-sm text-muted-foreground">Published</p>
-                <p className="text-xl sm:text-2xl font-bold">{stats.publishedArtworks}</p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  {isLoading ? '-' : stats.publishedArtworks}
+                </p>
               </div>
               <div className="p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors">
                 <p className="text-sm text-muted-foreground flex items-center gap-2">
                   <Eye className="h-4 w-4" aria-hidden="true" />
                   Total Views
                 </p>
-                <p className="text-xl sm:text-2xl font-bold">{stats.totalViews}</p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  {isLoading ? '-' : stats.totalViews}
+                </p>
               </div>
               <div className="p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors">
                 <p className="text-sm text-muted-foreground flex items-center gap-2">
                   <Heart className="h-4 w-4" aria-hidden="true" />
                   Total Favorites
                 </p>
-                <p className="text-xl sm:text-2xl font-bold">{stats.totalFavorites}</p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  {isLoading ? '-' : stats.totalFavorites}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -280,61 +306,18 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
         {/* Verified-Only Features */}
         {isVerifiedArtist ? (
           <>
-            <Card>
-              <CardHeader>
-                <CardTitle>Gallery Integration</CardTitle>
-                <CardDescription>
-                  Connect with physical galleries and track visitor engagement
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full">
-                  <Link 
-                    href="/artist/gallery"
-                    role="button"
-                    aria-label="Manage Gallery Integration"
-                    tabIndex={0}
-                    onKeyDown={handleKeyDown}
-                  >
-                    Manage Gallery
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Enhanced Analytics</CardTitle>
-                <CardDescription>
-                  Track your performance and visitor engagement
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full">
-                  <Link 
-                    href="/artist/analytics"
-                    role="button"
-                    aria-label="View Enhanced Analytics"
-                    tabIndex={0}
-                    onKeyDown={handleKeyDown}
-                  >
-                    View Analytics
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <FeatureComingSoon
+              title="Gallery Integration"
+              description="Connect with physical galleries and track visitor engagement"
+              restrictedTo="verified_artist"
+            />
           </>
         ) : (
           <>
             <FeatureComingSoon
               title="Gallery Integration"
               description="Connect with physical galleries, manage exhibitions, and track visitor engagement. Available for verified artists."
-              verifiedOnly
-            />
-            <FeatureComingSoon
-              title="Enhanced Analytics"
-              description="Get detailed insights into your artwork performance and visitor engagement. Available for verified artists."
-              verifiedOnly
+              restrictedTo="verified_artist"
             />
           </>
         )}
@@ -343,7 +326,6 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
         <FeatureComingSoon
           title="Messaging Center"
           description="Communicate directly with collectors and manage inquiries."
-          verifiedOnly={false}
         />
       </div>
     </div>

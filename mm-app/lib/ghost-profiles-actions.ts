@@ -1,7 +1,6 @@
 'use server'
 
 import { createServiceRoleClient } from '@/lib/supabase/service-role'
-import { Database } from '@/lib/types/database.types'
 
 type GhostProfilesResponse = {
   error: any | null

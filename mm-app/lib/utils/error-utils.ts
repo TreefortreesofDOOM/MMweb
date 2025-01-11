@@ -25,4 +25,16 @@ export function logError(error: ErrorLog): void {
     default:
       console.log('[Log]', logData)
   }
+}
+
+export function logAuthError(code: string, message: string, context: string, metadata?: Record<string, unknown>, userId?: string): void {
+  logError({
+    code,
+    message,
+    type: 'auth',
+    context,
+    timestamp: new Date().toISOString(),
+    ...(userId && { userId }),
+    ...(metadata && { metadata })
+  });
 } 

@@ -4,6 +4,7 @@ import { type AIContext, type ViewContext, type AssistantPersona, personaMapping
 import { useUnifiedAI } from '../context'
 import { useAuth } from '@/hooks/use-auth'
 import { PERSONALITIES, getPersonalizedContext } from '@/lib/ai/personalities'
+import type { UserRole } from '@/lib/navigation/types'
 
 export const useContextAwareness = () => {
   const pathname = usePathname()
@@ -41,7 +42,7 @@ export const useContextAwareness = () => {
       }
 
       // Get persona based on user role
-      const persona = user?.role ? personaMapping[user.role] : personaMapping.user
+      const persona = user?.role ? personaMapping[user.role as UserRole] : personaMapping.user
 
       // Get both character and role personalities
       const characterPersonality = PERSONALITIES.JARVIS // Default character personality
@@ -58,10 +59,10 @@ export const useContextAwareness = () => {
         route: pathname,
         pageType,
         persona,
+        personaContext,
+        characterPersonality: characterPersonality.name,
         data: {
-          ...contextData,
-          personaContext,
-          characterPersonality: characterPersonality.name // Add character info
+          ...contextData
         }
       }
     }

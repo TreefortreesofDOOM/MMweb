@@ -1,4 +1,4 @@
-import type { UserRole, NavigationItem, NavigationSection, RoleNavigation } from './types';
+import type { UserRole, NavItem, NavSection, RoleNavigation } from './types';
 import { navigationConfig } from './config';
 
 /**
@@ -11,7 +11,7 @@ export function isValidUserRole(role: unknown): role is UserRole {
 /**
  * Type guard to check if a navigation item has all required properties
  */
-export function isValidNavigationItem(item: Partial<NavigationItem>): item is NavigationItem {
+export function isValidNavigationItem(item: Partial<NavItem>): item is NavItem {
   return (
     typeof item === 'object' &&
     item !== null &&
@@ -24,7 +24,7 @@ export function isValidNavigationItem(item: Partial<NavigationItem>): item is Na
 /**
  * Type guard to check if a navigation section is valid
  */
-export function isValidNavigationSection(section: Partial<NavigationSection>): section is NavigationSection {
+export function isValidNavigationSection(section: Partial<NavSection>): section is NavSection {
   return (
     typeof section === 'object' &&
     section !== null &&

@@ -300,7 +300,7 @@ This will help us:
 ### 2. Server Actions
 ```typescript
 // lib/actions/ghost-profiles.ts
-import { createActionClient } from '@/lib/supabase/action'
+import { createActionClient } from '@/lib/supabase/supabase-action'
 import { stripe } from '@/lib/stripe/stripe-server-utils'
 import type { 
   GhostProfile, 

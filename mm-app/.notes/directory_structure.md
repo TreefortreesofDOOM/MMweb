@@ -6,7 +6,8 @@
 - **.google/**
     - mm-web-445818-44be61e33338.json
 - **.notes/**
-    - database_schema_20250108_194733.md
+    - auth-refactor.md
+    - database_schema_20250110_150401.md
     - directory_structure.md
     - feed-system.md
     - meeting_notes.md
@@ -179,7 +180,6 @@
         - ghost-profiles-list.tsx
     - **ai/**
         - ai-artist-search.tsx
-        - ai-message-bubble.tsx
     - **analytics/**
         - **ui/**
             - analytics-chart.tsx
@@ -400,8 +400,10 @@
 - **lib/**
     - **actions/**
         - **admin/**
+            - admin-actions.ts
             - generate-artwork.ts
             - mm-ai-actions.ts
+        - **ai/**
         - **artist/**
             - artist-actions.ts
         - **feed/**
@@ -413,8 +415,6 @@
             - following-actions.ts
             - gallery-actions.ts
             - patron-actions.ts
-        - admin.ts
-        - ai-search.ts
         - ai-settings-actions.ts
         - ai.ts
         - analytics.ts
@@ -456,10 +456,6 @@
     - **analytics/**
         - analytics.ts
         - track.ts
-    - **auth/**
-        - admin.ts
-        - agent.ts
-        - auth-utils.ts
     - **constants/**
         - mediums.ts
     - **emails/**
@@ -473,10 +469,10 @@
         - stripe-products.ts
         - stripe-server-utils.ts
     - **supabase/**
-        - action.ts
         - middleware.ts
         - service-role.ts
         - supabase-action-utils.ts
+        - supabase-action.ts
         - supabase-client.ts
         - supabase-server.ts
     - **types/**
@@ -491,6 +487,7 @@
         - errors.ts
         - ghost-profiles.ts
         - patron-types.ts
+        - search-artist-types.ts
         - settings-types.ts
     - **unified-ai/**
         - **docs/**
@@ -504,24 +501,25 @@
         - generate-post.ts
         - hooks.ts
         - index.ts
-        - post-artwork.ts
         - post-mm-ai.ts
         - types.ts
         - use-analysis.ts
         - use-chat.ts
         - utils.ts
     - **utils/**
-        - class-utils.ts
+        - artist-cache-utils.ts
+        - artist-query-utils.ts
+        - artist-search-utils.ts
         - common-utils.ts
-        - date-utils.ts
         - error-utils.ts
         - format-utils.ts
         - mm-ai-validation.ts
         - patron-utils.ts
+        - post-artwork-utils.ts
         - result.ts
-        - search-utils.ts
         - settings-utils.ts
     - **vertex-ai/**
+        - ai-search.ts
         - bigquery-setup.ts
         - data-extraction-utils.ts
         - format-utils.ts
@@ -672,7 +670,6 @@
         - analytics_test_data.sql
     - .gitignore
     - config.toml
-- **types/**
 - .cursorrules
 - .env
 - .env.local

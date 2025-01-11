@@ -25,4 +25,11 @@ export type CollectionWithItems = Database['public']['Tables']['collections']['R
 
 export type CollectionWithCount = Database['public']['Tables']['collections']['Row'] & {
   collection_items: { count: number }[]
+}
+
+export type FollowingArtist = {
+  id: string
+  name: string | null
+  avatar_url: string | null
+  artist_type?: string | null
 } 

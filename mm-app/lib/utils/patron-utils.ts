@@ -1,4 +1,4 @@
-import { createActionClient } from '@/lib/supabase/action'
+import { createActionClient } from '@/lib/supabase/supabase-action'
 
 export async function isPatron(): Promise<boolean> {
   const supabase = await createActionClient()

@@ -19,7 +19,8 @@ mm-app/
 │   ├── (auth)/      # Authentication flow
 │   ├── (protected)/ # Protected user routes
 │   ├── (public)/    # Public pages
-│   └── api/         # API endpoints
+│   ├── api/         # API endpoints
+│   └── collections/ # Patron Collections
 ├── components/       # React components
 ├── context/         # React contexts
 ├── hooks/           # Custom React hooks
@@ -27,13 +28,17 @@ mm-app/
 │   ├── actions/     # Server actions
 │   ├── ai/          # AI implementation
 │   ├── analytics/   # Analytics
-│   ├── auth/        # Auth utilities
+│   ├── constants/   # Constants
+│   ├── emails/      # Email templates
+│   ├── navigation/  # Navigation config
 │   ├── stripe/      # Payment integration
 │   ├── supabase/    # Database client
 │   ├── types/       # Type definitions
+│   ├── unified-ai/  # Unified AI system
 │   ├── utils/       # Common utilities
 │   └── vertex-ai/   # AI integration
 ├── public/          # Static assets
+├── scripts/         # Utility scripts
 └── supabase/        # Database config & migrations
 ```
 
@@ -72,7 +77,7 @@ const supabase = await createClient()
 
 2. **Server Actions**
 ```typescript
-import { createActionClient } from '@/lib/supabase/action'
+import { createActionClient } from '@/lib/supabase/supabase-action'
 const supabase = await createActionClient()
 ```
 

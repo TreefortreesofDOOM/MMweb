@@ -1,4 +1,4 @@
-import { postUnifiedAIArtwork } from './post-artwork'
+import { postUnifiedAIArtwork } from '../utils/post-artwork-utils'
 import type { Result } from '@/lib/utils/result'
 import type { MMAIError } from '@/lib/types/admin/mm-ai-types'
 

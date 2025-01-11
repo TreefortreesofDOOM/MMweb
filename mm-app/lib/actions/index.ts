@@ -1,5 +1,5 @@
 // Re-export all actions by category
-export * from './admin';
+export * from './admin/admin-actions';
 export * from './artist';
 export * from './artwork';
 export * from './auth';

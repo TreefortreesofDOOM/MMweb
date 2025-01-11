@@ -10,10 +10,16 @@ import { toast } from "sonner";
 interface FeatureComingSoonProps {
   title: string;
   description: string;
-  verifiedOnly?: boolean;
+  restrictedTo?: 'verified_artist' | 'emerging_artist' | 'patron' | 'admin';
+  badgeText?: string;
 }
 
-export function FeatureComingSoon({ title, description, verifiedOnly }: FeatureComingSoonProps) {
+export function FeatureComingSoon({ 
+  title, 
+  description, 
+  restrictedTo,
+  badgeText 
+}: FeatureComingSoonProps) {
   const [notifyRequested, setNotifyRequested] = useState(false);
 
   const handleNotifyClick = () => {
@@ -21,14 +27,34 @@ export function FeatureComingSoon({ title, description, verifiedOnly }: FeatureC
     toast.success('You will be notified when this feature launches');
   };
 
+  const getBadgeText = () => {
+    if (badgeText) return badgeText;
+    if (!restrictedTo) return null;
+
+    switch (restrictedTo) {
+      case 'verified_artist':
+        return 'Verified Artists Only';
+      case 'emerging_artist':
+        return 'Artists Only';
+      case 'patron':
+        return 'Patrons Only';
+      case 'admin':
+        return 'Admins Only';
+      default:
+        return null;
+    }
+  };
+
+  const displayBadge = getBadgeText();
+
   return (
     <Card className="relative">
-      {verifiedOnly && (
+      {displayBadge && (
         <Badge 
           variant="secondary" 
           className="absolute top-3 right-3"
         >
-          Verified Artists Only
+          {displayBadge}
         </Badge>
       )}
       <CardHeader>
