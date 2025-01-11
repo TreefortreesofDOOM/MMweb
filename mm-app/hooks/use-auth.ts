@@ -38,7 +38,7 @@ export function useAuth(): AuthState {
         .from('profiles')
         .select(`
           *,
-          artworks:artworks(count)
+          artworks:artworks!artworks_artist_id_fkey(count)
         `)
         .eq('id', userId)
         .single();

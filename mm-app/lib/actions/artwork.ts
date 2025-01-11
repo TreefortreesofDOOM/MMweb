@@ -466,16 +466,8 @@ export async function getSimilarArtworks(artworkId: string) {
 
     // Get the full artwork details for the similar artworks
     const { data: artworksData, error: artworksError } = await supabase
-      .from('artworks')
-      .select(`
-        *,
-        profiles (
-          id,
-          name,
-          avatar_url,
-          bio
-        )
-      `)
+      .from('artworks_with_artist')
+      .select('*')
       .in('id', similarArtworks.map((a: { artwork_id: string }) => a.artwork_id))
       .neq('id', artworkId)
       .eq('status', 'published');
@@ -544,16 +536,8 @@ export async function getArtworkDetails(id: string) {
   const supabase = await createActionClient();
   
   const { data: artwork, error } = await supabase
-    .from('artworks')
-    .select(`
-      *,
-      profiles (
-        id,
-        name,
-        avatar_url,
-        bio
-      )
-    `)
+    .from('artworks_with_artist')
+    .select('*')
     .eq('id', id)
     .single();
 

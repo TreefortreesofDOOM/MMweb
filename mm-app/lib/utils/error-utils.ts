@@ -1,4 +1,4 @@
-import type { ErrorLog } from '@/lib/types/errors'
+import type { ErrorLog } from '@/lib/types/gallery-error-types'
 
 export function logError(error: ErrorLog): void {
   const logData = {

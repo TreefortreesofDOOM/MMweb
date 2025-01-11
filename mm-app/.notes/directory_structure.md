@@ -6,10 +6,10 @@
 - **.google/**
     - mm-web-445818-44be61e33338.json
 - **.notes/**
-    - auth-refactor.md
-    - database_schema_20250110_150401.md
+    - database_schema_20250110_203708.md
     - directory_structure.md
     - feed-system.md
+    - gallery-event-guide.md
     - meeting_notes.md
     - mm-ai-api.md
     - mm-ai-posting-system.md
@@ -27,6 +27,8 @@
         - **applications/**
             - page.tsx
         - **featured-artist/**
+            - page.tsx
+        - **gallery-management/**
             - page.tsx
         - **ghost-profiles/**
             - **[id]/**
@@ -69,6 +71,10 @@
             - **feed/**
                 - error.tsx
                 - loading.tsx
+                - page.tsx
+            - **gallery/**
+                - **shows/**
+                    - page.tsx
                 - page.tsx
             - **portfolio/**
                 - page.tsx
@@ -113,7 +119,7 @@
             - page.tsx
         - **artwork/**
             - **[id]/**
-        - **gallery/**
+        - **gallery-showcase/**
             - page.tsx
         - **vertex-test/**
             - page.tsx
@@ -139,6 +145,10 @@
         - **collections/**
             - **[id]/**
         - **gallery/**
+            - **dates/**
+                - route.ts
+            - **shows/**
+                - route.ts
             - **visit/**
                 - **[userId]/**
         - **stripe/**
@@ -225,6 +235,17 @@
             - feed-item.tsx
             - feed-skeleton.tsx
         - feed-view.tsx
+    - **gallery/**
+        - **calendar/**
+            - admin-calendar.tsx
+            - date-picker.tsx
+        - **ui/**
+            - badge.tsx
+        - artwork-selector.tsx
+        - error-boundary.tsx
+        - show-approval-list.tsx
+        - show-form.tsx
+        - wall-type-select.tsx
     - **ghost-profiles/**
         - ghost-profile-notification.tsx
     - **nav/**
@@ -423,6 +444,7 @@
         - artwork.ts
         - auth.ts
         - featured-artist.ts
+        - gallery.ts
         - ghost-profiles.ts
         - helpers.ts
         - index.ts
@@ -457,7 +479,10 @@
         - analytics.ts
         - track.ts
     - **constants/**
+        - error-codes.ts
         - mediums.ts
+    - **db/**
+        - **migrations/**
     - **emails/**
         - artist-notifications.ts
     - **navigation/**
@@ -484,7 +509,8 @@
         - analytics.types.ts
         - custom-types.ts
         - database.types.ts
-        - errors.ts
+        - gallery-error-types.ts
+        - gallery-types.ts
         - ghost-profiles.ts
         - patron-types.ts
         - search-artist-types.ts
@@ -589,6 +615,7 @@
         - 20240101000000_initial_schema.sql
         - 20240101000003_create_email_function.sql
         - 20240108000001_add_collections.sql
+        - 20240111000001_update_gallery_dates_policy.sql
         - 20240123000000_create_updated_at_function.sql
         - 20240124000000_enable_extensions.sql
         - 20240124000001_create_updated_at_function.sql
@@ -660,6 +687,8 @@
         - 20240406000001_update_collection_functions.sql
         - 20240406000002_revert_claimed_ghost_profile.sql
         - 20240407000001_add_mm_ai_profile.sql
+        - 20240408000001_add_gallery_events.sql
+        - 20240408000002_add_artworks_with_artist_view.sql
         - 20241224140133_enable_storage_rls.sql
         - 20241224140420_ensure_artwork_bucket.sql
         - 20241224144027_remote_schema.sql

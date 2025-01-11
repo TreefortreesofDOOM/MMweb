@@ -3,21 +3,20 @@
 ## High Priority
 
 - [ ] Instead of Collection Age, on collection page in the collection data detail, show time since last transaction. We want to subtly encourage them to add more art to their collection. Rekindle their art buying habits.
-- [ ] Put current artist page into a protected route or figure out how to make the follow button work in the public route.
-
 
 ### Gallery Events.  
 - [ ] Need to work on setting up a gallery artist with the tools to add everything we need to show their work in our physical gallery. 
-   - [ ] Artist needs to classify their work into categories that align with the gallery's various walls.
-      - [ ] Add to database and backend. Flagging work with 'trust_wall', 'collectors_wall', 'added_value_pedestal', 'featured_work'.
-      - [ ] Add to selection tool in frontend.
+   - [ ] Artist needs to classify their work that align with the gallery's various walls.
+      - [ ] Add to database and backend. Flagging artworkwork with 'trust_wall', 'collectors_wall', 'added_value_pedestal', 'featured_work'.
+      - [ ] Add to frontend.
    - [ ] Date selection for gallery show. 
          - Based on calendar set by admin.
          - Artist selects desired date ranges. 
          - Admin confirms dates.
+         - Only shows available dates with not available dates grayed out.
 
 ## Stripe
-- [ ] Review our Stripe implementation and discuss how we can implement a system that adds products to the platform Stripe account from verified users and featured flagged users. Both the admin and the user need to be able to do this. 
+- [ ] Review our Stripe implementation and discuss how we can implement a system that adds products to the platform Stripe account from verified users. Both the admin and the user need to be able to do this. 
 - [ ] After a user classifies their work and the flags are set, we then can use that to add products to the Stripe account. Trust_wall are choose your own price with a minimum value set by the user and confirmed by the admin between $10 - $50, collectors_wall are fixed price, added_value_pedestal are fixed price, and featured_work are fixed price.
 
 ### Default Platform Follow Implementation
@@ -82,7 +81,25 @@
    - [ ] Enhance focus management
    - [ ] Add screen reader announcements for operations
 
-## Completed
+### Gallery System Enhancements
+1. Analytics Integration
+   - [ ] Implement show performance tracking
+   - [ ] Add artwork engagement metrics
+   - [ ] Create visitor pattern analysis system
+   - [ ] Build analytics dashboard for gallery insights
 
+2. Email Notification System
+   - [ ] Implement show status change notifications
+   - [ ] Create reminder system for upcoming shows
+   - [ ] Add marketing communication templates
+   - [ ] Set up automated email triggers
+
+3. Artist Dashboard Improvements
+   - [ ] Add performance metrics for gallery shows
+   - [ ] Implement show success tracking
+   - [ ] Create visitor analytics dashboard
+   - [ ] Build historical performance trends
+
+## Completed
 
 ## Deferred

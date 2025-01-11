@@ -125,16 +125,8 @@ export default async function PortfolioPage({ params }: PageProps) {
 
     // Fetch artist's published artworks with custom ordering
     const { data: artworks, error: artworksError } = await supabase
-      .from('artworks')
-      .select(`
-        *,
-        profiles (
-          id,
-          full_name,
-          bio,
-          avatar_url
-        )
-      `)
+      .from('artworks_with_artist')
+      .select('*')
       .eq('artist_id', id)
       .eq('status', 'published')
       .order('display_order', { ascending: true })

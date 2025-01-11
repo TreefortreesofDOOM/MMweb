@@ -18,15 +18,8 @@ export async function getArtistArtworks({ status = "all" }: { status?: "publishe
   console.log('Building query for user:', { userId: contextData.userId, status });
 
   let query = supabase
-    .from('artworks')
-    .select(`
-      *,
-      profiles (
-        name,
-        bio,
-        avatar_url
-      )
-    `)
+    .from('artworks_with_artist')
+    .select('*')
     .eq('artist_id', contextData.userId)
   
   if (status !== "all") {

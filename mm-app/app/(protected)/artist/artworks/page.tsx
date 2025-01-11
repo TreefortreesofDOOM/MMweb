@@ -7,16 +7,8 @@ export default async function ArtworksPage() {
   
   // Get artist's artworks
   const { data: artworks } = await supabase
-    .from('artworks')
-    .select(`
-      *,
-      profiles (
-        id,
-        name: full_name,
-        bio,
-        avatar_url
-      )
-    `)
+    .from('artworks_with_artist')
+    .select('*')
     .eq('artist_id', user?.id)
     .order('display_order', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: false });

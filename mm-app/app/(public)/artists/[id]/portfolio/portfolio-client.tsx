@@ -12,12 +12,11 @@ import { useToast } from '@/components/ui/use-toast'
 import type { Database } from '@/lib/types/database.types'
 
 type DbArtwork = Database['public']['Tables']['artworks']['Row'] & {
-  profiles?: {
-    id: string
-    full_name: string | null
-    bio: string | null
-    avatar_url: string | null
-  } | null
+  artist_name?: string | null
+  artist_full_name?: string | null
+  artist_bio?: string | null
+  artist_avatar_url?: string | null
+  artist_role?: string | null
 }
 
 interface GalleryArtwork {
@@ -58,12 +57,12 @@ export function PortfolioClient({ artistId, initialArtworks }: PortfolioClientPr
       order: number
     }>
 
-    const artistData = artwork.profiles ? {
-      id: artwork.profiles.id,
-      name: artwork.profiles.full_name || undefined,
-      bio: artwork.profiles.bio || undefined,
-      avatar_url: artwork.profiles.avatar_url || undefined
-    } : undefined;
+    const artistData = {
+      id: artwork.artist_id,
+      name: artwork.artist_name || undefined,
+      bio: artwork.artist_bio || undefined,
+      avatar_url: artwork.artist_avatar_url || undefined
+    };
 
     return {
       id: artwork.id,
@@ -77,11 +76,11 @@ export function PortfolioClient({ artistId, initialArtworks }: PortfolioClientPr
         order: img.order || index
       })),
       artist: artistData,
-      profiles: artwork.profiles ? {
-        id: artwork.profiles.id,
-        name: artwork.profiles.full_name || '',
-        avatar_url: artwork.profiles.avatar_url || '',
-      } : undefined
+      profiles: {
+        id: artwork.artist_id,
+        name: artwork.artist_name || '',
+        avatar_url: artwork.artist_avatar_url || '',
+      }
     }
   }, [])
 
@@ -138,16 +137,8 @@ export function PortfolioClient({ artistId, initialArtworks }: PortfolioClientPr
       setError(null)
 
       let query = supabase
-        .from('artworks')
-        .select(`
-          *,
-          profiles (
-            id,
-            full_name,
-            bio,
-            avatar_url
-          )
-        `)
+        .from('artworks_with_artist')
+        .select('*')
         .eq('artist_id', artistId)
         .eq('status', 'published')
 

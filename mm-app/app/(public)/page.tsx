@@ -18,7 +18,7 @@ export default async function Home() {
       *,
       artist:profiles!featured_artist_artist_id_fkey (
         id,
-        name: full_name,
+        full_name,
         bio,
         avatar_url
       )
@@ -31,7 +31,7 @@ export default async function Home() {
   if (!featuredArtist) {
     const { data: randomArtist } = await supabase
       .from('profiles')
-      .select('id, name, bio, avatar_url')
+      .select('id, full_name, bio, avatar_url')
       .eq('role', 'verified_artist')
       .limit(1)
       .order('random()');
@@ -41,16 +41,8 @@ export default async function Home() {
 
   // Fetch featured artist's artworks
   const { data: featuredArtworks } = await supabase
-    .from('artworks')
-    .select(`
-      *,
-      profiles (
-        id,
-        name,
-        bio,
-        avatar_url
-      )
-    `)
+    .from('artworks_with_artist')
+    .select('*')
     .eq('artist_id', featuredArtist?.id)
     .eq('status', 'published')
     .order('created_at', { ascending: false })
@@ -58,16 +50,8 @@ export default async function Home() {
 
   // Fetch other published artworks
   const { data: artworks } = await supabase
-    .from('artworks')
-    .select(`
-      *,
-      profiles (
-        id,
-        name,
-        bio,
-        avatar_url
-      )
-    `)
+    .from('artworks_with_artist')
+    .select('*')
     .eq('status', 'published')
     .neq('artist_id', featuredArtist?.id)
     .eq('ai_generated', false)
@@ -78,12 +62,12 @@ export default async function Home() {
   const transformArtworks = (artworksData: any[]) => 
     artworksData?.map(artwork => ({
       ...artwork,
-      artist: artwork.profiles ? {
-        id: artwork.profiles.id,
-        name: artwork.profiles.name,
-        bio: artwork.profiles.bio,
-        avatar_url: artwork.profiles.avatar_url
-      } : undefined
+      artist: {
+        id: artwork.artist_id,
+        name: artwork.artist_full_name,
+        bio: artwork.artist_bio,
+        avatar_url: artwork.artist_avatar_url
+      }
     })) || [];
 
   const transformedFeaturedArtworks = transformArtworks(featuredArtworks || []);
@@ -92,7 +76,7 @@ export default async function Home() {
   // Transform the featured artist data to match ArtistProfileCard interface
   const transformedFeaturedArtist = featuredArtist ? {
     id: featuredArtist.id,
-    full_name: featuredArtist.name,
+    full_name: featuredArtist.full_name,
     avatar_url: featuredArtist.avatar_url,
     bio: featuredArtist.bio,
     website: null,

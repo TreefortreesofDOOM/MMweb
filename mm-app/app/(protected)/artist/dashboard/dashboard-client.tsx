@@ -9,7 +9,7 @@ import { FeatureComingSoon } from '@/components/artist/feature-coming-soon';
 import { Progress } from "@/components/ui/progress";
 import { useArtist } from "@/hooks/use-artist";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, AlertCircle, Eye, Heart, Image, BookOpen, FileText, CreditCard } from "lucide-react";
+import { CheckCircle2, AlertCircle, Eye, Heart, Image, BookOpen, FileText, CreditCard, Medal } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { AIArtistAssistant } from '@/components/artist/ai-artist-assistant';
 import { getArtworkStats } from '@/lib/actions/artwork';
@@ -235,7 +235,7 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
             <Button 
               asChild 
               variant="secondary" 
-              className="w-full justify-start text-left font-medium hover:bg-secondary/90 h-11"
+              className="w-full justify-start text-left font-medium hover:bg-secondary hover:scale-[1.02] transition-all duration-200 h-11"
             >
               <Link 
                 href="/artist/portfolio"
@@ -250,7 +250,7 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
             <Button 
               asChild 
               variant="secondary" 
-              className="w-full justify-start text-left font-medium hover:bg-secondary/90 h-11"
+              className="w-full justify-start text-left font-medium hover:bg-secondary hover:scale-[1.02] transition-all duration-200 h-11"
             >
               <Link 
                 href="/artist/artworks"
@@ -262,6 +262,22 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
                 Manage Artworks
               </Link>
             </Button>
+            {profile.exhibition_badge && (
+              <Button 
+                asChild 
+                variant="secondary" 
+                className="w-full justify-start text-left font-medium hover:bg-secondary hover:scale-[1.02] transition-all duration-200 h-11"
+              >
+                <Link 
+                  href="/artist/gallery/shows"
+                  aria-label="Access Gallery Management"
+                  className="flex items-center gap-2 px-4"
+                >
+                  <Medal className="h-4 w-4" aria-hidden="true" />
+                  Gallery Management
+                </Link>
+              </Button>
+            )}
             {isEmergingArtist && (
               <Button 
                 asChild 

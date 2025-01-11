@@ -37,7 +37,7 @@ export default async function GalleryPage() {
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-8">
-      <PageViewTracker pathname="/gallery" />
+      <PageViewTracker pathname="/gallery-showcase" />
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Gallery</h1>
