@@ -4,7 +4,7 @@ import { useCallback, useMemo, useEffect } from "react";
 import { useArtist } from "./use-artist";
 import { checkVerificationRequirements } from "@/lib/actions/verification";
 import { useRouter } from "next/navigation";
-import type { Database } from "@/lib/database.types";
+import type { Database } from "@/lib/types/database.types";
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
