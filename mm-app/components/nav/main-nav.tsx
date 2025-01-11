@@ -63,10 +63,10 @@ export function MainNav({ userRole }: MainNavProps) {
         
         {/* Public Routes */}
         <Link
-          href="/gallery"
+          href="/gallery-showcase"
           className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
-            isActive('/gallery') ? "text-foreground" : "text-foreground/60"
+            "text-sm font-medium transition-colors hover:text-foreground/80",
+            isActive('/gallery-showcase') ? "text-foreground" : "text-foreground/60"
           )}
           role="link"
           aria-label="Browse Gallery"

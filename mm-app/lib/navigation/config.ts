@@ -13,7 +13,8 @@ import {
   Image as Gallery,
   Ghost,
   Clock,
-  Activity
+  Activity,
+  Calendar
 } from 'lucide-react';
 import type { RoleNavigation, UserRole } from './types';
 
@@ -28,6 +29,11 @@ export const navigationConfig: Record<UserRole, RoleNavigation> = {
             title: 'Dashboard',
             href: '/admin-dashboard',
             icon: LayoutDashboard
+          },
+          {
+            title: 'Gallery Management',
+            href: '/gallery-management',
+            icon: Calendar
           },
           {
             title: 'Applications',

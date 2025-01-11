@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getAdminStats } from '@/lib/actions/admin/admin-actions';
 import { createClient } from '@/lib/supabase/supabase-server';
 import { redirect } from 'next/navigation';
+import { ShowApprovalList } from '@/components/gallery/show-approval-list';
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -59,6 +60,22 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
+              Gallery Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">Calendar & Shows</div>
+            <Button variant="link" className="px-0" asChild>
+              <Link href="/gallery-management">
+                Manage Gallery →
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
               Pending Applications
             </CardTitle>
           </CardHeader>
@@ -89,6 +106,16 @@ export default async function AdminDashboardPage() {
         </Card>
       </div>
 
+      {/* Gallery Show Approval Section */}
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Gallery Show Approvals</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ShowApprovalList />
+        </CardContent>
+      </Card>
+
       {/* Analytics Dashboard */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -117,8 +144,6 @@ export default async function AdminDashboardPage() {
         <CardContent>
           <div className="space-y-2 text-muted-foreground">
             <p>• User Management</p>
-            <p>• Artwork Approval Queue</p>
-            <p>• Platform Settings</p>
           </div>
         </CardContent>
       </Card>

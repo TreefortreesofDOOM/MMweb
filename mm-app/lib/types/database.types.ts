@@ -222,6 +222,12 @@ export type Database = {
           created_at: string | null
           description: string | null
           display_order: number | null
+          gallery_approved_at: string | null
+          gallery_approved_by: string | null
+          gallery_price: number | null
+          gallery_wall_type:
+            | Database["public"]["Enums"]["gallery_wall_type"]
+            | null
           id: string
           images: Json
           keywords: string[] | null
@@ -241,6 +247,12 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          gallery_approved_at?: string | null
+          gallery_approved_by?: string | null
+          gallery_price?: number | null
+          gallery_wall_type?:
+            | Database["public"]["Enums"]["gallery_wall_type"]
+            | null
           id?: string
           images?: Json
           keywords?: string[] | null
@@ -260,6 +272,12 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          gallery_approved_at?: string | null
+          gallery_approved_by?: string | null
+          gallery_price?: number | null
+          gallery_wall_type?:
+            | Database["public"]["Enums"]["gallery_wall_type"]
+            | null
           id?: string
           images?: Json
           keywords?: string[] | null
@@ -288,6 +306,27 @@ export type Database = {
           {
             foreignKeyName: "artworks_artist_id_fkey"
             columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artworks_gallery_approved_by_fkey"
+            columns: ["gallery_approved_by"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "artworks_gallery_approved_by_fkey"
+            columns: ["gallery_approved_by"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artworks_gallery_approved_by_fkey"
+            columns: ["gallery_approved_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -637,6 +676,161 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      gallery_dates: {
+        Row: {
+          date: string
+          is_available: boolean | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          date: string
+          is_available?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          date?: string
+          is_available?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_dates_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "gallery_dates_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_dates_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gallery_show_artworks: {
+        Row: {
+          artwork_id: string
+          show_id: string
+        }
+        Insert: {
+          artwork_id: string
+          show_id: string
+        }
+        Update: {
+          artwork_id?: string
+          show_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_show_artworks_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_show_artworks_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "gallery_shows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gallery_shows: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          created_by: string | null
+          end_date: string
+          id: string
+          start_date: string
+          status: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          end_date: string
+          id?: string
+          start_date: string
+          status?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          end_date?: string
+          id?: string
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_shows_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "gallery_shows_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_shows_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_shows_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "gallery_shows_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_shows_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       gallery_visits: {
         Row: {
@@ -1810,6 +2004,11 @@ export type Database = {
       artist_application_status: "draft" | "pending" | "approved" | "rejected"
       artist_status: "draft" | "pending" | "approved" | "rejected"
       artwork_status: "draft" | "published" | "sold"
+      gallery_wall_type:
+        | "trust_wall"
+        | "collectors_wall"
+        | "added_value_pedestal"
+        | "featured_work"
       notification_type:
         | "email"
         | "new_artwork"
