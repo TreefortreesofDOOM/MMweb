@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { approveArtistApplication, rejectArtistApplication, getArtistApplications } from "@/lib/actions/admin"
+import { approveArtistApplication, rejectArtistApplication, getArtistApplications } from "@/lib/actions/admin/admin-actions"
 
 export default async function AdminApplicationsPage() {
   const { applications, error } = await getArtistApplications()

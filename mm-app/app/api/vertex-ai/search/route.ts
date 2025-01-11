@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { aiArtistSearch } from '@/lib/actions/ai-search'
+import { aiArtistSearch } from '@/lib/vertex-ai/ai-search'
 
 export async function GET(request: Request) {
   try {

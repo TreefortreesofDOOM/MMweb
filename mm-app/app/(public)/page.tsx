@@ -70,6 +70,7 @@ export default async function Home() {
     `)
     .eq('status', 'published')
     .neq('artist_id', featuredArtist?.id)
+    .eq('ai_generated', false)
     .order('created_at', { ascending: false })
     .limit(12);
 

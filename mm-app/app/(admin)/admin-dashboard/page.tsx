@@ -2,7 +2,7 @@ import { AnalyticsDashboard } from '@/components/analytics/dashboard';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { getAdminStats } from '@/lib/actions/admin';
+import { getAdminStats } from '@/lib/actions/admin/admin-actions';
 import { createClient } from '@/lib/supabase/supabase-server';
 import { redirect } from 'next/navigation';
 
