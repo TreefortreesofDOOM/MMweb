@@ -12,6 +12,11 @@
    -  added_value_pedestal are fixed price, 
    -  featured_work are fixed price,
    -  Trust_wall are choose-your-own-price with a minimum value set by the user and confirmed by the admin between $10 - $50. Please review the stripe documentation for more details since we are using Stripe Connect and i don't think we can use stripe connect for customer selected choose-your-own-price type products.  
+- [ ] Implement email notifications for Stripe events:
+   - Purchase confirmation to buyer
+   - Sale notification to artist
+   - Use email templates and resend.com integration
+   - Add proper error handling for failed notifications
 
 ### Recommendation Engine
 - There is no way to browse or follow collectors. We should think about how to implement this.

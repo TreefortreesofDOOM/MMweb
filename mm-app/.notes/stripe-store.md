@@ -53,632 +53,121 @@
   - Manual transfer to artist
   - Custom price input by customer
 
-## Overview
-Implementation of the Stripe store system for artists to create and manage products on the platform using the existing Stripe Connect Express integration.
-
-## Database Schema
-
-### Tables
-
-1. `store_products`
-   ```sql
-   create table store_products (
-     id uuid primary key default uuid_generate_v4(),
-     profile_id uuid references profiles(id) on delete cascade,
-     artwork_id uuid references artworks(id) on delete cascade,
-     stripe_product_id text unique,
-     stripe_price_id text,
-     is_variable_price boolean default false,
-     min_price decimal,
-     status text not null default 'draft',
-     metadata jsonb,
-     created_at timestamp with time zone default now(),
-     updated_at timestamp with time zone default now()
-   );
-   ```
-
-2. `store_settings`
-   ```sql
-   create table store_settings (
-     profile_id uuid primary key references profiles(id) on delete cascade,
-     stripe_account_id text unique,
-     is_stripe_enabled boolean default false,
-     application_fee_percent decimal not null default 10.0,
-     metadata jsonb,
-     created_at timestamp with time zone default now(),
-     updated_at timestamp with time zone default now()
-   );
-   ```
-
-### Functions
-
-1. Create store product:
-   ```sql
-   create or replace function create_store_product(
-     _profile_id uuid,
-     _artwork_id uuid,
-     _stripe_product_id text,
-     _stripe_price_id text,
-     _is_variable_price boolean default false,
-     _min_price decimal default null
-   ) returns store_products as $$
-   declare
-     _product store_products;
-   begin
-     -- Verify the artwork belongs to the artist
-     if not exists (
-       select 1 from artworks
-       where id = _artwork_id
-       and artist_id = _profile_id
-     ) then
-       raise exception 'Artwork does not belong to artist';
-     end if;
-
-     insert into store_products (
-       profile_id,
-       artwork_id,
-       stripe_product_id,
-       stripe_price_id,
-       is_variable_price,
-       min_price
-     )
-     values (
-       _profile_id,
-       _artwork_id,
-       _stripe_product_id,
-       _stripe_price_id,
-       _is_variable_price,
-       _min_price
-     )
-     returning * into _product;
-
-     return _product;
-   end;
-   $$ language plpgsql security definer;
-   ```
-
-### RLS Policies
-
-1. `store_products`
-   ```sql
-   -- Allow users to view products
-   create policy "Anyone can view products"
-   on store_products for select
-   using (true);
-
-   -- Allow verified artists to manage their own products
-   create policy "Verified artists can manage their own products"
-   on store_products for all
-   using (
-     auth.uid() = profile_id
-     and exists (
-       select 1 from profile_roles
-       where profile_id = auth.uid()
-       and role = 'verified_artist'
-     )
-   );
-
-   -- Allow admins to manage all products
-   create policy "Admins can manage all products"
-   on store_products for all
-   using (
-     exists (
-       select 1 from profile_roles
-       where profile_id = auth.uid()
-       and role = 'admin'
-     )
-   );
-   ```
-
 ## Implementation Steps
 
-### 1. Database Setup
-- [ ] Create store_products table with artwork reference
-- [ ] Create store_settings table
-- [ ] Add RLS policies for verified artists
-- [ ] Create helper functions
+### 1. Database Setup [COMPLETED]
+- [x] Create store_products table with artwork reference
+- [x] Create store_settings table
+- [x] Add RLS policies for verified artists
+- [x] Create helper functions
+- [x] Add payment_link column
+- [x] Add stripe_product_metadata for inventory tracking
 
-### 2. Product Management
-- [ ] Create product creation endpoint
-  ```typescript
-  // Example product creation with Stripe using artwork data
-  const createStripeProduct = async (artwork) => {
-    // Create product on platform account using artwork data
-    const product = await stripe.products.create({
-      name: artwork.title,
-      description: artwork.description,
-      images: artwork.images.map(img => img.url),
-      active: true,
-      metadata: {
-        artwork_id: artwork.id,
-        artist_id: artwork.artist_id,
-        environment: process.env.NODE_ENV
-      },
-      tax_code: 'txcd_10103001', // Fine art tax code
-      url: `${process.env.NEXT_PUBLIC_BASE_URL}/artwork/${artwork.id}`,
-    });
+### 2. Product Management [IN PROGRESS]
+- [x] Create product creation endpoint
+- [x] Set up Stripe product creation
+- [x] Handle variable price products
+- [x] Create payment links with destination charges
+- [x] Add inventory tracking via Stripe metadata
+- [ ] Implement product status updates (archive/unarchive)
+- [ ] Add product deletion with Stripe cleanup (admin only)
 
-    // Create price based on product type
-    if (artwork.is_variable_price) {
-      const price = await stripe.prices.create({
-        product: product.id,
-        currency: 'usd',
-        custom_unit_amount: {
-          enabled: true,
-          minimum: artwork.min_price * 100,
-        }
-      });
-    } else {
-      const price = await stripe.prices.create({
-        product: product.id,
-        currency: 'usd',
-        unit_amount: artwork.price * 100,
-      });
-    }
-  };
-  ```
+### 3. Frontend Components [IN PROGRESS]
+- [x] Create Store Management Page
+  - [x] Basic structure and routing
+  - [x] Authentication and role checks
+  - [x] Store settings display
+- [x] Create Product List component
+  - [x] Display artist's artworks with option to add to store
+  - [x] Show existing store status for each artwork
+  - [x] Quick actions (add to store, edit store settings)
+  - [x] Show inventory status (available/sold)
+- [x] Create Product Form component
+  - [x] Display artwork details
+  - [x] Allow setting store-specific options
+  - [x] Handle fixed/variable pricing
+  - [x] Add inventory type and quantity fields
+- [x] Create Store Settings component
+  - [x] Application fee display
+  - [x] Stripe account status
+  - [x] Payout schedule info
 
-### 3. Frontend Components
-- [ ] Create `ArtworkProductList` component
-  - Display artist's artworks with option to add to store
-  - Show existing store status for each artwork
-  - Quick actions (add to store, edit store settings)
+### 4. Payment Flow [IN PROGRESS]
+- [x] Add payment_link column to store_products table
+- [x] Update product creation to generate Payment Link
+- [x] Add "Buy Now" button that links to Payment Link URL
+  - [x] Disable button when sold out
+  - [x] Show "Sold" status
+- [x] Create success and cancel pages
+  - [x] Add session verification
+  - [x] Handle error states
+- [x] Use Stripe Checkout for automatic payment handling
+- [ ] Send confirmation emails
 
-- [ ] Create `ArtworkProductForm` component
-  - Display artwork details (title, description, images)
-  - Allow setting store-specific options:
-    - Fixed/Variable pricing
-    - Minimum price for variable pricing
-    - Active status
+### 5. Webhook Handling [IN PROGRESS]
+- [x] Set up single webhook endpoint for checkout events
+- [x] Handle `checkout.session.completed` event
+  - [x] Update inventory status
+  - [ ] Send confirmation emails
+  - [x] Handle sold out status
+- [x] Verify webhook signatures
+- [x] Add basic error handling
+- [ ] Add webhook monitoring in production
 
-- [ ] Create `StoreSettings` component
-  - Application fee display
-  - Stripe account status
-  - Payout schedule info
-  - Store metrics/analytics
+### 6. Event Handling [REMOVED]
+- Handled automatically by Stripe Checkout
 
-### 4. Payment Flow
+### 7. Refund Handling [REMOVED]
+- Handled through Stripe Dashboard
+- Automatic fee refund handling
+- Automatic transfer reversal
 
-1. **Checkout Flow**
-   ```typescript
-   // Create checkout session for fixed price product
-   const createCheckoutSession = async (product: StoreProduct) => {
-     const session = await stripe.checkout.sessions.create({
-       mode: 'payment',
-       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/store/success?session_id={CHECKOUT_SESSION_ID}`,
-       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/store/cancel`,
-       payment_intent_data: {
-         application_fee_amount: calculateApplicationFee(product.price),
-         transfer_data: {
-           destination: product.store_settings.stripe_account_id,
-         },
-       },
-       line_items: [{
-         price: product.stripe_price_id,
-         quantity: 1,
-       }],
-       shipping_address_collection: {
-         allowed_countries: ['US'],
-       },
-       billing_address_collection: 'required',
-       payment_method_types: ['card'],
-       metadata: {
-         product_id: product.id,
-         artwork_id: product.artwork_id,
-         artist_id: product.profile_id,
-       },
-     });
-     return session;
-   };
+### 8. Testing [IN PROGRESS]
+- [x] Test database setup and RLS policies
+- [x] Test store management page authentication
+- [x] Test product management
+- [x] Test Payment Link creation
+- [ ] Test webhook handling
 
-   // Create checkout session for variable price product
-   const createTrustWallCheckoutSession = async (product: StoreProduct, amount: number) => {
-     // Validate minimum price
-     if (amount < product.min_price) {
-       throw new Error('Amount is below minimum price');
-     }
+## Frontend Implementation Plan [IN PROGRESS]
 
-     const session = await stripe.checkout.sessions.create({
-       mode: 'payment',
-       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/store/success?session_id={CHECKOUT_SESSION_ID}`,
-       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/store/cancel`,
-       line_items: [{
-         price_data: {
-           currency: 'usd',
-           unit_amount: amount * 100,
-           product: product.stripe_product_id,
-         },
-         quantity: 1,
-       }],
-       shipping_address_collection: {
-         allowed_countries: ['US'],
-       },
-       billing_address_collection: 'required',
-       payment_method_types: ['card'],
-       metadata: {
-         product_id: product.id,
-         artwork_id: product.artwork_id,
-         artist_id: product.profile_id,
-         amount: amount,
-         is_variable_price: true, // Flag for webhook to handle manual transfer
-       },
-     });
-     return session;
-   };
-   ```
+### Components Structure [COMPLETED]
+- [x] Store Management Page (`/artist/store/page.tsx`)
+- [x] Product Management Components
+- [x] Store Settings Components
+- [x] Buy Now Button Component
 
-2. **Webhook Handling**
-   ```typescript
-   // Handle checkout session completed
-   const handleCheckoutSessionCompleted = async (event) => {
-     const session = event.data.object;
-     
-     // Update order status
-     await db.from('store_orders').update({
-       status: 'completed',
-       stripe_payment_intent: session.payment_intent,
-       shipping_details: session.shipping_details,
-       customer_details: session.customer_details,
-     }).match({ id: session.metadata.order_id });
-
-     // Handle different payment types
-     if (session.metadata.is_variable_price) {
-       // Queue manual transfer to artist
-       await createArtistPayout({
-         artistId: session.metadata.artist_id,
-         amount: calculateArtistShare(session.amount_total),
-         sessionId: session.id,
-         productId: session.metadata.product_id
-       });
-     }
-
-     // Send confirmation emails
-     await sendOrderConfirmationEmail(session);
-     await sendArtistNotificationEmail(session);
-   };
-
-   // Handle payment failed
-   const handlePaymentFailed = async (event) => {
-     const session = event.data.object;
-     
-     await db.from('store_orders').update({
-       status: 'failed',
-       error_message: session.last_payment_error?.message,
-     }).match({ id: session.metadata.order_id });
-   };
-   ```
-
-3. **Frontend Integration**
-   ```typescript
-   // Checkout button component
-   const CheckoutButton = ({ product }: { product: StoreProduct }) => {
-     const handleCheckout = async () => {
-       try {
-         const response = await fetch('/api/store/checkout', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ productId: product.id }),
-         });
-         
-         const { sessionId } = await response.json();
-         const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_KEY);
-         
-         await stripe.redirectToCheckout({ sessionId });
-       } catch (error) {
-         console.error('Error:', error);
-         toast.error('Failed to initiate checkout');
-       }
-     };
-
-     return (
-       <Button onClick={handleCheckout}>
-         Purchase
-       </Button>
-     );
-   };
-
-   // Trust wall checkout component
-   const TrustWallCheckout = ({ product }: { product: StoreProduct }) => {
-     const [amount, setAmount] = useState(product.min_price);
-     
-     const handleCheckout = async () => {
-       try {
-         const response = await fetch('/api/store/checkout/trust-wall', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ 
-             productId: product.id,
-             amount,
-           }),
-         });
-         
-         const { sessionId } = await response.json();
-         const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_KEY);
-         
-         await stripe.redirectToCheckout({ sessionId });
-       } catch (error) {
-         console.error('Error:', error);
-         toast.error('Failed to initiate checkout');
-       }
-     };
-
-     return (
-       <div>
-         <Input
-           type="number"
-           min={product.min_price}
-           step="0.01"
-           value={amount}
-           onChange={(e) => setAmount(parseFloat(e.target.value))}
-         />
-         <Button onClick={handleCheckout}>
-           Purchase
-         </Button>
-       </div>
-     );
-   };
-   ```
-
-### Testing Requirements
-
-1. **Product Management**
-   - [ ] Test creating products from artworks
-   - [ ] Verify store status updates
-   - [ ] Test variable pricing settings
-
-2. **Checkout Flow**
-   - [ ] Test fixed price checkout
-   - [ ] Test variable price checkout
-   - [ ] Verify application fee calculations
-   - [ ] Test shipping/billing info collection
-
-3. **Webhooks**
-   - [ ] Test successful payment handling
-   - [ ] Test failed payment handling
-   - [ ] Verify email notifications
-
-4. **Error Handling**
-   - [ ] Test invalid price inputs
-   - [ ] Test checkout with invalid products
-   - [ ] Verify error messages and UI feedback
-
-### 5. Webhook Handling
-- [ ] Set up webhook endpoints for Checkout events
-  ```typescript
-  // Handle successful payments
-  const handleCheckoutSuccess = async (session) => {
-    if (session.payment_intent_data?.transfer_data?.destination) {
-      // Fixed price product - funds automatically transferred
-      await updateProductSaleStatus(session);
-    } else {
-      // Variable price product - handle manual transfer
-      await createArtistPayout({
-        artistId: session.metadata.artist_id,
-        amount: calculateArtistShare(session.amount_total),
-        sessionId: session.id,
-        productId: session.metadata.product_id
-      });
-    }
-  };
-  ```
-
-### 6. Event Handling
-- [ ] Handle required Checkout events:
-  - [ ] `checkout.session.completed`
-  - [ ] `checkout.session.async_payment_succeeded`
-  - [ ] `checkout.session.async_payment_failed`
-- [ ] Handle transfer events:
-  - [ ] `transfer.created`
-  - [ ] `transfer.failed`
-
-### 7. Refund Handling
-- [ ] Implement refund process with transfer reversal
-  ```typescript
-  const handleRefund = async (paymentIntent) => {
-    const refund = await stripe.refunds.create({
-      payment_intent: paymentIntent,
-      reverse_transfer: true, // Pull funds back from connected account
-      refund_application_fee: true // Refund our fee as well
-    });
-    return refund;
-  };
-  ```
-
-### 8. Testing
-- [ ] Test Checkout flow for fixed price products
-  - [ ] Test successful payments with destination charges
-  - [ ] Test application fee calculation
-  - [ ] Test automatic transfers
-- [ ] Test Checkout flow for variable price products
-  - [ ] Test minimum price enforcement
-  - [ ] Test manual payout process
-- [ ] Test refund process
-  - [ ] Test transfer reversals
-  - [ ] Test application fee refunds
-
-## Pricing Models
-
-### Fixed Price Products
-- Standard pricing set by artist
-- Application fee automatically handled by Stripe Connect
-- Direct payout to artist's connected account
-
-### Variable Price Products (Trust Wall)
-- Default minimum price $10 (artist can choose to set higher. We suggest between $10 - $30)
-- Customer can choose amount above minimum
-- Payment collected to platform account
-- Manual calculation and payout of artist share
-- Platform handles fee splitting and transfers
-
-## Security Considerations
-- Use Stripe's built-in fraud prevention
-- Implement proper webhook signature verification
-- Monitor transactions
-- Ensure accurate fee calculations for manual payouts
-- Verify webhook events before processing
-
-## Deployment Checklist
-- [ ] Set up Stripe webhook endpoints
-- [ ] Configure webhook signing secrets
-- [ ] Set up error monitoring
-- [ ] Document API endpoints
-- [ ] Monitor initial transactions
-- [ ] Set up automated payout process for variable price products
-
-## Frontend Implementation Plan
-
-### Components Structure
-
-1. **Store Management Page** (`/artist/store/page.tsx`)
-   - Main dashboard for artists to manage their store products
-   - Lists all artworks with store status
-   - Quick actions to add/remove from store
-   - Store analytics and earnings
-
-2. **Product Management Components**
-   - `ArtworkProductList`: Lists artist's artworks
-     - Displays artwork thumbnail, title, price
-     - Shows store status (not listed, active, inactive)
-     - Quick actions (add to store, edit store settings)
-   
-   - `ArtworkProductForm`: Form to add artwork to store
-     - Display artwork details (read-only):
-       - Title
-       - Description
-       - Images
-     - Store settings:
-       - Variable pricing toggle
-       - Minimum price for variable pricing
-       - Active status
-
-3. **Store Settings Components**
-   - `StoreSettings`: Manage store configuration
-     - Application fee display (read-only)
-     - Stripe account status
-     - Payout schedule info
-     - Store metrics/analytics
-
-4. **Checkout Components**
-   - `CheckoutButton`: Initiates Stripe Checkout
-     - Handles both fixed and variable price products
-     - Collects shipping/billing info
-     - Processes payments with destination charges
-
-### State Management
-
-```typescript
-interface StoreProduct {
-  id: string
-  profile_id: string
-  artwork_id: string
-  is_variable_price: boolean
-  min_price?: number
-  stripe_product_id?: string
-  stripe_price_id?: string
-  status: 'draft' | 'active' | 'archived'
-  metadata: Record<string, any>
-}
-
-interface ArtworkWithStore extends Database['public']['Tables']['artworks']['Row'] {
-  store_product?: StoreProduct
-}
-```
-
-### API Integration
-
-1. **Product Management**
-   ```typescript
-   // Add artwork to store
-   POST /api/store/products
-   {
-     artwork_id: string
-     is_variable_price?: boolean
-     min_price?: number
-   }
-   
-   // List artworks with store status
-   GET /api/store/products
-   
-   // Get store settings
-   GET /api/store/settings
-   ```
-
-2. **Checkout Process**
-   ```typescript
-   // Create checkout session
-   POST /api/store/checkout
-   {
-     product_id: string
-     price?: number // For variable price products
-   }
-   ```
+### API Integration [IN PROGRESS]
+- [x] Product Management endpoints
+- [x] Store Settings endpoints
+- [ ] Basic webhook endpoint
 
 ### Implementation Order
+1. **Phase 1: Basic Structure** [COMPLETED]
+   - [x] Store management page layout
+   - [x] ArtworkProductList component
+   - [x] Store settings view
 
-1. **Phase 1: Basic Structure**
-   - Create store management page layout
-   - Implement ArtworkProductList component
-   - Add store settings view
+2. **Phase 2: Product Management** [COMPLETED]
+   - [x] ArtworkProductForm component
+   - [x] Artwork to store product conversion
+   - [x] Bulk actions
 
-2. **Phase 2: Product Management**
-   - Build ArtworkProductForm component
-   - Implement artwork to store product conversion
-   - Add bulk actions
+3. **Phase 3: Checkout Flow** [IN PROGRESS]
+   - [x] Add Payment Link to product creation
+   - [x] Add Buy Now button component
+   - [x] Create success/cancel pages
+   - [ ] Set up webhook handling
 
-3. **Phase 3: Checkout Flow**
-   - Implement CheckoutButton component
-   - Add Stripe Checkout integration
-   - Handle success/cancel flows
+4. **Phase 4: Polish** [IN PROGRESS]
+   - [x] Loading states
+   - [x] Error handling
+   - [x] Success notifications
+   - [ ] Performance optimization
 
-4. **Phase 4: Polish**
-   - Add loading states
-   - Implement error handling
-   - Add success notifications
-   - Optimize performance
-
-### UI/UX Guidelines
-
-1. **Loading States**
-   - Skeleton loaders for lists
-   - Disabled buttons during operations
-   - Progress indicators for uploads
-
-2. **Error Handling**
-   - Clear error messages
-   - Retry options where applicable
-   - Validation feedback
-
-3. **Responsive Design**
-   - Mobile-first approach
-   - Grid layout for product lists
-   - Collapsible sections on mobile
-
-4. **Accessibility**
-   - ARIA labels
-   - Keyboard navigation
-   - High contrast mode support
-
-### Testing Strategy
-
-1. **Unit Tests**
-   - Component rendering
-   - Form validation
-   - State management
-
-2. **Integration Tests**
-   - API interactions
-   - Checkout flow
-   - Error scenarios
-
-3. **E2E Tests**
-   - Complete purchase flow
-   - Store management workflows
-   - Settings updates
-
-### Dependencies
-
-- shadcn/ui components
-- react-hook-form
-- zod for validation
-- @stripe/stripe-js
-- TailwindCSS for styling
+## Deployment Checklist [NOT STARTED]
+- [ ] Set up Stripe webhook endpoint with signature verification
+- [ ] Configure success/cancel URLs in Stripe Dashboard
+- [ ] Set up basic error monitoring
+- [ ] Document API endpoints
+- [ ] Test with Stripe test cards
