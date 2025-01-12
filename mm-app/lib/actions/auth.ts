@@ -80,8 +80,33 @@ export const signInAction = async (formData: FormData) => {
       return encodedRedirect("error", "/sign-in", "Failed to create session");
     }
 
-    return redirect("/profile");
+    // Get user's role from profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.session.user.id)
+      .single();
+
+    // Redirect based on role
+    switch (profile?.role) {
+      case 'admin':
+        return redirect("/admin-dashboard");
+      case 'artist':
+      case 'verified_artist':
+      case 'emerging_artist':
+        return redirect("/artist/dashboard");
+      case 'patron':
+        return redirect("/patron/dashboard");
+      case 'user':
+        return redirect("/dashboard");
+      default:
+        return redirect("/profile");
+    }
   } catch (error) {
+    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+      throw error;
+    }
+    
     logAuthError(
       'AUTH_UNEXPECTED_ERROR',
       error instanceof Error ? error.message : 'An unexpected error occurred',
