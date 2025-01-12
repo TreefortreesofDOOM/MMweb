@@ -33,12 +33,15 @@ export const updatePreferences = async (
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) throw new Error('Not authenticated');
+
+  // Get current settings first
+  const currentSettings = await getSettings();
   
   const { error } = await supabase
     .rpc('upsert_user_preferences', {
       p_user_id: user.id,
-      p_theme: preferences.theme,
-      p_ai_personality: preferences.aiPersonality
+      p_theme: preferences.theme ?? currentSettings?.preferences.theme ?? 'system',
+      p_ai_personality: preferences.aiPersonality ?? currentSettings?.preferences.aiPersonality ?? 'professional'
     });
   
   if (error) {

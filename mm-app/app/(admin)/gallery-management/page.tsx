@@ -46,7 +46,17 @@ export default async function AdminGalleryPage() {
               <CardTitle>Calendar Management</CardTitle>
             </CardHeader>
             <CardContent>
-              <AdminCalendar />
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-medium">Gallery Calendar</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Manage available dates for gallery shows
+                    </p>
+                  </div>
+                </div>
+                <AdminCalendar />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

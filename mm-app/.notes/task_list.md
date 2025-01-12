@@ -5,11 +5,11 @@
 - [ ] Instead of Collection Age, on collection page in the collection data detail, show time since last transaction. We want to subtly encourage them to add more art to their collection. Rekindle their art buying habits.
 
 ### Gallery Events.  
-- [ ] Need to work on setting up a gallery artist with the tools to add everything we need to show their work in our physical gallery. 
-   - [ ] Artist needs to classify their work that align with the gallery's various walls.
-      - [ ] Add to database and backend. Flagging artworkwork with 'trust_wall', 'collectors_wall', 'added_value_pedestal', 'featured_work'.
-      - [ ] Add to frontend.
-   - [ ] Date selection for gallery show. 
+- [x] Need to work on setting up a gallery artist with the tools to add everything we need to show their work in our physical gallery. 
+   - [x] Artist needs to classify their work that align with the gallery's various walls.
+      - [x] Add to database and backend. Flagging artwork with 'trust_wall', 'collectors_wall', 'added_value_pedestal', 'featured_work'.
+      - [x] Add to frontend.
+   - [x] Date selection for gallery show. 
          - Based on calendar set by admin.
          - Artist selects desired date ranges. 
          - Admin confirms dates.

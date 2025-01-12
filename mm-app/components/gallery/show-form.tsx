@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +16,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { DateRangePicker } from './calendar/date-picker';
 import { ArtworkSelector } from './artwork-selector';
@@ -99,68 +100,78 @@ export const GalleryShowForm = ({ show, onSuccess }: GalleryShowFormProps) => {
     }
   };
 
+  const handleDateSelect = (range: DateRange | undefined) => {
+    if (range?.from && range?.to) {
+      form.setValue('startDate', format(range.from, 'yyyy-MM-dd'));
+      form.setValue('endDate', format(range.to, 'yyyy-MM-dd'));
+    } else {
+      form.setValue('startDate', '');
+      form.setValue('endDate', '');
+    }
+  };
+
+  const startDate = form.getValues('startDate');
+  const endDate = form.getValues('endDate');
+  const initialDateRange: DateRange | undefined = startDate && endDate
+    ? {
+        from: new Date(startDate),
+        to: new Date(endDate)
+      }
+    : undefined;
+
   return (
     <GalleryErrorBoundary>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Show Title</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Enter show title" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Show Title</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Enter show title" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="startDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Show Dates</FormLabel>
-                <FormControl>
-                  <DateRangePicker
-                    initialValue={show ? {
-                      from: new Date(show.start_date),
-                      to: new Date(show.end_date)
-                    } : undefined}
-                    onSelect={(range: DateRange | undefined) => {
-                      if (range?.from) {
-                        form.setValue('startDate', format(range.from, 'yyyy-MM-dd'));
-                      }
-                      if (range?.to) {
-                        form.setValue('endDate', format(range.to, 'yyyy-MM-dd'));
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <div className="space-y-2">
+              <FormLabel>Show Dates</FormLabel>
+              <DateRangePicker
+                onSelect={handleDateSelect}
+                initialValue={initialDateRange}
+              />
+              <FormDescription>
+                Select the start and end dates for your show
+              </FormDescription>
+              {(form.formState.errors.startDate || form.formState.errors.endDate) && (
+                <FormMessage>
+                  {form.formState.errors.startDate?.message || form.formState.errors.endDate?.message}
+                </FormMessage>
+              )}
+            </div>
 
-          <FormField
-            control={form.control}
-            name="artworkIds"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Select Artworks</FormLabel>
-                <FormControl>
-                  <ArtworkSelector
-                    selectedIds={field.value}
-                    onSelect={(ids) => form.setValue('artworkIds', ids)}
-                    showWallType
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="artworkIds"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Select Artworks</FormLabel>
+                  <FormControl>
+                    <ArtworkSelector
+                      selectedIds={field.value}
+                      onSelect={(ids) => form.setValue('artworkIds', ids)}
+                      showWallType
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <Button 
             type="submit" 

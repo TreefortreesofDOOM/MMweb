@@ -28,7 +28,7 @@ export async function generateMetadata(
 
     // Calculate total value for description
     const totalValue = collection.collection_items.reduce(
-      (sum, item) => sum + (item.artworks.price || 0),
+      (sum: number, item: any) => sum + (item.artworks.price || 0),
       0
     )
 

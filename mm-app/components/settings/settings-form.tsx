@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useCallback } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSettings } from '@/hooks/use-settings';
@@ -16,6 +16,8 @@ import { SettingsSection } from './settings-section';
 import { NotificationToggles } from './notification-toggles';
 import { useDebounce } from '@/hooks/use-debounce';
 import { RetryClaimButton } from '@/components/patron/settings/retry-claim-button';
+import { AiPersonalitySelector } from './ai-personality-selector';
+import { ThemeSelector } from '@/components/settings/theme-selector';
 
 interface SettingsFormProps {}
 
@@ -23,6 +25,7 @@ export const SettingsForm: FC<SettingsFormProps> = () => {
   const { settings, isLoading, error, updateSettings } = useSettings();
   const { profile } = useAuth();
   const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
 
   const form = useForm<UserSettings>({
     resolver: zodResolver(userSettingsSchema),
@@ -35,8 +38,19 @@ export const SettingsForm: FC<SettingsFormProps> = () => {
     },
   });
 
+  // Update form when settings are loaded
+  useEffect(() => {
+    if (settings) {
+      form.reset(settings);
+    }
+  }, [settings, form]);
+
   const handleSave = useCallback(async (values: UserSettings) => {
+    if (isSaving) return;
+    
     try {
+      setIsSaving(true);
+      
       // Update preferences
       const preferencesResult = await updateSettings('preferences', values.preferences);
       if (!preferencesResult.success) {
@@ -72,16 +86,26 @@ export const SettingsForm: FC<SettingsFormProps> = () => {
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update settings",
       });
+    } finally {
+      setIsSaving(false);
     }
-  }, [profile?.role, updateSettings, toast]);
+  }, [profile?.role, updateSettings, toast, isSaving]);
 
   // Debounced save function
   const debouncedSave = useDebounce(handleSave, 1000);
 
-  // Watch for form changes and trigger autosave
-  form.watch((data) => {
-    debouncedSave(data as UserSettings);
-  });
+  // Watch for form changes in useEffect
+  useEffect(() => {
+    const subscription = form.watch((formData) => {
+      if (formData && !isSaving) {
+        debouncedSave(formData as UserSettings);
+      }
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [form, debouncedSave, isSaving]);
 
   if (isLoading) {
     return (
@@ -107,7 +131,10 @@ export const SettingsForm: FC<SettingsFormProps> = () => {
     <Form {...form}>
       <form className="space-y-6">
         <SettingsSection title="Preferences">
-          {/* Existing preference fields */}
+          <div className="space-y-6">
+            <ThemeSelector />
+            <AiPersonalitySelector />
+          </div>
         </SettingsSection>
 
         <SettingsSection title="Notifications">

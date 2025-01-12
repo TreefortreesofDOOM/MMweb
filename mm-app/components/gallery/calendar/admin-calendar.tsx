@@ -10,6 +10,8 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import type { Database } from '@/lib/types/database.types';
 import type { DayProps } from 'react-day-picker';
+import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
 
 type GalleryDateRow = Database['public']['Tables']['gallery_dates']['Row'];
 
@@ -80,15 +82,13 @@ export const AdminCalendar = () => {
     const existingDate = availableDates?.find(d => 
       format(toLocalDate(d.date), 'yyyy-MM-dd') === dateStr
     );
-    const isAvailable = existingDate ? !existingDate.isAvailable : true;
+    const isAvailable = existingDate ? existingDate.isAvailable : true;
     
     setPendingChanges(prev => {
-      // Remove any existing changes for this date
       const filtered = prev.filter(p => 
         format(toLocalDate(p.date), 'yyyy-MM-dd') !== dateStr
       );
-      // Add the new change
-      return [...filtered, { date, isAvailable }];
+      return [...filtered, { date, isAvailable: !isAvailable }];
     });
   };
 
@@ -120,22 +120,21 @@ export const AdminCalendar = () => {
         format(toLocalDate(p.date), 'yyyy-MM-dd') === firstDateStr
       );
       
-      // If the first date is available (either in DB or pending changes), we'll make all unavailable
+      // Reverse the logic: if first date is unavailable, make all available
       const isFirstDateAvailable = firstDateInChanges 
         ? firstDateInChanges.isAvailable
-        : (firstDateInDB?.isAvailable ?? false);
+        : (firstDateInDB?.isAvailable ?? true);
 
       setPendingChanges(prev => {
-        // Remove any existing changes for these dates
-        const filtered = prev.filter(p => !datesToUpdate.some(d => 
-          format(toLocalDate(d), 'yyyy-MM-dd') === format(toLocalDate(p.date), 'yyyy-MM-dd')
-        ));
-        // Add the new changes
-        const newChanges = datesToUpdate.map(date => ({
-          date,
-          isAvailable: !isFirstDateAvailable // Toggle based on first date's state
-        }));
-        return [...filtered, ...newChanges];
+        const filtered = prev.filter(p => 
+          !datesToUpdate.some(d => 
+            format(toLocalDate(d), 'yyyy-MM-dd') === format(toLocalDate(p.date), 'yyyy-MM-dd')
+          )
+        );
+        return [
+          ...filtered,
+          ...datesToUpdate.map(d => ({ date: d, isAvailable: !isFirstDateAvailable }))
+        ];
       });
     }
     setIsDragging(false);
@@ -170,8 +169,9 @@ export const AdminCalendar = () => {
     }
   });
 
+  // Reverse the logic: show unavailable dates as selected
   const selectedDates = effectiveDates
-    .filter(d => d.isAvailable)
+    .filter(d => !d.isAvailable)
     .map(d => toLocalDate(d.date));
 
   // Calculate preview dates for drag selection
@@ -184,7 +184,7 @@ export const AdminCalendar = () => {
 
   return (
     <div 
-      className="space-y-4"
+      className="space-y-4 w-full"
       ref={calendarRef}
       onMouseUp={() => handleDragEnd()}
       onMouseLeave={() => handleDragEnd()}
@@ -193,16 +193,46 @@ export const AdminCalendar = () => {
         mode="multiple"
         selected={selectedDates}
         onSelect={(_, date) => handleDateClick(date)}
-        className="rounded-md border"
+        className="w-full rounded-md border p-6"
         disabled={(date) => date < new Date()}
         numberOfMonths={2}
+        showOutsideDays={false}
         modifiers={{
           preview: previewDates,
           selected: selectedDates
         }}
         modifiersStyles={{
-          preview: { backgroundColor: 'rgba(var(--primary), 0.1)' },
-          selected: { backgroundColor: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }
+          preview: { backgroundColor: 'rgba(var(--destructive), 0.1)' },
+          selected: { backgroundColor: 'hsl(var(--destructive))', color: 'hsl(var(--destructive-foreground))' }
+        }}
+        classNames={{
+          months: "flex flex-col sm:flex-row space-y-4 sm:space-x-8 sm:space-y-0 w-full justify-center",
+          month: "space-y-6 flex-1",
+          caption: "flex justify-center pt-1 relative items-center text-lg font-semibold",
+          caption_label: "text-base font-medium",
+          nav: "space-x-1 flex items-center",
+          nav_button: cn(
+            buttonVariants({ variant: "outline" }),
+            "h-9 w-9 bg-transparent p-0 opacity-50 hover:opacity-100"
+          ),
+          nav_button_previous: "absolute left-1",
+          nav_button_next: "absolute right-1",
+          table: "w-full border-collapse space-y-2",
+          head_row: "flex w-full",
+          head_cell: "text-muted-foreground rounded-md flex-1 font-normal text-base",
+          row: "flex w-full mt-4",
+          cell: "flex-1 text-center text-base p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+          day: cn(
+            buttonVariants({ variant: "ghost" }),
+            "w-full aspect-square p-0 font-normal aria-selected:opacity-100"
+          ),
+          day_range_end: "day-range-end",
+          day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+          day_today: "bg-accent text-accent-foreground",
+          day_outside: "hidden",
+          day_disabled: "hidden",
+          day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+          day_hidden: "invisible",
         }}
         components={{
           Day: (props: DayProps) => {
@@ -218,8 +248,8 @@ export const AdminCalendar = () => {
                   handleDragStart(props.date);
                 }}
                 onMouseEnter={() => handleDragMove(props.date)}
-                className={`h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md ${
-                  isSelected ? 'bg-primary text-primary-foreground' : ''
+                className={`w-full aspect-square p-0 font-normal text-base aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md ${
+                  isSelected ? 'bg-destructive text-destructive-foreground' : ''
                 }`}
               >
                 {props.date.getDate()}
@@ -231,7 +261,7 @@ export const AdminCalendar = () => {
       
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Click a date to toggle its availability, or click and drag to select multiple dates at once.
+          Click or drag to select dates that are unavailable. Unselected dates are available for booking.
         </p>
         <div className="flex items-center gap-4">
           {pendingChanges.length > 0 && (
