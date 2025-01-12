@@ -143,6 +143,13 @@ export type Database = {
             referencedRelation: "artworks"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "artwork_embeddings_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks_with_artist"
+            referencedColumns: ["id"]
+          },
         ]
       }
       artwork_embeddings_gemini: {
@@ -181,6 +188,13 @@ export type Database = {
             referencedRelation: "artworks"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "artwork_embeddings_gemini_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks_with_artist"
+            referencedColumns: ["id"]
+          },
         ]
       }
       artwork_favorites: {
@@ -208,6 +222,13 @@ export type Database = {
             columns: ["artwork_id"]
             isOneToOne: false
             referencedRelation: "artworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artwork_favorites_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks_with_artist"
             referencedColumns: ["id"]
           },
         ]
@@ -381,6 +402,13 @@ export type Database = {
             referencedRelation: "artworks"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "chat_history_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks_with_artist"
+            referencedColumns: ["id"]
+          },
         ]
       }
       collection_items: {
@@ -414,6 +442,13 @@ export type Database = {
             columns: ["artwork_id"]
             isOneToOne: false
             referencedRelation: "artworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_items_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks_with_artist"
             referencedColumns: ["id"]
           },
           {
@@ -739,6 +774,13 @@ export type Database = {
             columns: ["artwork_id"]
             isOneToOne: false
             referencedRelation: "artworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_show_artworks_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks_with_artist"
             referencedColumns: ["id"]
           },
           {
@@ -1400,6 +1442,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "transactions_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks_with_artist"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "transactions_ghost_profile_id_fkey"
             columns: ["ghost_profile_id"]
             isOneToOne: false
@@ -1640,6 +1689,48 @@ export type Database = {
         }
         Relationships: []
       }
+      artworks_with_artist: {
+        Row: {
+          artist_avatar_url: string | null
+          artist_bio: string | null
+          artist_full_name: string | null
+          artist_id: string | null
+          artist_name: string | null
+          artist_role: Database["public"]["Enums"]["user_role"] | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string | null
+          images: Json | null
+          price: number | null
+          status: Database["public"]["Enums"]["artwork_status"] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artworks_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "artworks_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artworks_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_roles: {
         Row: {
           id: string | null
@@ -1666,6 +1757,26 @@ export type Database = {
       }
     }
     Functions: {
+      approve_gallery_show: {
+        Args: {
+          p_show_id: string
+          p_user_id: string
+          p_start_date: string
+          p_end_date: string
+        }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          created_by: string | null
+          end_date: string
+          id: string
+          start_date: string
+          status: string
+          title: string
+          updated_at: string | null
+        }[]
+      }
       binary_quantize:
         | {
             Args: {
@@ -1946,6 +2057,26 @@ export type Database = {
           p_artist_id: string
         }
         Returns: undefined
+      }
+      update_gallery_show_dates: {
+        Args: {
+          p_show_id: string
+          p_user_id: string
+          p_start_date: string
+          p_end_date: string
+        }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          created_by: string | null
+          end_date: string
+          id: string
+          start_date: string
+          status: string
+          title: string
+          updated_at: string | null
+        }[]
       }
       upsert_user_preferences: {
         Args: {

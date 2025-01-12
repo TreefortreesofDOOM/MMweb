@@ -4,44 +4,30 @@
 
 - [ ] Instead of Collection Age, on collection page in the collection data detail, show time since last transaction. We want to subtly encourage them to add more art to their collection. Rekindle their art buying habits.
 
-### Gallery Events.  
-- [x] Need to work on setting up a gallery artist with the tools to add everything we need to show their work in our physical gallery. 
-   - [x] Artist needs to classify their work that align with the gallery's various walls.
-      - [x] Add to database and backend. Flagging artwork with 'trust_wall', 'collectors_wall', 'added_value_pedestal', 'featured_work'.
-      - [x] Add to frontend.
-   - [x] Date selection for gallery show. 
-         - Based on calendar set by admin.
-         - Artist selects desired date ranges. 
-         - Admin confirms dates.
-         - Only shows available dates with not available dates grayed out.
+- [ ] Add proper date editing for gallery shows:
+   - [ ] Create database function `update_gallery_show_dates` to handle date updates in a transaction
+   - [ ] Update old dates to be available again in gallery_dates table
+   - [ ] Set new dates as unavailable in gallery_dates table
+   - [ ] Add validation to prevent conflicts with other shows' dates
+   - [ ] Update the updateGalleryShow action to use the new function for approved shows
 
 ## Stripe
 - [ ] Review our Stripe implementation and discuss how we can implement a system that adds products to the platform Stripe account from verified users. Both the admin and the user need to be able to do this. 
-- [ ] After a user classifies their work and the flags are set, we then can use that to add products to the Stripe account. Trust_wall are choose your own price with a minimum value set by the user and confirmed by the admin between $10 - $50, collectors_wall are fixed price, added_value_pedestal are fixed price, and featured_work are fixed price.
+- [ ] After a user classifies their work and the flags are set, we are then ready to add products to the platform Stripe account with the users connected account included for payouts. 
+   -  Collectors_wall are fixed price, 
+   -  added_value_pedestal are fixed price, 
+   -  featured_work are fixed price,
+   -  Trust_wall are choose-your-own-price with a minimum value set by the user and confirmed by the admin between $10 - $50. Please review the stripe documentation for more details since we are using Stripe Connect and i don't think we can use stripe connect for customer selected choose-your-own-price type products.  
 
-### Default Platform Follow Implementation
-1. Database & Backend
-   - [x] Create Meaning Machine AI profile with admin role
-   - [x] Add migration for automatic follow relationship
-   - [x] Implement trigger for new user registration to auto-follow MM AI
-   - [x] Add RLS policies for system-managed follows
-
-2. Frontend Integration
-   - [x] Add visual indicator for MM AI content in feed
-   - [x] Add proper error handling for feed loading
-
-3. Testing & Validation [deferred]
-   - [ ] Add integration tests for auto-follow system
-   - [ ] Verify proper follow relationship creation
-   - [ ] Test edge cases (user deletion, role changes)
-
-### Patron Collection View Improvements
+### Recommendation Engine
 - There is no way to browse or follow collectors. We should think about how to implement this.
-   **Recommendation Engine**
+
+   **Basic Details**
    - We should recommend patrons to artists they might like based on an analysis of their collection and artist's content.
    - We should also recommend artists to patrons they might like based on an analysis of their collection and artist's content.
    - We should also recommend patrons to each other based on an analysis of their collection and each other's content.
 
+### Patron Collection View Improvements
 1. Error Handling
    - [ ] Implement ErrorBoundary wrapper for CollectionDetail
    - [ ] Add granular error handling for collection operations
@@ -102,4 +88,37 @@
 
 ## Completed
 
+### Gallery Events
+- [x] Need to work on setting up a gallery artist with the tools to add everything we need to show their work in our physical gallery. 
+   - [x] Artist needs to classify their work that align with the gallery's various walls.
+      - [x] Add to database and backend. Flagging artwork with 'trust_wall', 'collectors_wall', 'added_value_pedestal', 'featured_work'.
+      - [x] Add to frontend.
+   - [x] Date selection for gallery show. 
+         - Based on calendar set by admin.
+         - Artist selects desired date ranges. 
+         - Admin confirms dates.
+         - Only shows available dates with not available dates grayed out.
+   - [x] Gallery show approval process
+         - Automatically marks show dates as unavailable when approved
+         - Transaction ensures both show approval and date updates succeed together
+         - Validates to prevent approval if dates are already taken
+
+### Default Platform Follow Implementation
+1. Database & Backend
+   - [x] Create Meaning Machine AI profile with admin role
+   - [x] Add migration for automatic follow relationship
+   - [x] Implement trigger for new user registration to auto-follow MM AI
+   - [x] Add RLS policies for system-managed follows
+
+2. Frontend Integration
+   - [x] Add visual indicator for MM AI content in feed
+   - [x] Add proper error handling for feed loading
+
 ## Deferred
+
+### Default Platform Follow Implementation
+
+3. Testing & Validation [deferred]
+   - [ ] Add integration tests for auto-follow system
+   - [ ] Verify proper follow relationship creation
+   - [ ] Test edge cases (user deletion, role changes)
