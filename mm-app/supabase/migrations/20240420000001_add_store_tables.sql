@@ -21,7 +21,7 @@ create table store_settings (
   profile_id uuid primary key references profiles(id) on delete cascade,
   stripe_account_id text unique,
   is_stripe_enabled boolean default false,
-  application_fee_percent decimal not null default 10.0,
+  application_fee_percent decimal not null default 50.0,
   metadata jsonb,
   created_at timestamp with time zone default now(),
   updated_at timestamp with time zone default now()
@@ -94,7 +94,7 @@ create policy "Verified artists can manage their own products"
     and exists (
       select 1 from profile_roles
       where profile_id = auth.uid()
-      and role = 'verified_artist'
+      and role_name = 'verified_artist'
     )
   );
 
@@ -104,7 +104,7 @@ create policy "Admins can manage all products"
     exists (
       select 1 from profile_roles
       where profile_id = auth.uid()
-      and role = 'admin'
+      and role_name = 'admin'
     )
   );
 
@@ -120,7 +120,7 @@ create policy "Verified artists can manage their store settings"
     and exists (
       select 1 from profile_roles
       where profile_id = auth.uid()
-      and role = 'verified_artist'
+      and role_name = 'verified_artist'
     )
   );
 
@@ -130,6 +130,6 @@ create policy "Admins can manage all store settings"
     exists (
       select 1 from profile_roles
       where profile_id = auth.uid()
-      and role = 'admin'
+      and role_name = 'admin'
     )
   ); 

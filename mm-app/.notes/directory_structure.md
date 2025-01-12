@@ -6,7 +6,7 @@
 - **.google/**
     - mm-web-445818-44be61e33338.json
 - **.notes/**
-    - database_schema_20250110_203708.md
+    - database_schema_20250110_235607.md
     - directory_structure.md
     - feed-system.md
     - gallery-event-guide.md
@@ -15,6 +15,7 @@
     - mm-ai-posting-system.md
     - patron-role.md
     - project_overview.md
+    - stripe-store.md
     - task_list.md
 - **app/**
     - **(admin)/**
@@ -79,6 +80,8 @@
             - **portfolio/**
                 - page.tsx
             - **qr-code/**
+                - page.tsx
+            - **store/**
                 - page.tsx
             - **verification/**
                 - page.tsx
@@ -302,10 +305,13 @@
         - notification-toggles.tsx
         - settings-form.tsx
         - settings-section.tsx
+        - theme-selector.tsx
     - **social/**
         - favorite-button.tsx
         - follow-button.tsx
         - index.ts
+    - **store/**
+        - product-form.tsx
     - **ui/**
         - accordion.tsx
         - alert-dialog.tsx
@@ -633,7 +639,9 @@
         - 20240225000001_add_artwork_order_function.sql
         - 20240225000002_initialize_artwork_order.sql
         - 20240320000000_add_name_fields.sql
+        - 20240320000000_approve_gallery_show_function.sql
         - 20240320000001_add_chat_history.sql
+        - 20240320000001_update_gallery_show_dates_function.sql
         - 20240321000000_add_artworks_relationship.sql
         - 20240321000001_add_analytics_tables.sql
         - 20240327000000_add_social_features.sql
@@ -689,6 +697,7 @@
         - 20240407000001_add_mm_ai_profile.sql
         - 20240408000001_add_gallery_events.sql
         - 20240408000002_add_artworks_with_artist_view.sql
+        - 20240420000001_add_store_tables.sql
         - 20241224140133_enable_storage_rls.sql
         - 20241224140420_ensure_artwork_bucket.sql
         - 20241224144027_remote_schema.sql
