@@ -158,7 +158,7 @@ export default function GalleryShowsPage() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      {show.status === 'pending' && (
+                      {show.status !== 'rejected' && (
                         <Button
                           variant="outline"
                           size="sm"

@@ -10,9 +10,16 @@ import type { GalleryDate } from '@/lib/types/gallery-types';
 interface DateRangePickerProps {
   onSelect?: (range: DateRange | undefined) => void;
   initialValue?: DateRange;
+  currentShowId?: string;
+  isDisabled?: boolean;
 }
 
-export const DateRangePicker = ({ onSelect, initialValue }: DateRangePickerProps) => {
+export const DateRangePicker = ({ 
+  onSelect, 
+  initialValue,
+  currentShowId,
+  isDisabled 
+}: DateRangePickerProps) => {
   const [date, setDate] = React.useState<DateRange | undefined>(initialValue);
 
   const { data: availableDates } = useQuery({
@@ -30,6 +37,7 @@ export const DateRangePicker = ({ onSelect, initialValue }: DateRangePickerProps
   });
 
   const handleSelect = (range: DateRange | undefined) => {
+    if (isDisabled) return;
     setDate(range);
     onSelect?.(range);
   };
@@ -40,8 +48,23 @@ export const DateRangePicker = ({ onSelect, initialValue }: DateRangePickerProps
       selected={date}
       onSelect={handleSelect}
       disabled={(date) => {
+        // If component is disabled, disable all dates
+        if (isDisabled) return true;
+
         if (!availableDates?.length) return false;
+
         const dateStr = date.toISOString().split('T')[0];
+
+        if (currentShowId && date) {
+          const isCurrentSelection = 
+            initialValue?.from && 
+            initialValue?.to && 
+            date >= initialValue.from && 
+            date <= initialValue.to;
+          
+          if (isCurrentSelection) return false;
+        }
+
         return !availableDates.some(d => d.date === dateStr);
       }}
       numberOfMonths={2}

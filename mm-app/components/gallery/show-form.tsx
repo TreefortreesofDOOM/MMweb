@@ -81,6 +81,7 @@ export const GalleryShowForm = ({ show, onSuccess }: GalleryShowFormProps) => {
         // Handle specific error codes
         switch (error.code) {
           case GALLERY_ERROR_CODES.VALIDATION.INVALID_DATES:
+          case GALLERY_ERROR_CODES.VALIDATION.DATE_CONFLICT:
             form.setError('endDate', { message: error.message });
             break;
           case GALLERY_ERROR_CODES.VALIDATION.MISSING_ARTWORKS:
@@ -143,9 +144,14 @@ export const GalleryShowForm = ({ show, onSuccess }: GalleryShowFormProps) => {
               <DateRangePicker
                 onSelect={handleDateSelect}
                 initialValue={initialDateRange}
+                currentShowId={show?.id}
+                isDisabled={show?.status === 'approved'}
               />
               <FormDescription>
-                Select the start and end dates for your show
+                {show?.status === 'approved' 
+                  ? 'Show dates cannot be modified after approval. Please contact admin for any date changes.'
+                  : 'Select the start and end dates for your show'
+                }
               </FormDescription>
               {(form.formState.errors.startDate || form.formState.errors.endDate) && (
                 <FormMessage>
