@@ -31,6 +31,8 @@ const productSchema = z.object({
   min_price: z.number().min(10, 'Minimum price must be at least $10').optional(),
   price: z.number().min(0, 'Price must be 0 or greater').optional(),
   status: z.enum(['draft', 'published']).default('draft'),
+  inventory_type: z.enum(['unlimited', 'finite']).default('finite'),
+  inventory_quantity: z.number().min(1, 'Quantity must be at least 1').default(1),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -48,6 +50,10 @@ interface ProductFormProps {
     min_price: number | null;
     price: number | null;
     status: string;
+    stripe_product_metadata?: {
+      inventory?: string;
+      inventory_status?: string;
+    } | null;
   } | null;
   mode: 'create' | 'edit';
 }
@@ -63,6 +69,10 @@ export function ProductForm({ artwork, product, mode }: ProductFormProps) {
       min_price: product?.min_price || undefined,
       price: product?.price || undefined,
       status: (product?.status as 'draft' | 'published') || 'draft',
+      inventory_type: product?.stripe_product_metadata?.inventory ? 'finite' : 'finite',
+      inventory_quantity: product?.stripe_product_metadata?.inventory 
+        ? parseInt(product.stripe_product_metadata.inventory)
+        : 1,
     },
   });
 
@@ -78,6 +88,11 @@ export function ProductForm({ artwork, product, mode }: ProductFormProps) {
             min_price: data.min_price,
             price: data.price,
             status: data.status,
+            stripe_product_metadata: data.inventory_type === 'finite' ? {
+              limited_edition: true,
+              inventory: data.inventory_quantity?.toString(),
+              inventory_status: 'in_stock'
+            } : null
           });
 
         if (error) throw error;
@@ -89,6 +104,11 @@ export function ProductForm({ artwork, product, mode }: ProductFormProps) {
             min_price: data.min_price,
             price: data.price,
             status: data.status,
+            stripe_product_metadata: data.inventory_type === 'finite' ? {
+              limited_edition: true,
+              inventory: data.inventory_quantity?.toString(),
+              inventory_status: 'in_stock'
+            } : null
           })
           .eq('id', product?.id);
 
@@ -103,6 +123,7 @@ export function ProductForm({ artwork, product, mode }: ProductFormProps) {
   };
 
   const isVariablePrice = form.watch('is_variable_price');
+  const inventoryType = form.watch('inventory_type');
 
   return (
     <Form {...form}>
@@ -179,6 +200,55 @@ export function ProductForm({ artwork, product, mode }: ProductFormProps) {
                     value={field.value || ''}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <FormField
+          control={form.control}
+          name="inventory_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Inventory Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select inventory type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="unlimited">Unlimited</SelectItem>
+                  <SelectItem value="finite">Limited Edition</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Choose if this is a limited edition with fixed quantity
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {inventoryType === 'finite' && (
+          <FormField
+            control={form.control}
+            name="inventory_quantity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Available Quantity</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    value={field.value || ''}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Set the total number of editions available
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
