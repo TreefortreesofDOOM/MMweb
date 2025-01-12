@@ -4,14 +4,8 @@
 
 - [ ] Instead of Collection Age, on collection page in the collection data detail, show time since last transaction. We want to subtly encourage them to add more art to their collection. Rekindle their art buying habits.
 
-- [ ] Add proper date editing for gallery shows:
-   - [ ] Create database function `update_gallery_show_dates` to handle date updates in a transaction
-   - [ ] Update old dates to be available again in gallery_dates table
-   - [ ] Set new dates as unavailable in gallery_dates table
-   - [ ] Add validation to prevent conflicts with other shows' dates
-   - [ ] Update the updateGalleryShow action to use the new function for approved shows
-
 ## Stripe
+- [ ] Create an artist/store route which will be where the stripe products are created, edited, managed by the artist. 
 - [ ] Review our Stripe implementation and discuss how we can implement a system that adds products to the platform Stripe account from verified users. Both the admin and the user need to be able to do this. 
 - [ ] After a user classifies their work and the flags are set, we are then ready to add products to the platform Stripe account with the users connected account included for payouts. 
    -  Collectors_wall are fixed price, 
@@ -102,6 +96,11 @@
          - Automatically marks show dates as unavailable when approved
          - Transaction ensures both show approval and date updates succeed together
          - Validates to prevent approval if dates are already taken
+   - [x] Gallery show editing
+         - Artists can edit show title and artworks after approval
+         - Date changes restricted to pending shows only
+         - UI components updated to reflect editing permissions
+         - Database function and types updated for proper authorization
 
 ### Default Platform Follow Implementation
 1. Database & Backend
