@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -23,116 +23,160 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useRouter } from 'next/navigation';
+import { createBrowserClient } from '@/lib/supabase/supabase-client';
 
 const productSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().optional(),
-  type: z.enum(['collectors_wall', 'added_value_pedestal', 'featured_work', 'trust_wall']),
-  price: z.number().min(0, 'Price must be 0 or greater'),
-  minPrice: z.number().min(0).optional(),
-  maxPrice: z.number().min(0).optional(),
+  is_variable_price: z.boolean().default(false),
+  min_price: z.number().min(10, 'Minimum price must be at least $10').optional(),
+  price: z.number().min(0, 'Price must be 0 or greater').optional(),
+  status: z.enum(['draft', 'published']).default('draft'),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
 interface ProductFormProps {
-  onSubmit: (data: ProductFormValues) => Promise<void>;
-  initialData?: ProductFormValues;
+  artwork: {
+    id: string;
+    title: string;
+    description?: string | null;
+    images: { url: string }[];
+  };
+  product?: {
+    id: string;
+    is_variable_price: boolean;
+    min_price: number | null;
+    price: number | null;
+    status: string;
+  } | null;
+  mode: 'create' | 'edit';
 }
 
-export function ProductForm({ onSubmit, initialData }: ProductFormProps) {
+export function ProductForm({ artwork, product, mode }: ProductFormProps) {
+  const router = useRouter();
+  const supabase = createBrowserClient();
+
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: initialData || {
-      title: '',
-      description: '',
-      type: 'collectors_wall',
-      price: 0,
+    defaultValues: {
+      is_variable_price: product?.is_variable_price || false,
+      min_price: product?.min_price || undefined,
+      price: product?.price || undefined,
+      status: (product?.status as 'draft' | 'published') || 'draft',
     },
   });
 
   const handleSubmit = async (data: ProductFormValues) => {
     try {
-      await onSubmit(data);
-      form.reset();
+      if (mode === 'create') {
+        const { error } = await supabase
+          .from('store_products')
+          .insert({
+            profile_id: (await supabase.auth.getUser()).data.user?.id,
+            artwork_id: artwork.id,
+            is_variable_price: data.is_variable_price,
+            min_price: data.min_price,
+            price: data.price,
+            status: data.status,
+          });
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('store_products')
+          .update({
+            is_variable_price: data.is_variable_price,
+            min_price: data.min_price,
+            price: data.price,
+            status: data.status,
+          })
+          .eq('id', product?.id);
+
+        if (error) throw error;
+      }
+
+      router.push('/artist/store');
+      router.refresh();
     } catch (error) {
-      console.error('Error submitting product:', error);
+      console.error('Error saving product:', error);
     }
   };
 
-  const selectedType = form.watch('type');
-  const showPriceRange = selectedType === 'trust_wall';
+  const isVariablePrice = form.watch('is_variable_price');
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <div className="space-y-2">
+          <h3 className="font-medium">Artwork Details</h3>
+          <p className="text-sm text-muted-foreground">
+            {artwork.title}
+          </p>
+          {artwork.description && (
+            <p className="text-sm text-muted-foreground">
+              {artwork.description}
+            </p>
+          )}
+        </div>
+
         <FormField
           control={form.control}
-          name="title"
+          name="is_variable_price"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">
+                  Variable Price
+                </FormLabel>
+                <FormDescription>
+                  Allow customers to choose their own price above a minimum
+                </FormDescription>
+              </div>
               <FormControl>
-                <Input {...field} />
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Product Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a product type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="collectors_wall">Collector's Wall</SelectItem>
-                  <SelectItem value="added_value_pedestal">Added Value Pedestal</SelectItem>
-                  <SelectItem value="featured_work">Featured Work</SelectItem>
-                  <SelectItem value="trust_wall">Trust Wall</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Different product types have different pricing models
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {!showPriceRange && (
+        {isVariablePrice ? (
           <FormField
             control={form.control}
-            name="price"
+            name="min_price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price</FormLabel>
+                <FormLabel>Minimum Price ($)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(Number(e.target.value))}
+                    value={field.value || ''}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Minimum price must be at least $10
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Price ($)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    value={field.value || ''}
                   />
                 </FormControl>
                 <FormMessage />
@@ -141,50 +185,34 @@ export function ProductForm({ onSubmit, initialData }: ProductFormProps) {
           />
         )}
 
-        {showPriceRange && (
-          <>
-            <FormField
-              control={form.control}
-              name="minPrice"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Minimum Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Minimum price must be between $10 and $50
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Draft products are not visible in the store
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            <FormField
-              control={form.control}
-              name="maxPrice"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Maximum Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        )}
-
-        <Button type="submit">Save Product</Button>
+        <Button type="submit">
+          {mode === 'create' ? 'Create Product' : 'Update Product'}
+        </Button>
       </form>
     </Form>
   );
