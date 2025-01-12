@@ -6,7 +6,7 @@
 - **.google/**
     - mm-web-445818-44be61e33338.json
 - **.notes/**
-    - database_schema_20250110_235607.md
+    - database_schema_20250112_140425.md
     - directory_structure.md
     - feed-system.md
     - gallery-event-guide.md
@@ -154,6 +154,9 @@
                 - route.ts
             - **visit/**
                 - **[userId]/**
+        - **store/**
+            - **checkout/**
+                - route.ts
         - **stripe/**
             - **connect/**
                 - route.ts
@@ -312,6 +315,7 @@
         - index.ts
     - **store/**
         - product-form.tsx
+        - store-management-client.tsx
     - **ui/**
         - accordion.tsx
         - alert-dialog.tsx
@@ -328,6 +332,7 @@
         - copy-button.tsx
         - dialog.tsx
         - dropdown-menu.tsx
+        - error-alert.tsx
         - exhibition-badge.tsx
         - feature-gate.tsx
         - form-message.tsx
@@ -698,6 +703,7 @@
         - 20240408000001_add_gallery_events.sql
         - 20240408000002_add_artworks_with_artist_view.sql
         - 20240420000001_add_store_tables.sql
+        - 20240420000002_add_store_orders.sql
         - 20241224140133_enable_storage_rls.sql
         - 20241224140420_ensure_artwork_bucket.sql
         - 20241224144027_remote_schema.sql
