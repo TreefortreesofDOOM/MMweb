@@ -1246,6 +1246,267 @@ export type Database = {
           },
         ]
       }
+      store_orders: {
+        Row: {
+          amount_total: number
+          artist_amount: number
+          created_at: string | null
+          customer_details: Json | null
+          ghost_profile_id: string | null
+          id: string
+          metadata: Json | null
+          product_id: string | null
+          shipping_details: Json | null
+          status: string
+          stripe_payment_intent: string | null
+          stripe_session_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount_total: number
+          artist_amount: number
+          created_at?: string | null
+          customer_details?: Json | null
+          ghost_profile_id?: string | null
+          id?: string
+          metadata?: Json | null
+          product_id?: string | null
+          shipping_details?: Json | null
+          status?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount_total?: number
+          artist_amount?: number
+          created_at?: string | null
+          customer_details?: Json | null
+          ghost_profile_id?: string | null
+          id?: string
+          metadata?: Json | null
+          product_id?: string | null
+          shipping_details?: Json | null
+          status?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_orders_ghost_profile_id_fkey"
+            columns: ["ghost_profile_id"]
+            isOneToOne: false
+            referencedRelation: "ghost_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_products: {
+        Row: {
+          artwork_id: string | null
+          created_at: string | null
+          id: string
+          is_variable_price: boolean | null
+          metadata: Json | null
+          min_price: number | null
+          profile_id: string | null
+          status: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          artwork_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_variable_price?: boolean | null
+          metadata?: Json | null
+          min_price?: number | null
+          profile_id?: string | null
+          status?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          artwork_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_variable_price?: boolean | null
+          metadata?: Json | null
+          min_price?: number | null
+          profile_id?: string | null
+          status?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_products_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_products_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks_with_artist"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_products_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "store_products_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_products_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_settings: {
+        Row: {
+          application_fee_percent: number
+          created_at: string | null
+          is_stripe_enabled: boolean | null
+          metadata: Json | null
+          profile_id: string
+          stripe_account_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          application_fee_percent?: number
+          created_at?: string | null
+          is_stripe_enabled?: boolean | null
+          metadata?: Json | null
+          profile_id: string
+          stripe_account_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          application_fee_percent?: number
+          created_at?: string | null
+          is_stripe_enabled?: boolean | null
+          metadata?: Json | null
+          profile_id?: string
+          stripe_account_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_settings_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "store_settings_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_settings_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_transfers: {
+        Row: {
+          amount: number
+          artist_id: string | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          order_id: string | null
+          status: string
+          stripe_session_id: string | null
+          stripe_transfer_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          artist_id?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          stripe_transfer_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          artist_id?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          stripe_transfer_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_transfers_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artwork_counts"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "store_transfers_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profile_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_transfers_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_transfers_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "store_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       text_embeddings: {
         Row: {
           content_id: string
@@ -1806,6 +2067,29 @@ export type Database = {
       cleanup_expired_registrations: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      create_store_product: {
+        Args: {
+          _profile_id: string
+          _artwork_id: string
+          _stripe_product_id: string
+          _stripe_price_id: string
+          _is_variable_price?: boolean
+          _min_price?: number
+        }
+        Returns: {
+          artwork_id: string | null
+          created_at: string | null
+          id: string
+          is_variable_price: boolean | null
+          metadata: Json | null
+          min_price: number | null
+          profile_id: string | null
+          status: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          updated_at: string | null
+        }
       }
       find_artwork_conversations: {
         Args: {

@@ -93,8 +93,8 @@ create policy "Verified artists can manage their own products"
     auth.uid() = profile_id
     and exists (
       select 1 from profile_roles
-      where profile_id = auth.uid()
-      and role_name = 'verified_artist'
+      where id = auth.uid()
+      and mapped_role = 'verified_artist'
     )
   );
 
@@ -103,8 +103,8 @@ create policy "Admins can manage all products"
   using (
     exists (
       select 1 from profile_roles
-      where profile_id = auth.uid()
-      and role_name = 'admin'
+      where id = auth.uid()
+      and mapped_role = 'admin'
     )
   );
 
@@ -119,8 +119,8 @@ create policy "Verified artists can manage their store settings"
     auth.uid() = profile_id
     and exists (
       select 1 from profile_roles
-      where profile_id = auth.uid()
-      and role_name = 'verified_artist'
+      where id = auth.uid()
+      and mapped_role = 'verified_artist'
     )
   );
 
@@ -129,7 +129,7 @@ create policy "Admins can manage all store settings"
   using (
     exists (
       select 1 from profile_roles
-      where profile_id = auth.uid()
-      and role_name = 'admin'
+      where id = auth.uid()
+      and mapped_role = 'admin'
     )
   ); 
