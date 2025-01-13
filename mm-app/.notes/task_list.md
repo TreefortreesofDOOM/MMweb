@@ -11,6 +11,8 @@
 
 ### AI
    - [ ] Integration with Gallery Systems: Connect the analyzer with gallery management systems to automatically update metadata, enhance search functionalities, and improve user experiences.
+   - [ ] **Auto-Generating Artwork Titles** 
+      - Have a feature that auto-generates or suggests titles for artworks that are missing or have low-quality. The user can then accept or tweak them. Inside the edit artwork page. 
 
 ### Stripe
 - [ ] Implement email notifications for Stripe events:
