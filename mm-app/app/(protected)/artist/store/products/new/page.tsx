@@ -51,7 +51,6 @@ export default async function NewProductPage({ searchParams }: PageProps) {
               price: artwork.price
             }}
             currentWallType={artwork.gallery_wall_type}
-            currentPrice={artwork.gallery_price}
           />
         </CardContent>
       </Card>
