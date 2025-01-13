@@ -23,6 +23,53 @@ export async function updateProductPrice(data: UpdateProductPriceData) {
     .eq('artwork_id', data.artworkId)
     .single();
 
+  // If product doesn't exist, create it
+  if (productError?.code === 'PGRST116') {
+    // Get artwork details for Stripe product
+    const { data: artwork } = await supabase
+      .from('artworks')
+      .select('title, description, artist_id')
+      .eq('id', data.artworkId)
+      .single();
+
+    if (!artwork) throw new Error('Artwork not found');
+
+    // Create Stripe product
+    const stripeProduct = await stripe.products.create({
+      name: artwork.title,
+      description: artwork.description || undefined,
+      metadata: {
+        artwork_id: data.artworkId,
+        artist_id: artwork.artist_id,
+        wall_type: data.wallType,
+        is_variable_price: data.isVariablePrice.toString(),
+        min_price: data.minPrice?.toString() || null,
+        recommended_price: data.recommendedPrice?.toString() || null
+      }
+    });
+
+    // Create store product
+    const { data: newProduct, error: createError } = await supabase
+      .from('store_products')
+      .insert({
+        artwork_id: data.artworkId,
+        profile_id: artwork.artist_id,
+        stripe_product_id: stripeProduct.id,
+        is_variable_price: data.isVariablePrice,
+        min_price: data.minPrice || null,
+        metadata: {
+          wall_type: data.wallType,
+          recommended_price: data.recommendedPrice || null
+        },
+        status: 'active'
+      })
+      .select()
+      .single();
+
+    if (createError) throw createError;
+    return { success: true };
+  }
+
   if (productError) throw productError;
 
   // Update store product
@@ -31,7 +78,6 @@ export async function updateProductPrice(data: UpdateProductPriceData) {
     .update({
       is_variable_price: data.isVariablePrice,
       min_price: data.minPrice || null,
-      gallery_price: data.galleryPrice || null,
       metadata: {
         wall_type: data.wallType,
         recommended_price: data.recommendedPrice || null
