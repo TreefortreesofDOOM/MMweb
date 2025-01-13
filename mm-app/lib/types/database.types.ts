@@ -1317,6 +1317,8 @@ export type Database = {
           is_variable_price: boolean | null
           metadata: Json | null
           min_price: number | null
+          payment_link_id: string | null
+          payment_link_status: string | null
           profile_id: string | null
           status: string
           stripe_price_id: string | null
@@ -1330,6 +1332,8 @@ export type Database = {
           is_variable_price?: boolean | null
           metadata?: Json | null
           min_price?: number | null
+          payment_link_id?: string | null
+          payment_link_status?: string | null
           profile_id?: string | null
           status?: string
           stripe_price_id?: string | null
@@ -1343,6 +1347,8 @@ export type Database = {
           is_variable_price?: boolean | null
           metadata?: Json | null
           min_price?: number | null
+          payment_link_id?: string | null
+          payment_link_status?: string | null
           profile_id?: string | null
           status?: string
           stripe_price_id?: string | null
