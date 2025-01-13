@@ -1,17 +1,18 @@
 # Task List
 
+## Bugs
+
+- the count does not work on admin dashboard for pending applications.
+- upload image progress bar does not have animation.
+
 ## High Priority
 
 - [ ] Instead of Collection Age, on collection page in the collection data detail, show time since last transaction. We want to subtly encourage them to add more art to their collection. Rekindle their art buying habits.
 
-## Stripe
-- [ ] Create an artist/store route which will be where the stripe products are created, edited, managed by the artist. 
-- [ ] Review our Stripe implementation and discuss how we can implement a system that adds products to the platform Stripe account from verified users. Both the admin and the user need to be able to do this. 
-- [ ] After a user classifies their work and the flags are set, we are then ready to add products to the platform Stripe account with the users connected account included for payouts. 
-   -  Collectors_wall are fixed price, 
-   -  added_value_pedestal are fixed price, 
-   -  featured_work are fixed price,
-   -  Trust_wall are choose-your-own-price with a minimum value set by the user and confirmed by the admin between $10 - $50. Please review the stripe documentation for more details since we are using Stripe Connect and i don't think we can use stripe connect for customer selected choose-your-own-price type products.  
+### AI
+   - [ ] Integration with Gallery Systems: Connect the analyzer with gallery management systems to automatically update metadata, enhance search functionalities, and improve user experiences.
+
+### Stripe
 - [ ] Implement email notifications for Stripe events:
    - Purchase confirmation to buyer
    - Sale notification to artist
@@ -21,7 +22,7 @@
 ### Recommendation Engine
 - There is no way to browse or follow collectors. We should think about how to implement this.
 
-   **Basic Details**
+   **Basic Details** (needs more detail and design)
    - We should recommend patrons to artists they might like based on an analysis of their collection and artist's content.
    - We should also recommend artists to patrons they might like based on an analysis of their collection and artist's content.
    - We should also recommend patrons to each other based on an analysis of their collection and each other's content.
@@ -39,6 +40,38 @@
 
 ## Medium Priority
 
+### Email System
+   - [ ] Move email templates to a separate file
+   - [ ] Add proper error handling for email sending
+   - [ ] Add email preview functionality for admins
+   - [ ] Add email sending queue for reliability
+   - [ ] Add email templates for:
+   - [ ] Welcome email
+   - [ ] Password reset
+   - [ ] Email verification
+   - [ ] Complete domain verification for meaningmachine.com in Resend
+   - [ ] Update email sender from `onboarding@resend.dev` to `noreply@meaningmachine.com` in:
+   - `app/api/test-email/route.ts`
+   - `utils/emails/artist-notifications.ts`
+   **Email Templates** (needs more detail and design)
+
+   #### Artist Application Approval
+   ```html
+   <h2>Congratulations!</h2>
+   <p>Your application to become an artist on Meaning Machine has been approved.</p>
+   <p>You can now access the artist features and start uploading your artwork.</p>
+   <p>Welcome to the Meaning Machine community!</p>
+   ```
+
+   #### Artist Application Rejection
+   ```html
+   <h2>Application Update</h2>
+   <p>Thank you for your interest in becoming an artist on Meaning Machine.</p>
+   <p>After careful review, we regret to inform you that we cannot approve your application at this time.</p>
+   <p><strong>Reason:</strong> {rejectionReason}</p>
+   <p>You're welcome to apply again in the future.</p>
+   ```
+
 ### Patron Collection View Improvements
 1. Documentation
    - [ ] Add JSDoc comments for all components
@@ -53,6 +86,16 @@
    - [ ] Implement proper Suspense boundaries
 
 ## Low Priority
+
+### Artist Management
+- [ ] Add commission request system
+
+### General
+   - [ ] Add proper error handling throughout the application
+   - [ ] Add loading states for all actions
+   - [ ] Add proper TypeScript types for all components
+   - [ ] Add unit tests
+   - [ ] Add end-to-end tests 
 
 ### Patron Collection View Improvements
 1. DRY Improvements
@@ -84,6 +127,9 @@
    - [ ] Implement show success tracking
    - [ ] Create visitor analytics dashboard
    - [ ] Build historical performance trends
+
+### Admin Features
+   - [ ] Add user management
 
 ## Completed
 

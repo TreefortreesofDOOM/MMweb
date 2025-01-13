@@ -5,8 +5,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { updateArtworkEmbeddings, findSimilarArtworks } from '@/lib/ai/embeddings';
 import { blobToBase64 } from './helpers';
 import { getGeminiResponse } from '@/lib/ai/gemini';
-import { ARTWORK_ANALYSIS_PROMPTS } from '@/lib/ai/prompts';
 import { env } from '@/lib/env';
+import { ANALYSIS_PROMPTS, AI_TEMPERATURE } from '@/lib/ai/instructions';
 
 const genAI = new GoogleGenerativeAI(env.GOOGLE_AI_API_KEY);
 
@@ -26,10 +26,10 @@ export async function analyzeArtwork(formData: FormData) {
 
     // Run analyses in parallel
     const [description, style, techniques, keywords] = await Promise.all([
-      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.description, { imageUrl, temperature: 0.7 }),
-      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.style, { imageUrl, temperature: 0.5 }),
-      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.techniques, { imageUrl, temperature: 0.5 }),
-      getGeminiResponse(ARTWORK_ANALYSIS_PROMPTS.keywords, { imageUrl, temperature: 0.5 })
+      getGeminiResponse(ANALYSIS_PROMPTS.description, { imageUrl, temperature: AI_TEMPERATURE.creative }),
+      getGeminiResponse(ANALYSIS_PROMPTS.style, { imageUrl, temperature: AI_TEMPERATURE.factual }),
+      getGeminiResponse(ANALYSIS_PROMPTS.techniques, { imageUrl, temperature: AI_TEMPERATURE.factual }),
+      getGeminiResponse(ANALYSIS_PROMPTS.keywords, { imageUrl, temperature: AI_TEMPERATURE.factual })
     ]);
 
     // Process comma-separated lists into arrays

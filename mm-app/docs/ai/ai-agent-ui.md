@@ -1,7 +1,7 @@
 ## Current Implementation Review
 
 ### Core Components
-- **AI Integration**: Using Google Gemini Pro Vision for image analysis and text generation
+- **AI Integration**
 - **Assistant Implementations**:
   1. **Artwork Analysis Assistant**: First proof of concept
      - Real-time artwork analysis with floating UI

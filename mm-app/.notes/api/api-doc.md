@@ -77,6 +77,16 @@ This document provides comprehensive documentation for the MM Web API endpoints.
 - **Parameters**:
   - `userId`: User identifier
 
+#### Gallery Shows
+- **Endpoint**: `/gallery/shows`
+- **Method**: GET, POST
+- **Description**: Manages gallery shows and exhibitions
+
+#### Gallery Dates
+- **Endpoint**: `/gallery/dates`
+- **Method**: GET
+- **Description**: Retrieves available gallery dates and scheduling information
+
 ### 4. Artwork Management (`/api/artworks/`)
 
 #### Individual Artwork
@@ -239,6 +249,95 @@ This document provides comprehensive documentation for the MM Web API endpoints.
   - RLS policies
   - Image URL validation
   - Content type verification
+
+### 10. Store Management (`/api/store/`)
+
+#### Products
+- **Endpoint**: `/store/products`
+- **Method**: POST
+- **Description**: Creates and manages store products
+- **Authentication**: Required (Artist only)
+- **Request Body**:
+  ```typescript
+  {
+    artwork_id: string;          // UUID of artwork
+    is_variable_price: boolean;  // Optional, default false
+    min_price?: number;         // Required if variable price
+    price?: number;             // Required if fixed price
+    status: 'draft' | 'published';
+    inventory_type: 'unlimited' | 'finite';
+    inventory_quantity: number;  // Min 1
+  }
+  ```
+- **Implementation**: Product management with Stripe integration (150+ lines)
+
+#### Checkout
+- **Endpoint**: `/store/checkout`
+- **Method**: POST
+- **Description**: Handles product checkout process
+- **Request Body**:
+  ```typescript
+  {
+    productId: string;
+    amount?: number;        // Required for variable price products
+    customerEmail: string;
+  }
+  ```
+- **Features**:
+  - Variable and fixed pricing support
+  - Platform fee calculation
+  - Stripe integration
+  - Success/cancel URL handling
+- **Implementation**: Checkout process handler (100+ lines)
+
+### 11. Collections Management (`/api/collections/`)
+
+#### Move Collection Items
+- **Endpoint**: `/collections/[id]/move`
+- **Method**: POST
+- **Description**: Moves artworks between collections
+- **Authentication**: Required (Patron only)
+- **Parameters**:
+  - `id`: Collection identifier
+- **Request Body**:
+  ```typescript
+  {
+    targetCollectionId: string;  // Destination collection ID
+    artworkIds: string[];       // Array of artwork IDs to move
+  }
+  ```
+- **Implementation**: Collection items movement handler (40+ lines)
+
+#### Update Item Order
+- **Endpoint**: `/collections/[id]/order`
+- **Method**: PATCH
+- **Description**: Updates the display order of items in a collection
+- **Parameters**:
+  - `id`: Collection identifier
+- **Request Body**:
+  ```typescript
+  {
+    items: Array<{
+      id: string;     // Item ID
+      order: number;  // New display order
+    }>;
+  }
+  ```
+- **Implementation**: Order management (50+ lines)
+
+#### Update Privacy Settings
+- **Endpoint**: `/collections/[id]/privacy`
+- **Method**: PATCH
+- **Description**: Updates collection privacy settings
+- **Parameters**:
+  - `id`: Collection identifier
+- **Request Body**:
+  ```typescript
+  {
+    isPrivate: boolean;  // Privacy status
+  }
+  ```
+- **Implementation**: Privacy settings handler (25+ lines)
 
 ## Authentication
 

@@ -41,9 +41,19 @@ The platform implements a role-based navigation system with distinct features an
 
 **Sales Section**
 - Store (`/artist/store`)
-  - Sales management
-  - Pricing controls
-  - Transaction history
+  - Store management dashboard
+  - Product listings
+  - Sales overview
+  - Stripe integration status
+- Products
+  - New Product (`/artist/store/products/new`)
+    - Add artwork to store
+    - Configure pricing
+    - Set inventory
+  - Edit Product (`/artist/store/products/[id]/edit`)
+    - Update product details
+    - Modify pricing
+    - Adjust settings
 - Analytics (`/artist/analytics`)
   - Performance tracking
   - Engagement metrics
@@ -94,9 +104,22 @@ The platform implements a role-based navigation system with distinct features an
 - Dashboard (`/patron/dashboard`)
   - Collection statistics
   - Recent activity
-- Collections (`/patron/collections`)
-  - Collection management
-  - Artwork organization
+- Collections
+  - List (`/patron/collections`)
+    - Collection management
+    - Artwork organization
+    - Collection overview
+  - View Collection (`/patron/collections/[id]`)
+    - Collection details
+    - Artwork display
+    - Privacy settings
+  - Edit Collection (`/patron/collections/[id]/edit`)
+    - Update collection details
+    - Modify settings
+  - New Collection (`/patron/collections/new`)
+    - Create collection
+    - Set initial details
+    - Configure privacy
 - Favorites (`/patron/favorites`)
   - Saved artworks
   - Quick collection adding
@@ -272,6 +295,11 @@ const getDashboardPath = (role: UserRole): string => {
 - Consistent feed access across roles
 - Improved section organization
 - Better icon consistency
+- Detailed Store navigation for Verified Artists
+- Enhanced Collections management for Patrons
+- Product management routes
+- Collection privacy controls
+- Store integration status
 
 🔄 **Changed**
 - Simplified navigation structure
@@ -279,6 +307,11 @@ const getDashboardPath = (role: UserRole): string => {
 - Streamlined section titles
 - Improved mobile layout
 - Enhanced accessibility
+- Reorganized Sales section
+- Updated Collections structure
+- Enhanced route documentation
+- Improved section organization
+- Added more detailed descriptions
 
 ⚠️ **Monitoring**
 - Mobile navigation performance
