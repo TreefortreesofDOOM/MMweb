@@ -1314,45 +1314,54 @@ export type Database = {
           artwork_id: string | null
           created_at: string | null
           id: string
+          inventory_status: string | null
           is_variable_price: boolean | null
           metadata: Json | null
           min_price: number | null
+          payment_link: string | null
           payment_link_id: string | null
           payment_link_status: string | null
           profile_id: string | null
           status: string
           stripe_price_id: string | null
           stripe_product_id: string | null
+          stripe_product_metadata: Json | null
           updated_at: string | null
         }
         Insert: {
           artwork_id?: string | null
           created_at?: string | null
           id?: string
+          inventory_status?: string | null
           is_variable_price?: boolean | null
           metadata?: Json | null
           min_price?: number | null
+          payment_link?: string | null
           payment_link_id?: string | null
           payment_link_status?: string | null
           profile_id?: string | null
           status?: string
           stripe_price_id?: string | null
           stripe_product_id?: string | null
+          stripe_product_metadata?: Json | null
           updated_at?: string | null
         }
         Update: {
           artwork_id?: string | null
           created_at?: string | null
           id?: string
+          inventory_status?: string | null
           is_variable_price?: boolean | null
           metadata?: Json | null
           min_price?: number | null
+          payment_link?: string | null
           payment_link_id?: string | null
           payment_link_status?: string | null
           profile_id?: string | null
           status?: string
           stripe_price_id?: string | null
           stripe_product_id?: string | null
+          stripe_product_metadata?: Json | null
           updated_at?: string | null
         }
         Relationships: [
@@ -2074,29 +2083,65 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      create_store_product: {
-        Args: {
-          _profile_id: string
-          _artwork_id: string
-          _stripe_product_id: string
-          _stripe_price_id: string
-          _is_variable_price?: boolean
-          _min_price?: number
-        }
-        Returns: {
-          artwork_id: string | null
-          created_at: string | null
-          id: string
-          is_variable_price: boolean | null
-          metadata: Json | null
-          min_price: number | null
-          profile_id: string | null
-          status: string
-          stripe_price_id: string | null
-          stripe_product_id: string | null
-          updated_at: string | null
-        }
-      }
+      create_store_product:
+        | {
+            Args: {
+              _profile_id: string
+              _artwork_id: string
+              _stripe_product_id: string
+              _stripe_price_id: string
+              _is_variable_price?: boolean
+              _min_price?: number
+            }
+            Returns: {
+              artwork_id: string | null
+              created_at: string | null
+              id: string
+              inventory_status: string | null
+              is_variable_price: boolean | null
+              metadata: Json | null
+              min_price: number | null
+              payment_link: string | null
+              payment_link_id: string | null
+              payment_link_status: string | null
+              profile_id: string | null
+              status: string
+              stripe_price_id: string | null
+              stripe_product_id: string | null
+              stripe_product_metadata: Json | null
+              updated_at: string | null
+            }
+          }
+        | {
+            Args: {
+              _profile_id: string
+              _artwork_id: string
+              _stripe_product_id: string
+              _stripe_price_id: string
+              _payment_link: string
+              _stripe_product_metadata: Json
+              _is_variable_price?: boolean
+              _min_price?: number
+            }
+            Returns: {
+              artwork_id: string | null
+              created_at: string | null
+              id: string
+              inventory_status: string | null
+              is_variable_price: boolean | null
+              metadata: Json | null
+              min_price: number | null
+              payment_link: string | null
+              payment_link_id: string | null
+              payment_link_status: string | null
+              profile_id: string | null
+              status: string
+              stripe_price_id: string | null
+              stripe_product_id: string | null
+              stripe_product_metadata: Json | null
+              updated_at: string | null
+            }
+          }
       find_artwork_conversations: {
         Args: {
           p_user_id: string

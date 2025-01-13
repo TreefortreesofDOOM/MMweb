@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/supabase-server'
 import { ProductForm } from '@/components/store/product-form'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { updateProductPrice } from '@/lib/actions/store-actions'
+import type { GalleryWallType } from '@/lib/types/gallery-types'
 
 export default async function NewProductPage({
   searchParams,
@@ -43,8 +45,18 @@ export default async function NewProductPage({
         </CardHeader>
         <CardContent>
           <ProductForm 
-            artwork={artwork}
-            mode="create"
+            artworkId={artwork.id}
+            onSubmit={async (values) => {
+              await updateProductPrice({
+                artworkId: artwork.id,
+                wallType: values.wallType as GalleryWallType,
+                isVariablePrice: values.isVariablePrice,
+                minPrice: values.minPrice,
+                recommendedPrice: values.recommendedPrice,
+                galleryPrice: values.galleryPrice
+              });
+              redirect('/artist/store');
+            }}
           />
         </CardContent>
       </Card>

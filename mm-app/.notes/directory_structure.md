@@ -6,7 +6,7 @@
 - **.google/**
     - mm-web-445818-44be61e33338.json
 - **.notes/**
-    - database_schema_20250112_140425.md
+    - database_schema_20250112_143855.md
     - directory_structure.md
     - feed-system.md
     - gallery-event-guide.md
@@ -15,6 +15,7 @@
     - mm-ai-posting-system.md
     - patron-role.md
     - project_overview.md
+    - stripe-store-tasks.md
     - stripe-store.md
     - task_list.md
 - **app/**
@@ -82,6 +83,11 @@
             - **qr-code/**
                 - page.tsx
             - **store/**
+                - **[id]/**
+                - **products/**
+                    - **[id]/**
+                    - **new/**
+                        - page.tsx
                 - page.tsx
             - **verification/**
                 - page.tsx
@@ -157,6 +163,8 @@
         - **store/**
             - **checkout/**
                 - route.ts
+            - **products/**
+                - route.ts
         - **stripe/**
             - **connect/**
                 - route.ts
@@ -184,6 +192,11 @@
                 - route.ts
     - **collections/**
         - **[id]/**
+    - **store/**
+        - **cancel/**
+            - page.tsx
+        - **success/**
+            - page.tsx
     - favicon.ico
     - globals.css
     - layout.tsx
@@ -314,6 +327,9 @@
         - follow-button.tsx
         - index.ts
     - **store/**
+        - artwork-product-list.tsx
+        - checkout-status.tsx
+        - product-card.tsx
         - product-form.tsx
         - store-management-client.tsx
     - **ui/**
@@ -465,6 +481,7 @@
         - role.ts
         - settings.ts
         - social.ts
+        - store-actions.ts
         - update-avatar.ts
         - verification.ts
     - **ai/**
@@ -566,6 +583,8 @@
     - env.ts
     - ghost-profiles-actions.ts
     - utils.ts
+- **migrations/**
+    - 20240421000003_add_payment_link_columns.sql
 - **public/**
     - **images/**
         - **favicons/**
@@ -704,6 +723,9 @@
         - 20240408000002_add_artworks_with_artist_view.sql
         - 20240420000001_add_store_tables.sql
         - 20240420000002_add_store_orders.sql
+        - 20240421000001_add_payment_link_and_inventory.sql
+        - 20240421000001_add_store_price_rules.sql
+        - 20240421000002_add_payment_link_id.sql
         - 20241224140133_enable_storage_rls.sql
         - 20241224140420_ensure_artwork_bucket.sql
         - 20241224144027_remote_schema.sql
