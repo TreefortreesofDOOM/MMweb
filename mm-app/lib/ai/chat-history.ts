@@ -1,3 +1,6 @@
+import { createClient } from '@/lib/supabase/supabase-server';
+import { generateEmbedding } from './embeddings';
+
 interface ChatHistoryMatch {
   message: string;
   response: string;
@@ -20,11 +23,51 @@ export async function findRelevantChatHistory(
   similarConversations: ChatHistoryMatch[];
   artworkHistory: ArtworkChatHistory[];
 }> {
-  // Return empty results
-  return {
-    similarConversations: [],
-    artworkHistory: []
-  };
+  try {
+    const supabase = await createClient();
+    const [promptEmbedding] = await generateEmbedding(prompt);
+
+    // Find similar conversations
+    const { data: similarConversations, error: similarError } = await supabase.rpc(
+      'find_similar_conversations',
+      {
+        p_user_id: userId,
+        p_query: prompt,
+        p_embedding: promptEmbedding,
+        p_match_count: 5,
+        p_match_threshold: 0.8
+      }
+    );
+
+    if (similarError) throw similarError;
+
+    // Find artwork-specific conversations if artworkId is provided
+    let artworkHistory: ArtworkChatHistory[] = [];
+    if (artworkId) {
+      const { data: artworkConversations, error: artworkError } = await supabase.rpc(
+        'find_artwork_conversations',
+        {
+          p_user_id: userId,
+          p_artwork_id: artworkId,
+          p_match_count: 5
+        }
+      );
+
+      if (artworkError) throw artworkError;
+      artworkHistory = artworkConversations || [];
+    }
+
+    return {
+      similarConversations: similarConversations || [],
+      artworkHistory
+    };
+  } catch (error) {
+    console.error('Error finding relevant chat history:', error);
+    return {
+      similarConversations: [],
+      artworkHistory: []
+    };
+  }
 }
 
 export const formatChatContext = (

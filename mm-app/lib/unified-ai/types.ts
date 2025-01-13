@@ -23,7 +23,7 @@ export const personaMapping: Record<UserRole, AssistantPersona> = {
 } as const
 
 // Context types
-export type ViewContext = 'profile' | 'artwork' | 'gallery' | 'general'
+export type ViewContext = 'general' | 'profile' | 'artwork' | 'gallery' | 'store' | 'collection' | 'portfolio'
 
 /**
  * Parameters used for image generation

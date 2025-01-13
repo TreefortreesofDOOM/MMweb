@@ -22,7 +22,6 @@ export interface ArtworkContext {
     };
 }
 
-
 export const AI_TEMPERATURE = {
     creative: 0.7,  // For descriptions and creative analysis
     factual: 0.3,   // For technical details and categorization

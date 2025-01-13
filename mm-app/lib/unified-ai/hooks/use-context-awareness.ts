@@ -4,6 +4,7 @@ import { type AIContext, type ViewContext, type AssistantPersona, personaMapping
 import { useUnifiedAI } from '../context'
 import { useAuth } from '@/hooks/use-auth'
 import { PERSONALITIES, getPersonalizedContext } from '@/lib/ai/personalities'
+import { getSettings } from '@/lib/actions/settings'
 import type { UserRole } from '@/lib/navigation/types'
 
 export const useContextAwareness = () => {
@@ -12,7 +13,7 @@ export const useContextAwareness = () => {
   const { user } = useAuth()
 
   useEffect(() => {
-    const determinePageContext = (): AIContext => {
+    const determinePageContext = async (): Promise<AIContext> => {
       // Get view context
       let pageType: ViewContext = 'general'
       let contextData = {}
@@ -25,6 +26,15 @@ export const useContextAwareness = () => {
         }
       }
       
+      // Portfolio pages
+      if (pathname.includes('/portfolio')) {
+        pageType = 'portfolio'
+        contextData = {
+          userId: user?.id,
+          isOwner: true
+        }
+      }
+
       // Artwork pages
       if (pathname.includes('/artwork')) {
         pageType = 'artwork'
@@ -41,19 +51,37 @@ export const useContextAwareness = () => {
         }
       }
 
+      // Store pages
+      if (pathname.includes('/store')) {
+        pageType = 'store'
+        contextData = {
+          storeId: pathname.split('/').pop(),
+          isProductPage: pathname.includes('/products/')
+        }
+      }
+
+      // Collections pages
+      if (pathname.includes('/collections')) {
+        pageType = 'collection'
+        contextData = {
+          collectionId: pathname.split('/').pop(),
+          isPrivate: pathname.includes('/private/')
+        }
+      }
+
       // Get persona based on user role
       const persona = user?.role ? personaMapping[user.role as UserRole] : personaMapping.user
 
-      // Get both character and role personalities
-      const characterPersonality = PERSONALITIES.JARVIS // Default character personality
+      // Get user's preferred AI personality from settings
+      const settings = await getSettings()
+      const preferredCharacter = settings?.preferences.aiPersonality?.toUpperCase() || 'JARVIS'
+      const characterPersonality = PERSONALITIES[preferredCharacter as keyof typeof PERSONALITIES]
       const rolePersonality = PERSONALITIES[persona.toUpperCase() as keyof typeof PERSONALITIES]
 
       // Combine context behaviors
       const personaContext = rolePersonality 
         ? getPersonalizedContext(rolePersonality, pageType)
-        : characterPersonality.contextBehaviors[pageType] || 
-          characterPersonality.contextBehaviors.general || 
-          'Consider the context and purpose of what you are viewing.'
+        : getPersonalizedContext(characterPersonality, pageType)
 
       return {
         route: pathname,
@@ -67,14 +95,15 @@ export const useContextAwareness = () => {
       }
     }
 
-    const pageContext = determinePageContext()
-    
-    dispatch({
-      type: 'SET_PAGE_CONTEXT',
-      payload: pageContext
+    // Update to handle async function
+    determinePageContext().then(pageContext => {
+      dispatch({
+        type: 'SET_PAGE_CONTEXT',
+        payload: pageContext
+      })
     })
 
-  }, [pathname, dispatch, user?.role])
+  }, [pathname, dispatch, user?.role, user?.id])
 
   const suggestAssistant = () => {
     switch (state.context.pageContext.pageType) {
@@ -82,6 +111,11 @@ export const useContextAwareness = () => {
         return {
           mode: 'analysis' as const,
           type: 'bio_extraction'
+        }
+      case 'portfolio':
+        return {
+          mode: 'analysis' as const,
+          type: 'portfolio-analysis'
         }
       case 'artwork':
         return {
@@ -100,49 +134,6 @@ export const useContextAwareness = () => {
         }
     }
   }
-
-  const getPersonaContext = (persona: AssistantPersona, pageType: ViewContext): string => {
-    switch (persona) {
-      case 'collector':
-        switch (pageType) {
-          case 'artwork':
-            return 'You are viewing an artwork as a collector. Focus on its collectible value, market position, and how it might fit into a collection.';
-          case 'gallery':
-            return 'You are browsing a gallery as a collector. Consider the curation, themes, and potential additions to your collection.';
-          case 'profile':
-            return 'You are viewing an artist profile as a collector. Focus on their career trajectory, body of work, and collecting opportunities.';
-          default:
-            return 'You are exploring as a collector. Consider market trends, collecting strategies, and portfolio development.';
-        }
-
-      case 'mentor':
-        switch (pageType) {
-          case 'artwork':
-            return 'You are reviewing artwork as a mentor. Focus on artistic technique, composition, and potential improvements.';
-          case 'gallery':
-            return 'You are exploring gallery space as a mentor. Consider presentation, curation, and exhibition strategies.';
-          case 'profile':
-            return 'You are reviewing an artist profile as a mentor. Focus on portfolio development, career growth, and professional presentation.';
-          default:
-            return 'You are mentoring artists. Consider career development, artistic growth, and professional opportunities.';
-        }
-
-      case 'advisor':
-        switch (pageType) {
-          case 'artwork':
-            return 'You are analyzing artwork as an advisor. Focus on market trends, platform metrics, and engagement analytics.';
-          case 'gallery':
-            return 'You are analyzing gallery performance as an advisor. Consider traffic patterns, conversion rates, and user engagement.';
-          case 'profile':
-            return 'You are reviewing profile metrics as an advisor. Focus on visibility, engagement rates, and growth opportunities.';
-          default:
-            return 'You are providing strategic insights. Consider platform metrics, user behavior, and growth opportunities.';
-        }
-
-      default:
-        return 'You are exploring content. Consider the context and purpose of what you are viewing.';
-    }
-  };
 
   return {
     pageContext: state.context.pageContext,

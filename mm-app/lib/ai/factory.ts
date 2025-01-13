@@ -298,4 +298,11 @@ class FallbackAIProvider implements AIServiceProvider {
     this.primaryProvider.setMaxTokens(maxTokens)
     this.fallbackProvider.setMaxTokens(maxTokens)
   }
+
+  async generateImage(prompt: string, options?: any): Promise<string> {
+    return this.withFallback(
+      () => this.primaryProvider.generateImage(prompt, options),
+      () => this.fallbackProvider.generateImage(prompt, options)
+    )
+  }
 } 

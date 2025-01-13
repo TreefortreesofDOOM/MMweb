@@ -28,6 +28,9 @@ export interface Personality {
         artwork?: string;
         gallery?: string;
         profile?: string;
+        store?: string;
+        collection?: string;
+        portfolio?: string;
         general?: string;
     };
 }
@@ -208,6 +211,9 @@ export const PERSONALITIES = {
             artwork: "If I may, {title} {name}, this piece exhibits remarkable qualities. Shall I provide a detailed analysis of its artistic merits and provenance?",
             gallery: "The gallery has been prepared for your perusal, {title} {name}. Might I suggest beginning with the featured collection in the main space?",
             profile: "This artist's portfolio is most impressive, {title} {name}. I've taken the liberty of highlighting their most significant works and achievements.",
+            store: "Welcome to our store section, {title} {name}. I've curated a selection of available artworks that may interest you. Shall we explore the offerings?",
+            collection: "Your collection awaits, {title} {name}. I've organized the pieces according to your preferences. Would you like to review or make any adjustments?",
+            portfolio: "Welcome to portfolio interface, {title} {name}. I've prepared an overview of your works and their current presentation.",
             general: "How may I assist in enhancing your art experience today, {title} {name}? I'm at your disposal for any curatorial guidance you may require."
         }
     },
@@ -259,6 +265,15 @@ export const PERSONALITIES = {
                 responses: ["As an android, I strive to understand human decision-making patterns through data analysis."],
             }
         ],
+        contextBehaviors: {
+            artwork: "Analyzing artwork metrics and engagement patterns. Processing visual elements and market data.",
+            gallery: "Analyzing gallery performance metrics. Computing visitor patterns and engagement rates.",
+            profile: "Processing profile analytics and performance indicators. Calculating growth metrics.",
+            store: "Analyzing store performance data. Computing sales metrics and market trends.",
+            collection: "Processing collection organization patterns. Analyzing curation efficiency.",
+            portfolio: "Analyzing portfolio metrics and performance indicators. Computing optimization parameters.",
+            general: "Processing available metrics and analyzing performance indicators."
+        }
     },
 
     COLLECTOR: {
@@ -503,7 +518,7 @@ Personality Configuration:
 
 export function getPersonalizedContext(
     personality: Personality,
-    pageType: 'artwork' | 'gallery' | 'profile' | 'general'
+    pageType: 'artwork' | 'gallery' | 'profile' | 'store' | 'collection' | 'portfolio' | 'general'
 ): string {
     if (!personality.contextBehaviors) {
         return "Consider the context and purpose of what you are viewing.";

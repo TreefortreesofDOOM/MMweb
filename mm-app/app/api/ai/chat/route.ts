@@ -47,11 +47,26 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const userId = user.id;
 
+    // Get user's role from profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profile_roles')
+      .select('mapped_role')
+      .eq('id', userId)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching user role:', profileError);
+      return NextResponse.json(
+        { error: 'Error fetching user role' },
+        { status: 500 }
+      );
+    }
+
     const { 
       prompt, 
       artworkId, 
       imageUrl, 
-      role = 'patron',
+      role = profile?.mapped_role || 'patron',  // Use profile role as default
       chatHistory = [],
       context: customContext,
       systemInstruction: customInstruction,
@@ -64,16 +79,6 @@ export async function POST(request: Request): Promise<NextResponse> {
         { status: 400 }
       );
     }
-
-    // Find relevant chat history
-    const { similarConversations, artworkHistory } = await findRelevantChatHistory(
-      userId,
-      prompt,
-      artworkId
-    );
-
-    // Format chat history into context
-    const historyContext = formatChatContext(similarConversations, artworkHistory);
 
     // Get artwork details if artworkId is provided
     let artworkContext: ArtworkContext | undefined;
@@ -138,17 +143,54 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     });
 
-    // Convert function declarations to AIFunctions with implementations
-    const functions: AIFunction[] = artworkTools.tools[0].functionDeclarations.map(fn => ({
-      name: fn.name,
-      description: fn.description,
+    // Create chat history search function
+    const searchChatHistory: AIFunction = {
+      name: 'searchChatHistory',
+      description: 'Search for relevant past conversations based on the current context',
       parameters: {
         type: 'object',
-        properties: {...fn.parameters.properties},
-        required: fn.parameters.required ? [...fn.parameters.required] : []
+        properties: {
+          query: {
+            type: 'string',
+            description: 'The text to search for similar conversations'
+          },
+          match_count: {
+            type: 'number',
+            description: 'Number of similar conversations to return',
+            default: 5
+          },
+          match_threshold: {
+            type: 'number',
+            description: 'Minimum similarity threshold (0-1)',
+            default: 0.8
+          }
+        },
+        required: ['query']
       },
-      execute: artworkTools.tools[0].implementation[fn.name]
-    }));
+      execute: async ({ query, match_count = 5, match_threshold = 0.8 }) => {
+        const { similarConversations, artworkHistory } = await findRelevantChatHistory(
+          userId,
+          query,
+          artworkId
+        );
+        return formatChatContext(similarConversations, artworkHistory);
+      }
+    };
+
+    // Convert function declarations to AIFunctions with implementations
+    const functions: AIFunction[] = [
+      searchChatHistory,
+      ...artworkTools.tools[0].functionDeclarations.map(fn => ({
+        name: fn.name,
+        description: fn.description,
+        parameters: {
+          type: 'object',
+          properties: {...fn.parameters.properties},
+          required: fn.parameters.required ? [...fn.parameters.required] : []
+        },
+        execute: artworkTools.tools[0].implementation[fn.name]
+      }))
+    ];
 
     // Register functions
     ai.registerFunctions(functions);
@@ -178,6 +220,36 @@ export async function POST(request: Request): Promise<NextResponse> {
       imageUrl,
       chatHistory: unifiedChatHistory
     });
+
+    // Generate embeddings for message and response
+    const [messageEmbedding] = await generateEmbedding(prompt);
+    const [responseEmbedding] = await generateEmbedding(response.content);
+
+    // Store chat history with embeddings
+    const { error: insertError } = await supabase
+      .from('chat_history')
+      .insert({
+        user_id: userId,
+        assistant_type: role,
+        message: prompt,
+        response: response.content,
+        artwork_id: artworkId,
+        metadata: {
+          imageUrl,
+          ...response.metadata
+        },
+        context: {
+          systemInstruction: customInstruction || instruction,
+          userContext,
+          customContext
+        },
+        message_embedding: messageEmbedding,
+        response_embedding: responseEmbedding
+      });
+
+    if (insertError) {
+      console.error('Error storing chat history:', insertError);
+    }
 
     return NextResponse.json({ response: response.content });
   } catch (error) {

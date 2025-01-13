@@ -433,6 +433,10 @@ export class GeminiProvider implements AIServiceProvider {
     this.maxTokens = maxTokens
   }
 
+  async generateImage(prompt: string, options?: any): Promise<string> {
+    throw new Error('Image generation is not supported by Gemini. Use ChatGPT provider instead.')
+  }
+
   private async storeMessageForEmbeddings(message: {
     role: 'user' | 'assistant' | 'system'
     content: string
