@@ -72,13 +72,13 @@ export function AIArtistAssistant({ className }: AIArtistAssistantProps) {
             variant="outline" 
             className="relative h-auto min-h-[120px] p-4 overflow-hidden hover:bg-muted flex flex-col justify-start items-stretch"
           >
-            <Link href="/artist/portfolio" className="flex flex-col gap-2 text-left h-full">
+            <Link href="/artist/analyze-portfolio" className="flex flex-col gap-2 text-left h-full">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span className="font-medium">Portfolio Optimization</span>
+                <span className="font-medium">Portfolio Analysis</span>
               </div>
               <p className="text-sm text-muted-foreground whitespace-normal">
-                Receive suggestions to enhance your portfolio presentation
+                Get AI-powered insights to optimize your portfolio
               </p>
             </Link>
           </Button>

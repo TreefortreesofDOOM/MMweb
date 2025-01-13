@@ -1,5 +1,6 @@
 import { Content } from "@google/generative-ai";
 import { applyPersonalityToInstruction, PERSONALITIES } from './personalities';
+import type { PortfolioData } from './portfolio-data-collector'
 
 let agentName = "Meaning Machine AI";
 // Types
@@ -345,4 +346,129 @@ export const ANALYSIS_PROMPTS = {
 
     `,
 } as const;
+
+export const PORTFOLIO_ANALYSIS_PROMPTS = {
+  composition: (data: PortfolioData) => `
+Analyze this artist's portfolio composition and provide specific recommendations:
+
+Current Portfolio:
+- Primary mediums: ${data.profile.medium?.join(', ') || 'None specified'}
+- Total artworks: ${data.artworks.length}
+- Technique distribution: ${Object.entries(data.artworks.reduce((acc: Record<string, number>, artwork) => {
+    artwork.techniques?.forEach(technique => {
+      acc[technique] = (acc[technique] || 0) + 1
+    })
+    return acc
+  }, {})).map(([k, v]) => `${k}: ${v}`).join(', ')}
+- Engagement: ${data.engagementMetrics.totalViews} views, ${data.engagementMetrics.totalFavorites} favorites
+- Average engagement: ${data.engagementMetrics.averageViewsPerArtwork.toFixed(1)} views/artwork
+
+${data.engagementMetrics.totalViews > 0 ? `
+Engagement Analysis:
+- Total views: ${data.engagementMetrics.totalViews}
+- Average views per artwork: ${data.engagementMetrics.averageViewsPerArtwork.toFixed(1)}
+- Most viewed artworks: ${data.artworks.sort((a, b) => ((b.ai_metadata as any)?.views || 0) - ((a.ai_metadata as any)?.views || 0)).slice(0, 3).map(a => a.title).join(', ')}
+` : ''}
+
+Sales Analysis:
+- Total revenue: $${data.transactions.reduce((sum, t) => sum + (t.amount_total || 0), 0).toFixed(2)}
+- Average price: $${(data.artworks.reduce((sum, a) => sum + (a.price || 0), 0) / data.artworks.length).toFixed(2)}
+- Best sellers: ${data.artworks.sort((a, b) => {
+    const aCount = data.transactions.filter(t => t.artwork_id === a.id).length
+    const bCount = data.transactions.filter(t => t.artwork_id === b.id).length
+    return bCount - aCount
+  }).slice(0, 3).map(a => a.title).join(', ')}
+
+Market Analysis:
+- Price range: $${Math.min(...data.artworks.map(a => a.price || 0))} - $${Math.max(...data.artworks.map(a => a.price || 0))}
+- Average days to sell: ${(data.transactions.reduce((sum, t) => {
+    const artwork = data.artworks.find(a => a.id === t.artwork_id)
+    if (!artwork) return sum
+    const created = new Date(artwork.created_at || 0)
+    const sold = new Date(t.created_at || 0)
+    return sum + (sold.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
+  }, 0) / data.transactions.length).toFixed(1)} days
+
+Analyze:
+1. Medium balance and diversity
+2. Style consistency across the portfolio
+3. Technical diversity within each medium
+4. Portfolio completeness and gaps
+5. Engagement patterns and sales trends
+
+Provide specific recommendations for:
+1. Balancing the portfolio across mediums
+2. Strengthening style consistency
+3. Expanding technical range
+4. Filling portfolio gaps
+5. Leveraging successful patterns`,
+
+  presentation: (data: PortfolioData) => `
+Current Portfolio Presentation:
+- Total artworks: ${data.artworks.length}
+- Display order: ${data.artworks.sort((a, b) => (a.display_order || 0) - (b.display_order || 0)).map(a => a.title).join(', ')}
+- Image quality: ${data.artworks.filter(a => (a.ai_metadata as any)?.imageQuality === 'high').length} high quality, ${data.artworks.filter(a => (a.ai_metadata as any)?.imageQuality === 'medium').length} medium quality
+- Description coverage: ${data.artworks.filter(a => a.description).length} artworks have descriptions
+
+Analyze:
+1. Image quality and consistency
+2. Description completeness and quality
+3. Portfolio organization and flow
+4. Visual hierarchy
+5. Artwork presentation details
+
+Provide specific recommendations for:
+1. Improving image quality
+2. Enhancing descriptions
+3. Optimizing organization
+4. Strengthening visual impact
+5. Refining presentation details`,
+
+  pricing: (data: PortfolioData) => `
+Current Pricing:
+- Price range: $${Math.min(...data.artworks.map(a => a.price || 0))} - $${Math.max(...data.artworks.map(a => a.price || 0))}
+- Average price: $${(data.artworks.reduce((sum, a) => sum + (a.price || 0), 0) / data.artworks.length).toFixed(2)}
+- Sales performance: ${data.transactions.length} sales, $${data.transactions.reduce((sum, t) => sum + (t.amount_total || 0), 0).toFixed(2)} total revenue
+
+Analyze:
+1. Price consistency within mediums
+2. Price alignment with market
+3. Price progression over time
+4. Sales performance by price point
+5. Price-value relationship
+
+Provide specific recommendations for:
+1. Adjusting price points
+2. Aligning with market rates
+3. Optimizing price structure
+4. Maximizing value perception
+5. Improving sales conversion`,
+
+  market: (data: PortfolioData) => `
+Current Market Position:
+- Total artworks: ${data.artworks.length}
+- Active listings: ${data.artworks.filter(a => a.status === 'published').length}
+- Sales history: ${data.transactions.length} sales
+- Average days to sell: ${(data.transactions.reduce((sum, t) => {
+    const artwork = data.artworks.find(a => a.id === t.artwork_id)
+    if (!artwork) return sum
+    const created = new Date(artwork.created_at || 0)
+    const sold = new Date(t.created_at || 0)
+    return sum + (sold.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
+  }, 0) / data.transactions.length).toFixed(1)} days
+
+Analyze:
+1. Market demand patterns
+2. Competition analysis
+3. Buyer preferences
+4. Sales velocity
+5. Market positioning
+
+Provide specific recommendations for:
+1. Targeting market segments
+2. Differentiating offerings
+3. Meeting buyer needs
+4. Improving sales velocity
+5. Strengthening market position`
+}
 

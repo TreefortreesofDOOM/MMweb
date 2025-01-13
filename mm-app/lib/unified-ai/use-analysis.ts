@@ -162,6 +162,39 @@ export function useAnalysis({ onSuccess, onError }: UseAnalysisProps = {}) {
         onSuccess?.(result)
         return result
 
+      // PORTFOLIO ANALYSIS //
+      } else if (type.startsWith('portfolio_')) {
+        console.log('=== useAnalysis: Starting portfolio analysis ===', { type })
+        
+        const response = await fetch('/api/ai/analyze-portfolio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            portfolioData: content,
+            analysisType: type 
+          })
+        })
+
+        const result = await response.json()
+        console.log('=== useAnalysis: Portfolio analysis result ===', result)
+
+        if (!response.ok || result.status === 'error') {
+          const errorMessage = result.content || 'Portfolio analysis failed'
+          console.error('=== useAnalysis: Portfolio analysis failed ===', errorMessage)
+          throw new Error(errorMessage)
+        }
+
+        return {
+          type,
+          content: result.content,
+          timestamp: new Date().toISOString(),
+          status: result.status,
+          results: {
+            summary: result.results?.summary || result.content,
+            details: Array.isArray(result.results?.details) ? result.results.details : []
+          }
+        }
+
       // DEFAULT //
       } else {
         result = createAnalysisResult(

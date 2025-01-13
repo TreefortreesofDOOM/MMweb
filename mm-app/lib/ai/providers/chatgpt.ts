@@ -4,10 +4,6 @@ import type { MessageContent } from 'openai/resources/beta/threads/messages'
 import type { ChatCompletionMessageParam, ChatCompletionContentPart } from 'openai/resources/chat/completions'
 import { AIServiceProvider, Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult } from './base'
 import { env } from '@/lib/env'
-import { createReadStream, unlinkSync } from 'fs'
-import { tmpdir } from 'os'
-import { join } from 'path'
-import { writeFile } from 'fs/promises'
 import ms from 'ms'
 
 // Type guard for text content
@@ -124,15 +120,6 @@ export class ChatGPTProvider implements AIServiceProvider {
           // Delete thread
           await this.client.beta.threads.del(info.id)
           
-          // Clean up temp files
-          for (const filePath of info.tempFiles) {
-            try {
-              unlinkSync(filePath)
-            } catch (error) {
-              console.error('Error cleaning up temp file:', error)
-            }
-          }
-
           // Remove from map
           this.threadMap.delete(context)
         } catch (error) {
@@ -165,30 +152,19 @@ export class ChatGPTProvider implements AIServiceProvider {
     return { id: thread.id, isNew: true }
   }
 
-  private async uploadFile(url: string, context?: string): Promise<{ fileId: string; tempPath: string }> {
+  private async uploadFile(url: string, context?: string): Promise<{ fileId: string }> {
     const response = await fetch(url)
-    const arrayBuffer = await response.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-    const filename = (url.split('/').pop() || 'image.jpg').toLowerCase()
+    const blob = await response.blob()
     
-    // Write buffer to temp file
-    const tempPath = join(tmpdir(), `${Date.now()}-${filename}`)
-    await writeFile(tempPath, buffer)
-
-    // Create a readable stream from the temp file
-    const stream = createReadStream(tempPath)
-
+    // Create a File object from the Blob
+    const file = new File([blob], 'image.jpg', { type: blob.type })
+    
     const uploadedFile = await this.client.files.create({
-      file: stream,
+      file,
       purpose: 'assistants'
     })
 
-    // Add temp file to thread info for cleanup
-    if (context && this.threadMap.has(context)) {
-      this.threadMap.get(context)!.tempFiles.push(tempPath)
-    }
-
-    return { fileId: uploadedFile.id, tempPath }
+    return { fileId: uploadedFile.id }
   }
 
   async sendMessage(message: Message): Promise<Response> {

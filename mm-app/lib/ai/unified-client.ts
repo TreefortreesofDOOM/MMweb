@@ -1,8 +1,11 @@
-import { AIServiceFactory, AIConfig } from './factory'
-import { Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult, AIServiceProvider } from './providers/base'
+import { AIServiceFactory, AIConfig } from '@/lib/ai/factory'
+import { Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult, AIServiceProvider } from '@/lib/ai/providers/base'
 import { env } from '@/lib/env'
 import { Content } from '@google/generative-ai'
-import { ChatGPTProvider } from './providers/chatgpt'
+import { ChatGPTProvider } from '@/lib/ai/providers/chatgpt'
+import type { PortfolioData } from '@/lib/ai/portfolio-data-collector'
+import type { PortfolioAnalysisType, PortfolioAnalysisResult } from '@/lib/ai/portfolio-types'
+import { PORTFOLIO_ANALYSIS_PROMPTS } from '@/lib/ai/instructions'
 
 // Default configuration using environment variables for provider selection
 const defaultConfig: AIConfig = {
@@ -59,6 +62,12 @@ export interface SendMessageOptions {
     content: string
     name?: string
   }>
+}
+
+export interface PortfolioAnalysisOptions {
+  temperature?: number
+  maxTokens?: number
+  systemInstruction?: string
 }
 
 export class UnifiedAIClient {
@@ -191,5 +200,49 @@ export class UnifiedAIClient {
   async generateImage(prompt: string, options?: any): Promise<string> {
     const provider = await this.ensureProvider()
     return provider.generateImage(prompt, options)
+  }
+
+  async analyzePortfolio(
+    portfolioData: PortfolioData,
+    analysisType: PortfolioAnalysisType,
+    options: PortfolioAnalysisOptions = {}
+  ): Promise<PortfolioAnalysisResult> {
+    const provider = await this.ensureProvider()
+
+    if (options.temperature) {
+      provider.setTemperature(options.temperature)
+    }
+    if (options.maxTokens) {
+      provider.setMaxTokens(options.maxTokens)
+    }
+
+    // Get the prompt generator for this analysis type
+    const promptType = analysisType.replace('portfolio_', '') as keyof typeof PORTFOLIO_ANALYSIS_PROMPTS
+    const promptGenerator = PORTFOLIO_ANALYSIS_PROMPTS[promptType]
+
+    if (!promptGenerator) {
+      throw new Error(`No prompt found for analysis type: ${analysisType}`)
+    }
+
+    const prompt = promptGenerator(portfolioData)
+    const message: Message = {
+      role: 'user',
+      content: prompt,
+      systemInstruction: options.systemInstruction || `You are an expert art portfolio analyst. Analyze the portfolio data and provide specific, actionable recommendations. Format your response as JSON with "summary" and "recommendations" fields.`,
+      metadata: {
+        analysisType,
+        portfolioData
+      }
+    }
+
+    const response = await provider.sendMessage(message)
+    const result = JSON.parse(response.content)
+
+    return {
+      type: analysisType,
+      summary: result.summary,
+      recommendations: result.recommendations,
+      status: 'success'
+    }
   }
 } 

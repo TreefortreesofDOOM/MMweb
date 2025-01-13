@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { RoleNav } from '@/components/nav/role-nav';
 import { UnifiedAIProvider } from '@/components/unified-ai/unified-ai-provider';
 import { UnifiedAI } from '@/components/unified-ai/unified-ai';
+import { ArtistProvider } from '@/components/providers/artist-provider';
 
 export default async function ProtectedLayout({
   children,
@@ -17,22 +18,24 @@ export default async function ProtectedLayout({
     return redirect('/sign-in');
   }
 
-  // Get user role for conditional rendering
+  // Get user profile with artist details
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('*, verificationProgress:verification_progress')
     .eq('id', user.id)
     .single();
 
   return (
     <div className="min-h-screen">
       <UnifiedAIProvider>
-        <RoleNav role={profile?.role ?? 'user'}>
-          <main className="flex-1">
-            {children}
-          </main>
-        </RoleNav>
-        <UnifiedAI />
+        <ArtistProvider profile={profile}>
+          <RoleNav role={profile?.role ?? 'user'}>
+            <main className="flex-1">
+              {children}
+            </main>
+          </RoleNav>
+          <UnifiedAI />
+        </ArtistProvider>
       </UnifiedAIProvider>
     </div>
   );

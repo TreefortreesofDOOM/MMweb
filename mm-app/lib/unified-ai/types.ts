@@ -170,7 +170,34 @@ export const ANALYSIS_TYPES = [
   'artwork_description',
   'artwork_style',
   'artwork_techniques',
-  'artwork_keywords'
+  'artwork_keywords',
+  'portfolio_composition',
+  'portfolio_presentation',
+  'portfolio_pricing',
+  'portfolio_market'
 ] as const
 
-export type AnalysisType = typeof ANALYSIS_TYPES[number] 
+export type AnalysisType = typeof ANALYSIS_TYPES[number]
+
+// Portfolio-specific types
+export const PORTFOLIO_ANALYSIS_TYPES = [
+  'portfolio_composition',
+  'portfolio_presentation',
+  'portfolio_pricing',
+  'portfolio_market'
+] as const
+
+export type PortfolioAnalysisType = typeof PORTFOLIO_ANALYSIS_TYPES[number]
+
+export interface PortfolioRecommendations {
+  composition?: string[]
+  presentation?: string[]
+  pricing?: string[]
+  market?: string[]
+}
+
+export interface PortfolioAnalysisResult {
+  type: PortfolioAnalysisType
+  recommendations: PortfolioRecommendations
+  error?: string
+} 
