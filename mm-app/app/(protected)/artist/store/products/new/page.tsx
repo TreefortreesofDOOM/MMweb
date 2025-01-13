@@ -2,14 +2,13 @@ import { createClient } from '@/lib/supabase/supabase-server'
 import { ProductForm } from '@/components/store/product-form'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { updateProductPrice } from '@/lib/actions/store-actions'
-import type { GalleryWallType } from '@/lib/types/gallery-types'
 
-export default async function NewProductPage({
-  searchParams,
-}: {
-  searchParams: { artwork?: string }
-}) {
+interface PageProps {
+  searchParams: Promise<{ artwork?: string }> | { artwork?: string }
+}
+
+export default async function NewProductPage({ searchParams }: PageProps) {
+  const params = await searchParams;
   const supabase = await createClient()
 
   // Get current user
@@ -19,14 +18,14 @@ export default async function NewProductPage({
   }
 
   // Verify artwork exists and belongs to user
-  if (!searchParams.artwork) {
+  if (!params.artwork) {
     redirect('/artist/store')
   }
 
   const { data: artwork } = await supabase
     .from('artworks')
     .select('*')
-    .eq('id', searchParams.artwork)
+    .eq('id', params.artwork)
     .eq('artist_id', user.id)
     .single()
 
@@ -46,17 +45,13 @@ export default async function NewProductPage({
         <CardContent>
           <ProductForm 
             artworkId={artwork.id}
-            onSubmit={async (values) => {
-              await updateProductPrice({
-                artworkId: artwork.id,
-                wallType: values.wallType as GalleryWallType,
-                isVariablePrice: values.isVariablePrice,
-                minPrice: values.minPrice,
-                recommendedPrice: values.recommendedPrice,
-                galleryPrice: values.galleryPrice
-              });
-              redirect('/artist/store');
+            artwork={{
+              title: artwork.title,
+              description: artwork.description,
+              price: artwork.price
             }}
+            currentWallType={artwork.gallery_wall_type}
+            currentPrice={artwork.gallery_price}
           />
         </CardContent>
       </Card>

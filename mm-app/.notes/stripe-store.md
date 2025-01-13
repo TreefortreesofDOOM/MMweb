@@ -36,8 +36,8 @@ The Stripe integration enables artists to sell their artwork through our platfor
     - Standard fixed price using `gallery_price`
     - Direct price display and checkout
   - Metadata synced to Stripe products:
-    ```typescript
-    metadata: {
+  ```typescript
+      metadata: {
       wall_type: gallery_wall_type,
       is_variable_price: boolean,
       min_price?: number,
