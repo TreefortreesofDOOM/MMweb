@@ -90,9 +90,12 @@ export default function ProductPage({ params }: ProductPageProps) {
         <CardContent>
           <ProductForm
             artworkId={artwork.id}
+            artwork={{
+              title: artwork.title,
+              description: artwork.description,
+              price: artwork.price
+            }}
             currentWallType={artwork.gallery_wall_type}
-            currentPrice={artwork.gallery_price}
-            onSubmit={handleSubmit}
           />
         </CardContent>
       </Card>
