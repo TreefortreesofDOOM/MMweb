@@ -118,6 +118,21 @@
    - [x] Add visual indicator for MM AI content in feed
    - [x] Add proper error handling for feed loading
 
+#### Patron Collection Integration
+- [x] Reuse existing collection creation logic from `createPurchasedWorksCollection`
+- [x] Reuse existing ghost profile claiming process from `claimGhostProfile`
+- [x] Reuse existing transaction update logic for hybrid approach
+
+#### Ghost Profile Handling
+- [x] Reuse existing ghost profile creation/update functions from `lib/actions/ghost-profiles.ts`
+- [x] Reuse existing ghost profile claiming process
+- [x] Leverage existing ghost profile database schema and RLS policies
+
+#### Transaction Validation
+- [x] Reuse existing transaction schema and constraints
+- [x] Leverage existing unique constraint on stripe_session_id
+- [x] Use existing hybrid approach for transaction ownership tracking
+
 ## Deferred
 
 ### Default Platform Follow Implementation
