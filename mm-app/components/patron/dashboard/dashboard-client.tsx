@@ -66,8 +66,8 @@ export default function DashboardClient({ collections, profile }: DashboardClien
   }, [collections])
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6 md:space-y-8" role="main" aria-label="Patron Dashboard">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="max-w-7xl mx-auto p-4 md:p-6" role="main" aria-label="Patron Dashboard">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Patron Dashboard</h1>
           <div className="flex flex-wrap items-center gap-2 mt-1">
@@ -79,7 +79,7 @@ export default function DashboardClient({ collections, profile }: DashboardClien
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Quick Stats */}
         <Card className="sm:hover:shadow-lg transition-shadow">
           <CardHeader className="sm:p-6">

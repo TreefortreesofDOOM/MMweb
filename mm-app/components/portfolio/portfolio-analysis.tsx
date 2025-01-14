@@ -187,34 +187,36 @@ export function PortfolioAnalysis({ profileId, onAnalysisComplete }: PortfolioAn
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Portfolio Analysis</CardTitle>
-          <CardDescription>
-            Get AI-powered insights about your portfolio's composition, presentation, pricing, and market position.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Button
-            onClick={handleAnalyze}
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? (
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Analyzing Portfolio...</span>
-              </div>
-            ) : (
-              'Analyze Portfolio'
-            )}
-          </Button>
+        <div className="bg-gradient-to-r from-purple-200/80 to-indigo-300/80 dark:from-purple-900 dark:to-indigo-900">
+          <CardHeader className="space-y-1">
+            <CardTitle>Portfolio Analysis</CardTitle>
+            <CardDescription className="dark:text-gray-300">
+              Get Meaning Machine AI insights about your portfolio's composition, presentation, pricing, and market position.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-0">
+            <Button
+              onClick={handleAnalyze}
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Analyzing Portfolio...</span>
+                </div>
+              ) : (
+                'Analyze Portfolio'
+              )}
+            </Button>
 
-          {error && (
-            <div className="mt-4 p-4 bg-red-50 text-red-600 rounded-md text-sm">
-              {error}
-            </div>
-          )}
-        </CardContent>
+            {error && (
+              <div className="mt-4 p-4 bg-red-50 text-red-600 rounded-md text-sm">
+                {error}
+              </div>
+            )}
+          </CardContent>
+        </div>
       </Card>
 
       {/* Analysis Cards */}

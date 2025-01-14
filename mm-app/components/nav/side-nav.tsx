@@ -6,14 +6,14 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils/common-utils';
 import { RoleNavigation, NavItem } from '@/lib/navigation/types';
-import { ExternalLink } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface SideNavProps {
   config: RoleNavigation;
 }
 
-function NavLink({ item }: { item: NavItem }) {
+function NavLink({ item, isCollapsed }: { item: NavItem; isCollapsed: boolean }) {
   const pathname = usePathname();
   const isActive = pathname === item.href;
   const Icon = item.icon;
@@ -33,7 +33,8 @@ function NavLink({ item }: { item: NavItem }) {
       className={cn(
         "w-full justify-start gap-2",
         isActive && "bg-muted font-medium",
-        "focus-visible:ring-2 focus-visible:ring-offset-2"
+        "focus-visible:ring-2 focus-visible:ring-offset-2",
+        isCollapsed && "justify-center px-2"
       )}
     >
       <Link 
@@ -41,12 +42,14 @@ function NavLink({ item }: { item: NavItem }) {
         href={item.href}
         target={item.isExternal ? "_blank" : undefined}
         rel={item.isExternal ? "noopener noreferrer" : undefined}
-        className="flex items-center"
+        className={cn(
+          "flex items-center",
+          isCollapsed ? "justify-center" : "w-full"
+        )}
         role="menuitem"
         tabIndex={0}
         aria-current={isActive ? "page" : undefined}
         onKeyDown={(e) => {
-          // Handle enter and space for activation
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             e.currentTarget.click();
@@ -59,12 +62,16 @@ function NavLink({ item }: { item: NavItem }) {
             aria-hidden="true"
           />
         )}
-        <span>{item.title}</span>
-        {item.isExternal && (
-          <ExternalLink 
-            className="ml-auto h-3 w-3" 
-            aria-label="Opens in new tab"
-          />
+        {!isCollapsed && (
+          <>
+            <span className="ml-2">{item.title}</span>
+            {item.isExternal && (
+              <ExternalLink 
+                className="ml-auto h-3 w-3" 
+                aria-label="Opens in new tab"
+              />
+            )}
+          </>
         )}
       </Link>
     </Button>
@@ -72,33 +79,66 @@ function NavLink({ item }: { item: NavItem }) {
 }
 
 export function SideNav({ config }: SideNavProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   return (
     <nav 
-      className="w-64 border-r bg-background"
+      className={cn(
+        "relative border-r bg-background transition-all duration-300",
+        isCollapsed ? "w-[56px]" : "w-[240px]"
+      )}
       role="navigation"
       aria-label={`${config.role} navigation`}
     >
-      <ScrollArea className="h-full py-6">
+      <Button
+        variant="ghost"
+        size="sm"
+        className={cn(
+          "absolute right-0 top-6 translate-x-[100%] rounded-l-none border border-l-0",
+          "hover:bg-muted",
+          "focus-visible:ring-offset-[1px] focus-visible:ring-offset-border",
+          "h-12 w-5 p-0"
+        )}
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      >
+        {isCollapsed ? (
+          <ChevronRight className="h-4 w-4" />
+        ) : (
+          <ChevronLeft className="h-4 w-4" />
+        )}
+      </Button>
+
+      <ScrollArea className="h-full w-full py-6">
         {config.navigation.map((section) => (
           <div 
             key={section.title} 
-            className="px-3 py-2"
+            className={cn(
+              "w-full",
+              isCollapsed ? "px-2 py-2" : "px-3 py-2"
+            )}
             role="menu"
             aria-label={section.title}
           >
-            <h2 
-              className="mb-2 px-4 text-sm font-semibold tracking-tight text-muted-foreground"
-              id={`nav-section-${section.title.toLowerCase().replace(/\s+/g, '-')}`}
-            >
-              {section.title}
-            </h2>
+            {!isCollapsed && (
+              <h2 
+                className="mb-2 px-4 text-sm font-semibold tracking-tight text-muted-foreground"
+                id={`nav-section-${section.title.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                {section.title}
+              </h2>
+            )}
             <div 
-              className="space-y-1"
+              className="space-y-1 w-full"
               role="group"
               aria-labelledby={`nav-section-${section.title.toLowerCase().replace(/\s+/g, '-')}`}
             >
               {section.items.map((item) => (
-                <NavLink key={item.href} item={item} />
+                <NavLink 
+                  key={item.href} 
+                  item={item} 
+                  isCollapsed={isCollapsed}
+                />
               ))}
             </div>
           </div>

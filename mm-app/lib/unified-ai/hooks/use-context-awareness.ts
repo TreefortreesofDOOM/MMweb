@@ -74,9 +74,9 @@ export const useContextAwareness = () => {
 
       // Get user's preferred AI personality from settings
       const settings = await getSettings()
-      const preferredCharacter = settings?.preferences.aiPersonality?.toUpperCase() || 'JARVIS'
+      const preferredCharacter = settings?.preferences?.aiPersonality?.toUpperCase() || 'JARVIS'
       const characterPersonality = PERSONALITIES[preferredCharacter as keyof typeof PERSONALITIES]
-      const rolePersonality = PERSONALITIES[persona.toUpperCase() as keyof typeof PERSONALITIES]
+      const rolePersonality = persona ? PERSONALITIES[persona.toUpperCase() as keyof typeof PERSONALITIES] : null
 
       // Combine context behaviors
       const personaContext = rolePersonality 
@@ -106,7 +106,9 @@ export const useContextAwareness = () => {
   }, [pathname, dispatch, user?.role, user?.id])
 
   const suggestAssistant = () => {
-    switch (state.context.pageContext.pageType) {
+    const currentPageContext = state.context.pageContext as AIContext | undefined
+    
+    switch (currentPageContext?.pageType) {
       case 'profile':
         return {
           mode: 'analysis' as const,
@@ -136,7 +138,7 @@ export const useContextAwareness = () => {
   }
 
   return {
-    pageContext: state.context.pageContext,
+    pageContext: state.context.pageContext as AIContext,
     suggestedAssistant: suggestAssistant()
   }
 } 

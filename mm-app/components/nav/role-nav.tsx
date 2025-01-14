@@ -8,6 +8,9 @@ import { useNavigation } from '@/hooks/use-navigation';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { useUnifiedAIVisibility } from '@/lib/unified-ai/hooks';
+import { UnifiedAI } from '@/components/unified-ai/unified-ai';
+import { cn } from '@/lib/utils';
 
 interface RoleNavProps {
   role: unknown;
@@ -17,6 +20,7 @@ interface RoleNavProps {
 export function RoleNav({ role, children }: RoleNavProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const { isEmergingArtist, getVerificationStatus, getVerificationPercentage } = useArtist();
+  const { isOpen: isAIOpen, isCollapsed: isAICollapsed } = useUnifiedAIVisibility();
   
   const handleMobileNavToggle = useCallback((open: boolean) => {
     setIsMobileNavOpen(open);
@@ -89,14 +93,18 @@ export function RoleNav({ role, children }: RoleNavProps) {
         {renderVerificationStatus()}
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1">
-        <div className="flex h-16 items-center border-b px-4 md:px-6">
-          {/* Removed duplicate MobileNav */}
-        </div>
-        <main className="flex-1 p-4 md:p-6" role="main">
+      {/* Main Content Area with AI Integration */}
+      <div className="relative flex-1">
+        <main 
+          className={cn(
+            "p-4 md:p-6 transition-all duration-200 ease-in-out",
+            isAIOpen && !isAICollapsed && "mr-[400px]",
+          )} 
+          role="main"
+        >
           {children}
         </main>
+        <UnifiedAI />
       </div>
     </div>
   );

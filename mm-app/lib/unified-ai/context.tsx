@@ -8,6 +8,7 @@ type UnifiedAIAction =
   | { type: 'SET_MODE'; payload: AIMode }
   | { type: 'SET_OPEN'; payload: boolean }
   | { type: 'SET_MINIMIZED'; payload: boolean }
+  | { type: 'SET_COLLAPSED'; payload: boolean }
   | { type: 'ADD_MESSAGE'; payload: Message }
   | { type: 'ADD_ANALYSIS'; payload: AnalysisResult }
   | { type: 'SET_PAGE_CONTEXT'; payload: AIContext }
@@ -17,9 +18,10 @@ const initialState: UnifiedAIState = {
   mode: 'chat',
   isOpen: false,
   isMinimized: false,
+  isCollapsed: false,
   context: {
-    conversation: [],
-    analysis: [],
+    conversation: [] as Message[],
+    analysis: [] as AnalysisResult[],
     pageContext: {
       route: '/',
       pageType: 'general',
@@ -36,6 +38,8 @@ function unifiedAIReducer(state: UnifiedAIState, action: UnifiedAIAction): Unifi
       return { ...state, isOpen: action.payload }
     case 'SET_MINIMIZED':
       return { ...state, isMinimized: action.payload }
+    case 'SET_COLLAPSED':
+      return { ...state, isCollapsed: action.payload }
     case 'ADD_MESSAGE':
       return {
         ...state,

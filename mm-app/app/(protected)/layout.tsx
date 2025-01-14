@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/supabase-server';
 import { redirect } from 'next/navigation';
 import { RoleNav } from '@/components/nav/role-nav';
 import { UnifiedAIProvider } from '@/components/unified-ai/unified-ai-provider';
-import { UnifiedAI } from '@/components/unified-ai/unified-ai';
 import { ArtistProvider } from '@/components/providers/artist-provider';
 
 export default async function ProtectedLayout({
@@ -30,11 +29,8 @@ export default async function ProtectedLayout({
       <UnifiedAIProvider>
         <ArtistProvider profile={profile}>
           <RoleNav role={profile?.role ?? 'user'}>
-            <main className="flex-1">
-              {children}
-            </main>
+            {children}
           </RoleNav>
-          <UnifiedAI />
         </ArtistProvider>
       </UnifiedAIProvider>
     </div>

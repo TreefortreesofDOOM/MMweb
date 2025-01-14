@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useUnifiedAIActions, useUnifiedAIContext } from './hooks'
+import { useUnifiedAIActions } from './hooks'
 import { createAnalysisResult } from './utils'
 import type { AnalysisResult } from './types'
 import { ANALYSIS_TYPES } from './types'
+import { useUnifiedAI } from './context'
 
 interface UseAnalysisProps {
   onSuccess?: (result: AnalysisResult) => void
@@ -14,7 +15,8 @@ interface UseAnalysisProps {
 export function useAnalysis({ onSuccess, onError }: UseAnalysisProps = {}) {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const { addAnalysis, setMode } = useUnifiedAIActions()
-  const { analysis } = useUnifiedAIContext()
+  const { state } = useUnifiedAI()
+  const analysis = state.context.analysis
 
   const analyze = async (type: typeof ANALYSIS_TYPES[number], content: string) => {
     try {
@@ -197,11 +199,7 @@ export function useAnalysis({ onSuccess, onError }: UseAnalysisProps = {}) {
 
       // DEFAULT //
       } else {
-        result = createAnalysisResult(
-          type,
-          `Sample ${type} analysis result`,
-          'success'
-        )
+        throw new Error(`Analysis type '${type}' not supported`)
       }
 
       addAnalysis(result)

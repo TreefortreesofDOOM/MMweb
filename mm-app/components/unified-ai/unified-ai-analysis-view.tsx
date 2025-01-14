@@ -124,7 +124,7 @@ export const UnifiedAIAnalysisView = ({
   websiteUrl
 }: UnifiedAIAnalysisViewProps) => {
   const context = useUnifiedAIContext()
-  const { analysis } = context
+  const { analysis } = context as { analysis: AnalysisResult[] }
   const { setMode } = useUnifiedAIActions()
   const { isAnalyzing, analyze } = useAnalysis()
   const { pageContext } = useContextAwareness()
@@ -210,7 +210,7 @@ export const UnifiedAIAnalysisView = ({
         // Mark as complete
         portfolioProgress.completeAnalysis(type as PortfolioAnalysisType)
       } else {
-        await analyze(type, `Sample ${type} content`)
+        throw new Error('No content available for analysis')
       }
     } catch (err) {
       console.error(`Failed to perform ${type}:`, err)

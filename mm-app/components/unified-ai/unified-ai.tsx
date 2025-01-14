@@ -9,15 +9,15 @@ import { UnifiedAIPanel } from './unified-ai-panel'
 import { UnifiedAITransition } from './unified-ai-transition'
 import { UnifiedAIChatView } from './unified-ai-chat-view'
 import { UnifiedAIAnalysisView } from './unified-ai-analysis-view'
-import type { AnalysisResult } from '@/lib/unified-ai/types'
+import type { AnalysisResult, AIContext } from '@/lib/unified-ai/types'
 import { updateProfileBio } from '@/lib/actions/profile'
 import { useToast } from '@/components/ui/use-toast'
 
 export const UnifiedAI = () => {
   const mode = useUnifiedAIMode()
   const { isOpen, isMinimized } = useUnifiedAIVisibility()
-  const context = useUnifiedAIContext()
-  const websiteUrl = context.pageContext?.data?.websiteUrl
+  const context = useUnifiedAIContext() as AIContext
+  const websiteUrl = context.data?.websiteUrl
   const { toast } = useToast()
 
   // Initialize analysis and chat hooks
@@ -63,7 +63,7 @@ export const UnifiedAI = () => {
       
       // Handle artwork analysis results
       if (result.type.startsWith('artwork_') && result.status === 'success') {
-        const callbacks = context.pageContext?.data?.artworkCallbacks
+        const callbacks = context.data?.artworkCallbacks
         if (!callbacks) {
           console.warn('No artwork callbacks registered')
           return
@@ -100,13 +100,10 @@ export const UnifiedAI = () => {
   }
 
   return (
-    <>
-      {/* Floating Button */}
-      {!isOpen && <UnifiedAIButton />}
-
-      {/* Panel */}
-      <UnifiedAITransition show={isOpen && !isMinimized}>
-        <UnifiedAIContainer>
+    <UnifiedAITransition show={true}>
+      <UnifiedAIContainer>
+        <UnifiedAIButton />
+        {isOpen && (
           <UnifiedAIPanel>
             {mode === 'chat' ? (
               <UnifiedAIChatView
@@ -120,8 +117,8 @@ export const UnifiedAI = () => {
               />
             )}
           </UnifiedAIPanel>
-        </UnifiedAIContainer>
-      </UnifiedAITransition>
-    </>
+        )}
+      </UnifiedAIContainer>
+    </UnifiedAITransition>
   )
 } 

@@ -60,32 +60,32 @@ export const UnifiedAIChatView = ({
   }
 
   return (
-    <div className={cn('flex h-full flex-col space-y-4', className)}>
+    <div className={cn('flex h-full flex-col', className)}>
       {/* Personality Info */}
       <motion.div 
-        className="flex flex-col space-y-2 rounded-lg bg-muted p-3"
+        className="flex-none flex flex-col space-y-2 rounded-lg bg-muted p-3"
         layout
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium">Character: {activeCharacter}</span>
-            <div className="h-2 w-2 rounded-full bg-green-500" />
+            <span className="text-xs font-medium">Character: {activeCharacter}</span>
+            <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-foreground">Role: {activePersona || 'loading...'}</span>
-            <div className="h-2 w-2 rounded-full bg-blue-500" />
+            <span className="text-xs font-medium text-foreground">Role: {activePersona || 'loading...'}</span>
+            <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
           </div>
         </div>
         {contextSuggestion && (
           <div className="rounded border border-border/50 bg-background/50 p-2">
-            <span className="text-xs text-muted-foreground">{contextSuggestion}</span>
+            <span className="text-[11px] text-muted-foreground">{contextSuggestion}</span>
           </div>
         )}
       </motion.div>
 
       {/* Messages */}
       <motion.div
-        className="flex-1 space-y-4 overflow-auto"
+        className="flex-1 space-y-4 overflow-y-auto min-h-0"
         initial="initial"
         animate="animate"
         variants={stagger.container}
@@ -106,7 +106,7 @@ export const UnifiedAIChatView = ({
               <motion.div
                 layout
                 className={cn(
-                  'max-w-[80%] rounded-lg px-4 py-2',
+                  'max-w-[80%] rounded-lg px-3 py-1.5 text-sm',
                   message.role === 'assistant'
                     ? 'bg-muted text-muted-foreground'
                     : 'bg-primary text-primary-foreground'
@@ -153,14 +153,14 @@ export const UnifiedAIChatView = ({
       <motion.form
         layout
         onSubmit={handleSubmit}
-        className="space-y-4"
+        className="flex-none space-y-4 pt-4"
       >
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type your message..."
-          className="min-h-[80px] resize-none"
+          className="min-h-[60px] text-sm resize-none"
           disabled={isLoading}
         />
         <div className="flex items-center justify-between space-x-4">

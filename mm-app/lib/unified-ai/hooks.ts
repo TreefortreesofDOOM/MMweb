@@ -19,6 +19,10 @@ export function useUnifiedAIActions() {
     dispatch({ type: 'SET_MINIMIZED', payload: isMinimized })
   }, [dispatch])
 
+  const setCollapsed = useCallback((isCollapsed: boolean) => {
+    dispatch({ type: 'SET_COLLAPSED', payload: isCollapsed })
+  }, [dispatch])
+
   const addMessage = useCallback((message: Message) => {
     dispatch({ type: 'ADD_MESSAGE', payload: message })
   }, [dispatch])
@@ -35,6 +39,7 @@ export function useUnifiedAIActions() {
     setMode,
     setOpen,
     setMinimized,
+    setCollapsed,
     addMessage,
     addAnalysis,
     reset
@@ -55,7 +60,8 @@ export function useUnifiedAIVisibility() {
   const { state } = useUnifiedAI()
   return {
     isOpen: state.isOpen,
-    isMinimized: state.isMinimized
+    isMinimized: state.isMinimized,
+    isCollapsed: state.isCollapsed
   }
 }
 

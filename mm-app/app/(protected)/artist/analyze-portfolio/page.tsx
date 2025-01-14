@@ -12,7 +12,7 @@ export default function AnalyzePortfolioPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="mb-8 text-3xl font-bold">Portfolio Analysis</h1>
+      <h1 className="mb-8 text-3xl font-bold">Portfolio</h1>
       
       <PortfolioAnalysis 
         profileId={user.id}

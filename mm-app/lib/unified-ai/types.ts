@@ -49,6 +49,20 @@ export interface AIContext {
   profileId?: string
   personaContext?: string
   characterPersonality?: string
+  pageContext?: {
+    route: string
+    pageType: ViewContext
+    persona: AssistantPersona
+    data?: {
+      websiteUrl?: string
+      artworkCallbacks?: {
+        onApplyDescription: (description: string) => void
+        onApplyStyles: (styles: string[]) => void
+        onApplyTechniques: (techniques: string[]) => void
+        onApplyKeywords: (keywords: string[]) => void
+      }
+    }
+  }
   data?: {
     websiteUrl?: string
     artworkCallbacks?: {
@@ -101,6 +115,7 @@ export interface UnifiedAIState {
   mode: AIMode
   isOpen: boolean
   isMinimized: boolean
+  isCollapsed: boolean
   context: {
     conversation: Message[]
     analysis: AnalysisResult[]
