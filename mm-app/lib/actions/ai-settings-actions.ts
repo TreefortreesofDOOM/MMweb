@@ -33,7 +33,14 @@ export async function getAISettings() {
 
     if (error) throw error
 
-    const settings = aiSettingsSchema.parse(data)
+    // Format the timestamps to ISO strings if they exist
+    const formattedData = {
+      ...data,
+      created_at: data?.created_at ? new Date(data.created_at).toISOString() : undefined,
+      updated_at: data?.updated_at ? new Date(data.updated_at).toISOString() : undefined
+    }
+    
+    const settings = aiSettingsSchema.parse(formattedData)
     return { success: true, data: settings }
   } catch (error) {
     console.error('Error getting AI settings:', error)

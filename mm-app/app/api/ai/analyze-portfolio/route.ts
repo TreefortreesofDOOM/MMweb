@@ -1,77 +1,168 @@
 import { NextResponse } from 'next/server'
-import { UnifiedAIClient } from '@/lib/ai/unified-client'
-import type { PortfolioData } from '@/lib/ai/portfolio-data-collector'
-import type { PortfolioAnalysisType } from '@/lib/ai/portfolio-types'
+import { UnifiedAIClient, PortfolioAnalyzer, collectPortfolioData, PortfolioAnalysisType } from '@/lib/ai'
 import { env } from '@/lib/env'
+import { getAISettings } from '@/lib/actions/ai-settings-actions'
+import { createActionClient } from '@/lib/supabase/supabase-action-utils'
+import { ARTIST_ROLES } from '@/lib/types/custom-types'
+import { UserRole } from '@/lib/navigation/types'
+import { PERSONALITIES, getPersonalizedContext } from '@/lib/ai/personalities'
 
-export const runtime = 'edge'
-
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    console.log('=== Portfolio Analysis API: Starting ===')
-    const body = await req.json()
-    console.log('=== Received request body ===', JSON.stringify(body, null, 2))
-    
-    const { portfolioData, analysisType } = body
+    const { profileId, analysisTypes } = await request.json()
 
-    if (!portfolioData || !analysisType) {
-      console.error('=== Missing required data ===', { portfolioData: !!portfolioData, analysisType })
-      return NextResponse.json({
-        type: analysisType,
-        content: 'Missing required data for portfolio analysis',
-        status: 'error',
-        results: {
-          summary: 'Missing required data for portfolio analysis',
-          details: []
-        }
-      }, { status: 400 })
+    if (!profileId || !analysisTypes?.length) {
+      return NextResponse.json(
+        { status: 'error', error: 'Missing required fields' },
+        { status: 400 }
+      )
     }
 
-    console.log('=== Initializing AI client ===')
-    const client = new UnifiedAIClient()
-
-    console.log('=== Starting portfolio analysis ===', { analysisType })
-    const result = await client.analyzePortfolio(portfolioData, analysisType, {
-      temperature: 0.7,
-      maxTokens: 1500
+    // Validate analysis types
+    const validAnalysisTypes = (analysisTypes as string[]).filter((type: string): type is PortfolioAnalysisType => {
+      return ['portfolio_composition', 'portfolio_presentation', 'portfolio_pricing', 'portfolio_market'].includes(type)
     })
-    console.log('=== Raw analysis result ===', JSON.stringify(result, null, 2))
 
-    if (!result || !result.summary) {
-      console.error('=== Invalid analysis result ===', { result })
-      return NextResponse.json({
-        type: analysisType,
-        content: 'Failed to generate portfolio analysis',
-        status: 'error',
-        results: {
-          summary: 'Failed to generate portfolio analysis',
-          details: []
+    if (validAnalysisTypes.length === 0) {
+      return NextResponse.json(
+        { status: 'error', error: 'No valid analysis types provided' },
+        { status: 400 }
+      )
+    }
+
+    // Get user and profile using Supabase
+    const supabase = await createActionClient()
+    const { data: { session }, error: authError } = await supabase.auth.getSession()
+
+    if (authError || !session?.user) {
+      return NextResponse.json(
+        { status: 'error', error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Get profile to check artist role
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('artist_type, role')
+      .eq('id', profileId)
+      .single();
+
+    if (profileError || !profile) {
+      return Response.json({ error: 'Failed to get profile' }, { status: 500 });
+    }
+
+    const persona = profile.role as UserRole;
+
+    // Get user settings for AI personality
+    const { data: userSettings } = await supabase
+      .rpc('get_user_settings', {
+        p_user_id: session.user.id
+      });
+
+    // Get user's preferred AI personality
+    const preferredCharacter = userSettings?.preferences?.aiPersonality?.toUpperCase() || 'JARVIS'
+    const characterPersonality = PERSONALITIES[preferredCharacter as keyof typeof PERSONALITIES]
+    const rolePersonality = PERSONALITIES[persona.toUpperCase() as keyof typeof PERSONALITIES]
+
+    // Get personalized context
+    const personaContext = rolePersonality 
+      ? getPersonalizedContext(rolePersonality, 'portfolio')
+      : getPersonalizedContext(characterPersonality, 'portfolio')
+
+    // Get AI settings
+    const { data: aiSettings, error: aiSettingsError } = await getAISettings()
+    if (aiSettingsError || !aiSettings) {
+      return NextResponse.json(
+        { status: 'error', error: 'Failed to load AI settings' },
+        { status: 500 }
+      )
+    }
+
+    // Initialize AI client with correct config structure
+    const client = new UnifiedAIClient({
+      primary: {
+        provider: aiSettings.primary_provider as 'chatgpt' | 'gemini',
+        config: {
+          apiKey: env.OPENAI_API_KEY,
+          model: aiSettings.primary_provider === 'chatgpt' ? env.OPENAI_MODEL : env.GEMINI_TEXT_MODEL,
+          temperature: 0.7,
+          maxTokens: 2048
         }
-      }, { status: 500 })
-    }
+      },
+      fallback: aiSettings.fallback_provider ? {
+        provider: aiSettings.fallback_provider as 'chatgpt' | 'gemini',
+        config: {
+          apiKey: env.GOOGLE_AI_API_KEY,
+          model: aiSettings.fallback_provider === 'chatgpt' ? env.OPENAI_MODEL : env.GEMINI_TEXT_MODEL,
+          temperature: 0.7,
+          maxTokens: 2048
+        }
+      } : undefined
+    })
 
-    const response = {
-      type: analysisType,
-      content: result.summary,
-      status: 'success' as const,
-      results: {
-        summary: result.summary,
-        details: Array.isArray(result.recommendations) ? result.recommendations : []
-      }
-    }
-    console.log('=== Sending successful response ===', JSON.stringify(response, null, 2))
-    return NextResponse.json(response)
+    // Collect portfolio data
+    console.log('Collecting portfolio data for:', profileId)
+    const portfolioData = await collectPortfolioData(profileId)
 
-  } catch (error) {
-    console.error('=== Portfolio analysis error ===', error)
+    // Initialize portfolio analyzer with context
+    const analyzer = new PortfolioAnalyzer(client)
+
+    // Process each analysis type in parallel with unique contexts
+    console.log('Starting portfolio analysis:', validAnalysisTypes)
+    const analysisPromises = validAnalysisTypes.map(type => 
+      analyzer.analyzePortfolio({
+        type,
+        data: portfolioData,
+        context: {
+          route: `/artist/analyze-portfolio/${type}`,
+          pageType: 'portfolio',
+          persona,
+          characterPersonality: preferredCharacter,
+          personaContext,
+          data: {
+            userId: profileId
+          }
+        }
+      })
+    )
+
+    const results = await Promise.all(
+      analysisPromises.map(async (promise, index) => {
+        try {
+          const result = await promise
+          return { 
+            type: validAnalysisTypes[index],
+            result 
+          }
+        } catch (error) {
+          console.error(`Error analyzing ${validAnalysisTypes[index]}:`, error)
+          return {
+            type: validAnalysisTypes[index],
+            result: {
+              type: validAnalysisTypes[index],
+              status: 'error',
+              error: error instanceof Error ? error.message : 'Analysis failed',
+              summary: '',
+              recommendations: []
+            }
+          }
+        }
+      })
+    )
+
     return NextResponse.json({
-      type: 'error',
-      content: error instanceof Error ? error.message : 'An unexpected error occurred',
-      status: 'error',
-      results: {
-        summary: error instanceof Error ? error.message : 'An unexpected error occurred',
-        details: []
-      }
-    }, { status: 500 })
+      status: 'success',
+      results
+    })
+  } catch (error) {
+    console.error('Error in portfolio analysis:', error)
+    return NextResponse.json(
+      { 
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Failed to analyze portfolio'
+      },
+      { status: 500 }
+    )
   }
 } 

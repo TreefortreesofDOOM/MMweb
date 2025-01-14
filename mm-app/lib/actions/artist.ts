@@ -49,16 +49,7 @@ export async function submitArtistApplication(formData: FormData) {
     }
 
     // Track application submission
-    await trackOnboardingStep({
-      step: 'artist_application',
-      completed: true,
-      metadata: {
-        userId: user.id,
-        hasPortfolio: !!applicationData.portfolioUrl,
-        hasInstagram: !!applicationData.instagram,
-        hasBio: !!applicationData.bio
-      }
-    });
+    await trackOnboardingStep(user.id, 'artist_application');
 
     return encodedRedirect(
       'success',

@@ -3,7 +3,7 @@
 import { createActionClient } from '@/lib/supabase/supabase-action-utils';
 import { encodedRedirect } from "@/lib/utils/common-utils";
 import { headers } from "next/headers";
-import { Database } from "@/lib/database.types";
+import { Database } from "@/lib/types/database.types";
 
 interface PartialRegistrationData {
   email?: string;

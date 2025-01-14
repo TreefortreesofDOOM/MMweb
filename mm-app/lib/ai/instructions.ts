@@ -21,6 +21,8 @@ export interface ArtworkContext {
         role: 'gallery' | 'artist' | 'patron';
         [key: string]: any;
     };
+    characterPersonality?: string;
+    personaContext?: string;
 }
 
 export const AI_TEMPERATURE = {
@@ -255,9 +257,8 @@ export const TOOL_INSTRUCTIONS: Record<string, ToolInstruction> = {
 };
 
 export function buildSystemInstruction(role: 'curator' | 'mentor' | 'collector' | 'advisor', context: ArtworkContext): SystemInstruction {
-    // Start with base instruction
+    // Start with core information without style guidelines
     let instruction = `I am ${agentName}, your AI assistant at the Meaning Machine art gallery.
-${STYLE_GUIDELINES}
 
 ${BASE_INSTRUCTION.gallery_info}
 ${BASE_INSTRUCTION.features}
@@ -276,6 +277,24 @@ ${info.example_queries ? `Example queries:\n${info.example_queries.map((q: strin
 Best practices:
 ${info.best_practices.map(practice => `- ${practice}`).join('\n')}
 `).join('\n')}`;
+
+    // If we have a character personality, apply it first
+    if (context.characterPersonality && PERSONALITIES[context.characterPersonality as keyof typeof PERSONALITIES]) {
+        const personality = PERSONALITIES[context.characterPersonality as keyof typeof PERSONALITIES];
+        instruction = applyPersonalityToInstruction(instruction, personality, {
+            role: context.user?.role || 'visitor',
+            id: context.user?.id || '',
+            displayName: context.user?.displayName
+        });
+    } else {
+        // Only apply default style guidelines if no character personality is specified
+        instruction = `${instruction}\n${STYLE_GUIDELINES}`;
+    }
+
+    // Add persona context if provided
+    if (context.personaContext) {
+        instruction += `\n\nContext Behavior:\n${context.personaContext}`;
+    }
 
     // Add context message if artwork context is provided
     let contextMessage: Content | undefined;
@@ -349,7 +368,12 @@ export const ANALYSIS_PROMPTS = {
 
 export const PORTFOLIO_ANALYSIS_PROMPTS = {
   composition: (data: PortfolioData) => `
-Analyze this artist's portfolio composition and provide specific recommendations:
+IMPORTANT: Return ONLY raw JSON with exactly these fields:
+{
+  "summary": "A single string summarizing the analysis",
+  "recommendations": ["An array of string recommendations"]
+}
+DO NOT use nested objects or additional fields. The response must be valid JSON that can be directly parsed.
 
 Current Portfolio:
 - Primary mediums: ${data.profile.medium?.join(', ') || 'None specified'}
@@ -396,14 +420,25 @@ Analyze:
 4. Portfolio completeness and gaps
 5. Engagement patterns and sales trends
 
-Provide specific recommendations for:
+Provide specific recommendations in your personality and persona for:
 1. Balancing the portfolio across mediums
 2. Strengthening style consistency
 3. Expanding technical range
 4. Filling portfolio gaps
-5. Leveraging successful patterns`,
+5. Leveraging successful patterns
+
+In your response: 
+1. When responding about composition, use qualified recommendations for the artist to consider because composition is highly subjective.
+2. Speak to the artist as a mentor`,
 
   presentation: (data: PortfolioData) => `
+IMPORTANT: Return ONLY raw JSON with exactly these fields:
+{
+  "summary": "A single string summarizing the analysis",
+  "recommendations": ["An array of string recommendations"]
+}
+DO NOT use nested objects or additional fields. The response must be valid JSON that can be directly parsed.
+
 Current Portfolio Presentation:
 - Total artworks: ${data.artworks.length}
 - Display order: ${data.artworks.sort((a, b) => (a.display_order || 0) - (b.display_order || 0)).map(a => a.title).join(', ')}
@@ -417,7 +452,7 @@ Analyze:
 4. Visual hierarchy
 5. Artwork presentation details
 
-Provide specific recommendations for:
+Provide specific recommendations in your personality and persona for:
 1. Improving image quality
 2. Enhancing descriptions
 3. Optimizing organization
@@ -425,6 +460,13 @@ Provide specific recommendations for:
 5. Refining presentation details`,
 
   pricing: (data: PortfolioData) => `
+IMPORTANT: Return ONLY raw JSON with exactly these fields:
+{
+  "summary": "A single string summarizing the analysis",
+  "recommendations": ["An array of string recommendations"]
+}
+DO NOT use nested objects or additional fields. The response must be valid JSON that can be directly parsed.
+
 Current Pricing:
 - Price range: $${Math.min(...data.artworks.map(a => a.price || 0))} - $${Math.max(...data.artworks.map(a => a.price || 0))}
 - Average price: $${(data.artworks.reduce((sum, a) => sum + (a.price || 0), 0) / data.artworks.length).toFixed(2)}
@@ -437,7 +479,7 @@ Analyze:
 4. Sales performance by price point
 5. Price-value relationship
 
-Provide specific recommendations for:
+Provide specific recommendations in your personality and persona for:
 1. Adjusting price points
 2. Aligning with market rates
 3. Optimizing price structure
@@ -445,6 +487,13 @@ Provide specific recommendations for:
 5. Improving sales conversion`,
 
   market: (data: PortfolioData) => `
+IMPORTANT: Return ONLY raw JSON with exactly these fields:
+{
+  "summary": "A single string summarizing the analysis",
+  "recommendations": ["An array of string recommendations"]
+}
+DO NOT use nested objects or additional fields. The response must be valid JSON that can be directly parsed.
+
 Current Market Position:
 - Total artworks: ${data.artworks.length}
 - Active listings: ${data.artworks.filter(a => a.status === 'published').length}
@@ -464,7 +513,7 @@ Analyze:
 4. Sales velocity
 5. Market positioning
 
-Provide specific recommendations for:
+Provide specific recommendations in your personality and persona for:
 1. Targeting market segments
 2. Differentiating offerings
 3. Meeting buyer needs

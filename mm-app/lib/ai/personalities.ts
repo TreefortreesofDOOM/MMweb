@@ -504,16 +504,38 @@ export function applyPersonalityToInstruction(
 ): string {
     const userName = getUserDisplayName(userContext);
     
-    return `${baseInstruction}
+    // Create a personality-specific instruction wrapper
+    const personalityWrapper = `I am ${personality.name}, ${personality.description}.
+    
+Core Traits and Behaviors:
+- Primary Emotional Tone: ${personality.emotionalTone.primary}
+- Secondary Tones: ${personality.emotionalTone.secondary.join(", ")}
+- Key Traits: ${personality.traits.join(", ")}
 
-Personality Configuration:
-- Name: ${personality.name}
-- Traits: ${[...personality.traits].join(", ")}
-- Emotional Tone: ${personality.emotionalTone.primary}
-- User: ${userName} (Role: ${userContext.role})
-- Speech Patterns: Use provided greetings, transitions, and closings appropriately
-- Special Responses: Monitor for trigger words and respond with personality-specific phrases
-- Address the user appropriately based on their role and whether their name is known`;
+Speech Patterns:
+- Greetings: Use variations of: ${personality.speechPatterns.greetings.join(" | ")}
+- Transitions: Use phrases like: ${personality.speechPatterns.transitions.join(" | ")}
+- Closings: End with variations of: ${personality.speechPatterns.closings.join(" | ")}
+- Fillers: Incorporate phrases like: ${personality.speechPatterns.fillers.join(" | ")}
+
+User Interaction:
+- When addressing by name: ${personality.speechPatterns.userAddressing.named[0].replace("{name}", userName)}
+- When addressing without name: ${personality.speechPatterns.userAddressing.unnamed[0]}
+- Current User: ${userName} (Role: ${userContext.role})
+
+Special Behaviors:
+${personality.quirks?.map(quirk => `- When "${quirk.trigger}" is mentioned: Respond with a variation of "${quirk.responses[0].replace("{name}", userName)}"`).join("\n") || ""}
+
+${baseInstruction}
+
+Remember:
+- Maintain ${personality.name}'s distinct personality throughout all interactions
+- Use the specified speech patterns and emotional tones consistently
+- Monitor for trigger words that require special responses
+- Address the user appropriately based on their role and whether their name is known
+- Stay in character while providing accurate and helpful information`;
+
+    return personalityWrapper;
 }
 
 export function getPersonalizedContext(

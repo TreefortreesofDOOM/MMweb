@@ -6,18 +6,33 @@
 - **.google/**
     - mm-web-445818-44be61e33338.json
 - **.notes/**
-    - database_schema_20250112_143855.md
+    - **ai/**
+        - ai-ui-ux-design-guide.md
+        - context-awareness.md
+        - mm-ai-api.md
+        - mm-ai-posting-system.md
+        - new-ai-functions.md
+        - portfolio-optimization-notes.md
+        - portfolio-optimization.md
+    - **api/**
+        - api-doc.md
+    - **features/**
+        - feed-system.md
+        - qr-code-feature.md
+        - registration-flow.md
+        - stripe-store.md
+    - database_schema_20250112_190620.md
+    - deferred.md
+    - deployment-checklist.md
     - directory_structure.md
-    - feed-system.md
     - gallery-event-guide.md
     - meeting_notes.md
-    - mm-ai-api.md
-    - mm-ai-posting-system.md
+    - navigation.md
     - patron-role.md
     - project_overview.md
     - stripe-store-tasks.md
-    - stripe-store.md
     - task_list.md
+    - uxTodo2.md
 - **app/**
     - **(admin)/**
         - **admin-dashboard/**
@@ -60,6 +75,9 @@
     - **(protected)/**
         - **artist/**
             - **analytics/**
+                - page.tsx
+            - **analyze-portfolio/**
+                - layout.tsx
                 - page.tsx
             - **artworks/**
                 - **[id]/**
@@ -143,6 +161,8 @@
                 - route.ts
             - **analyze-artwork/**
                 - route.ts
+            - **analyze-portfolio/**
+                - route.ts
             - **chat/**
                 - route.ts
             - **extract-bio/**
@@ -191,6 +211,8 @@
             - **stripe/**
                 - route.ts
     - **collections/**
+        - **[id]/**
+    - **portfolio/**
         - **[id]/**
     - **store/**
         - **cancel/**
@@ -299,7 +321,9 @@
         - **settings/**
             - retry-claim-button.tsx
     - **portfolio/**
+        - portfolio-analysis.tsx
         - portfolio-filters.tsx
+        - portfolio-progress.tsx
         - portfolio-sort.tsx
     - **profile/**
         - avatar-upload.tsx
@@ -310,6 +334,7 @@
         - website-input.tsx
     - **providers/**
         - artist-provider.tsx
+        - portfolio-progress-provider.tsx
         - query-provider.tsx
         - settings-provider.tsx
         - theme-provider.tsx
@@ -398,11 +423,6 @@
         - ai-provider-migration.md
         - ai-provider-strategy.md
         - ai-todos.md
-    - **api/**
-        - api-doc.md
-    - **features/**
-        - feed-system.md
-        - qr-code-feature.md
     - **implementation/**
         - implementation.md
         - implementationBackup.md
@@ -417,10 +437,6 @@
         - artists-page.md
         - patron-role.md
         - role-features.md
-    - **ui/**
-        - artist-dashboard.md
-        - navigation.md
-        - uxTodo2.md
     - @ghost-accounts.md
     - current-directory-structure.md
     - ghost-accounts.md
@@ -428,9 +444,7 @@
     - masterRoadmap.md
     - oldMasterRoadmap.md
     - progressReport.md
-    - registration-flow.md
     - roadmap2.md
-    - todo.md
     - verification-system.md
 - **hooks/**
     - use-analytics.ts
@@ -472,6 +486,7 @@
         - auth.ts
         - featured-artist.ts
         - gallery.ts
+        - ghost-profiles-actions.ts
         - ghost-profiles.ts
         - helpers.ts
         - index.ts
@@ -497,9 +512,12 @@
         - embeddings.ts
         - factory.ts
         - gemini.ts
+        - index.ts
         - instructions.ts
         - personalities.ts
-        - prompts.ts
+        - portfolio-analyzer.ts
+        - portfolio-data-collector.ts
+        - portfolio-types.ts
         - types.ts
         - unified-client.ts
         - website-bio-extractor.ts
@@ -509,8 +527,6 @@
     - **constants/**
         - error-codes.ts
         - mediums.ts
-    - **db/**
-        - **migrations/**
     - **emails/**
         - artist-notifications.ts
     - **navigation/**
@@ -544,13 +560,11 @@
         - search-artist-types.ts
         - settings-types.ts
     - **unified-ai/**
-        - **docs/**
-            - mm-ai-api.md
-            - mm-ai-posting-system.md
         - **hooks/**
             - use-context-awareness.ts
         - animations.ts
         - artwork-types.ts
+        - constants.ts
         - context.tsx
         - generate-post.ts
         - hooks.ts
@@ -581,7 +595,6 @@
         - types.ts
         - vertex-client.ts
     - env.ts
-    - ghost-profiles-actions.ts
     - utils.ts
 - **migrations/**
     - 20240421000003_add_payment_link_columns.sql
@@ -732,6 +745,7 @@
         - 20241224144129_remote_schema.sql
         - 20241224150210_update_storage_policies.sql
         - 20241224151820_ensure_artworks_table.sql
+        - 20250112000001_fix_transaction_recursion.sql
     - **seed/**
         - analytics_test_data.sql
     - .gitignore

@@ -7,7 +7,7 @@ import { isValidUserRole } from '@/lib/navigation/navigation-utils'
 import { 
   updateGhostProfileVisibility, 
   updateGhostProfilesBatchVisibility 
-} from '@/lib/ghost-profiles-actions'
+} from '@/lib/actions/ghost-profiles-actions'
 
 export const dynamic = 'force-dynamic'
 
