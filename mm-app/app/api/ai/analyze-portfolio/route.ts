@@ -7,7 +7,7 @@ import { ARTIST_ROLES } from '@/lib/types/custom-types'
 import { UserRole } from '@/lib/navigation/types'
 import { PERSONALITIES, getPersonalizedContext } from '@/lib/ai/personalities'
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<Response> {
   try {
     const { profileId, analysisTypes } = await request.json()
 
@@ -46,19 +46,22 @@ export async function POST(request: Request) {
       .from('profiles')
       .select('artist_type, role')
       .eq('id', profileId)
-      .single();
+      .single()
 
     if (profileError || !profile) {
-      return Response.json({ error: 'Failed to get profile' }, { status: 500 });
+      return NextResponse.json(
+        { status: 'error', error: 'Failed to get profile' },
+        { status: 500 }
+      )
     }
 
-    const persona = profile.role as UserRole;
+    const persona = profile.role as UserRole
 
     // Get user settings for AI personality
     const { data: userSettings } = await supabase
       .rpc('get_user_settings', {
         p_user_id: session.user.id
-      });
+      })
 
     // Get user's preferred AI personality
     const preferredCharacter = userSettings?.preferences?.aiPersonality?.toUpperCase() || 'JARVIS'
@@ -79,7 +82,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Initialize AI client with correct config structure
+    // Initialize AI client
     const client = new UnifiedAIClient({
       primary: {
         provider: aiSettings.primary_provider as 'chatgpt' | 'gemini',
@@ -98,69 +101,59 @@ export async function POST(request: Request) {
           temperature: 0.7,
           maxTokens: 2048
         }
-      } : undefined
+      } : undefined,
     })
 
     // Collect portfolio data
-    console.log('Collecting portfolio data for:', profileId)
     const portfolioData = await collectPortfolioData(profileId)
-
-    // Initialize portfolio analyzer with context
+    
+    // Initialize analyzer
     const analyzer = new PortfolioAnalyzer(client)
 
-    // Process each analysis type in parallel with unique contexts
-    console.log('Starting portfolio analysis:', validAnalysisTypes)
-    const analysisPromises = validAnalysisTypes.map(type => 
-      analyzer.analyzePortfolio({
-        type,
-        data: portfolioData,
-        context: {
-          route: `/artist/analyze-portfolio/${type}`,
-          pageType: 'portfolio',
-          persona,
-          characterPersonality: preferredCharacter,
-          personaContext,
-          data: {
-            userId: profileId
-          }
-        }
-      })
-    )
-
-    const results = await Promise.all(
-      analysisPromises.map(async (promise, index) => {
-        try {
-          const result = await promise
-          return { 
-            type: validAnalysisTypes[index],
-            result 
-          }
-        } catch (error) {
-          console.error(`Error analyzing ${validAnalysisTypes[index]}:`, error)
-          return {
-            type: validAnalysisTypes[index],
-            result: {
-              type: validAnalysisTypes[index],
-              status: 'error',
-              error: error instanceof Error ? error.message : 'Analysis failed',
-              summary: '',
-              recommendations: []
+    // Run analyses
+    const results = []
+    for (const type of validAnalysisTypes) {
+      try {
+        const result = await analyzer.analyzePortfolio({
+          type,
+          data: portfolioData,
+          context: {
+            route: `/artist/analyze-portfolio/${type}`,
+            pageType: 'portfolio',
+            persona,
+            characterPersonality: preferredCharacter,
+            personaContext,
+            data: {
+              userId: profileId
             }
           }
-        }
-      })
-    )
+        })
+        results.push({ type, result })
+      } catch (err) {
+        console.error(`Error analyzing ${type}:`, err)
+        results.push({
+          type,
+          result: {
+            type,
+            status: 'error' as const,
+            error: err instanceof Error ? err.message : 'Analysis failed',
+            summary: '',
+            recommendations: []
+          }
+        })
+      }
+    }
 
     return NextResponse.json({
       status: 'success',
       results
     })
-  } catch (error) {
-    console.error('Error in portfolio analysis:', error)
+  } catch (err) {
+    console.error('Error in portfolio analysis:', err)
     return NextResponse.json(
       { 
         status: 'error',
-        error: error instanceof Error ? error.message : 'Failed to analyze portfolio'
+        error: err instanceof Error ? err.message : 'Failed to analyze portfolio'
       },
       { status: 500 }
     )

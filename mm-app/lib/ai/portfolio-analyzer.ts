@@ -25,6 +25,7 @@ const promptMapping = {
 export interface PortfolioAnalysisOptions {
   type: PortfolioAnalysisType;
   data: PortfolioData;
+  onProgress?: (progress: number) => void;
   context?: {
     route: string;
     pageType: 'portfolio';
@@ -46,7 +47,10 @@ export class PortfolioAnalyzer {
   }
 
   async analyzePortfolio(options: PortfolioAnalysisOptions): Promise<PortfolioAnalysisResult> {
-    const { type, data, context } = options;
+    const { type, data, context, onProgress } = options;
+    
+    // Report initial progress
+    onProgress?.(10);
     
     // Get prompt generator for analysis type
     const promptType = promptMapping[type];
@@ -54,6 +58,9 @@ export class PortfolioAnalyzer {
     if (!prompt) {
       throw new Error(`No prompt generator found for analysis type: ${type}`);
     }
+
+    // Report prompt preparation progress
+    onProgress?.(20);
 
     // Map the user's role to the correct system instruction role
     const userRole = context?.persona || 'user';
@@ -69,19 +76,20 @@ export class PortfolioAnalyzer {
       personaContext: context?.personaContext
     });
 
-    console.log('System Instruction:', {
-      role: systemRole,
-      instruction: systemInstruction.instruction,
-      hasSystemInstruction: !!systemInstruction.instruction,
-      characterPersonality: context?.characterPersonality,
-      personaContext: context?.personaContext
-    });
+    // Report system instruction preparation progress
+    onProgress?.(30);
 
     try {
+      // Report AI request start
+      onProgress?.(40);
+
       const response = await this.client.sendMessage(prompt(data), {
         context: context ? JSON.stringify(context) : undefined,
         systemInstruction: systemInstruction.instruction
       });
+
+      // Report AI response received
+      onProgress?.(80);
 
       try {
         const result = JSON.parse(this.cleanJsonResponse(response.content));
@@ -90,12 +98,20 @@ export class PortfolioAnalyzer {
           throw new Error('Invalid response format');
         }
 
-        return {
+        // Report parsing complete
+        onProgress?.(90);
+
+        const analysisResult: PortfolioAnalysisResult = {
           type,
-          status: 'success',
+          status: 'success' as const,
           summary: result.summary,
           recommendations: result.recommendations
         };
+
+        // Report completion
+        onProgress?.(100);
+
+        return analysisResult;
       } catch (error) {
         console.error('Error parsing AI response:', error);
         throw error;

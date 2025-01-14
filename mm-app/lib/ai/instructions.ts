@@ -368,68 +368,60 @@ export const ANALYSIS_PROMPTS = {
 
 export const PORTFOLIO_ANALYSIS_PROMPTS = {
   composition: (data: PortfolioData) => `
-IMPORTANT: Return ONLY raw JSON with exactly these fields:
+Analyze this portfolio's composition and provide recommendations.
+
+Portfolio Details:
+${data.artworks.map(art => `
+- "${art.title}":
+  * Description: ${art.description || 'None'}
+  * Techniques: ${art.techniques?.join(', ') || 'None specified'}
+  * Styles: ${art.styles?.join(', ') || 'None specified'}
+  * Keywords: ${art.keywords?.join(', ') || 'None specified'}
+  * AI Metadata: ${(art.ai_metadata as any)?.style || 'None'} style, ${(art.ai_metadata as any)?.colors?.join(', ') || 'No colors specified'}
+  * Status: ${art.status}
+  * Display Order: ${art.display_order || 'Not specified'}
+`).join('\n')}
+
+Analyze For:
+
+1. Style Patterns:
+- Primary artistic styles across the portfolio
+- Style consistency and variations
+- Unique style signatures
+- Style development opportunities
+
+2. Technical Range:
+- Technique distribution and mastery
+- Technical complexity patterns
+- Signature technical approaches
+- Areas for technical expansion
+
+3. Subject Matter & Themes:
+- Recurring subjects and themes from keywords
+- Thematic strengths
+- Conceptual depth
+- Theme development opportunities
+
+4. Portfolio Structure:
+- Series and collections identification
+- Portfolio organization
+- Content balance
+- Portfolio gaps and opportunities
+
+[Analysis Instructions]
+1. Identify patterns in styles, techniques, and themes
+2. Map relationships between different works
+3. Evaluate portfolio strengths and distinctive features
+4. Assess portfolio completeness and focus areas
+
+IMPORTANT: You MUST respond with ONLY a JSON object in the following format, regardless of your personality:
 {
-  "summary": "A single string summarizing the analysis",
-  "recommendations": ["An array of string recommendations"]
+  "summary": "A single string summarizing the composition analysis",
+  "recommendations": ["An array of specific, actionable recommendations"]
 }
-DO NOT use nested objects or additional fields. The response must be valid JSON that can be directly parsed.
 
-Current Portfolio:
-- Primary mediums: ${data.profile.medium?.join(', ') || 'None specified'}
-- Total artworks: ${data.artworks.length}
-- Technique distribution: ${Object.entries(data.artworks.reduce((acc: Record<string, number>, artwork) => {
-    artwork.techniques?.forEach(technique => {
-      acc[technique] = (acc[technique] || 0) + 1
-    })
-    return acc
-  }, {})).map(([k, v]) => `${k}: ${v}`).join(', ')}
-- Engagement: ${data.engagementMetrics.totalViews} views, ${data.engagementMetrics.totalFavorites} favorites
-- Average engagement: ${data.engagementMetrics.averageViewsPerArtwork.toFixed(1)} views/artwork
-
-${data.engagementMetrics.totalViews > 0 ? `
-Engagement Analysis:
-- Total views: ${data.engagementMetrics.totalViews}
-- Average views per artwork: ${data.engagementMetrics.averageViewsPerArtwork.toFixed(1)}
-- Most viewed artworks: ${data.artworks.sort((a, b) => ((b.ai_metadata as any)?.views || 0) - ((a.ai_metadata as any)?.views || 0)).slice(0, 3).map(a => a.title).join(', ')}
-` : ''}
-
-Sales Analysis:
-- Total revenue: $${data.transactions.reduce((sum, t) => sum + (t.amount_total || 0), 0).toFixed(2)}
-- Average price: $${(data.artworks.reduce((sum, a) => sum + (a.price || 0), 0) / data.artworks.length).toFixed(2)}
-- Best sellers: ${data.artworks.sort((a, b) => {
-    const aCount = data.transactions.filter(t => t.artwork_id === a.id).length
-    const bCount = data.transactions.filter(t => t.artwork_id === b.id).length
-    return bCount - aCount
-  }).slice(0, 3).map(a => a.title).join(', ')}
-
-Market Analysis:
-- Price range: $${Math.min(...data.artworks.map(a => a.price || 0))} - $${Math.max(...data.artworks.map(a => a.price || 0))}
-- Average days to sell: ${(data.transactions.reduce((sum, t) => {
-    const artwork = data.artworks.find(a => a.id === t.artwork_id)
-    if (!artwork) return sum
-    const created = new Date(artwork.created_at || 0)
-    const sold = new Date(t.created_at || 0)
-    return sum + (sold.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
-  }, 0) / data.transactions.length).toFixed(1)} days
-
-Analyze:
-1. Medium balance and diversity
-2. Style consistency across the portfolio
-3. Technical diversity within each medium
-4. Portfolio completeness and gaps
-5. Engagement patterns and sales trends
-
-Provide specific recommendations in your personality and persona for:
-1. Balancing the portfolio across mediums
-2. Strengthening style consistency
-3. Expanding technical range
-4. Filling portfolio gaps
-5. Leveraging successful patterns
-
-In your response: 
-1. When responding about composition, use qualified recommendations for the artist to consider because composition is highly subjective.
-2. Speak to the artist as a mentor`,
+DO NOT include any additional text, commentary, or personality-driven responses outside of this JSON structure.
+The summary and recommendations should reflect your personality, but the response format must be pure JSON.`,
 
   presentation: (data: PortfolioData) => `
 IMPORTANT: Return ONLY raw JSON with exactly these fields:
