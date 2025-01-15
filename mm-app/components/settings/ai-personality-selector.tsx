@@ -1,44 +1,47 @@
 'use client';
 
-import { FC } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
+import { useSettings } from '@/hooks/use-settings';
+import { AI_PERSONALITIES } from '@/lib/utils/settings-utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { type UserSettings } from '@/lib/types/settings-types';
-import { AI_PERSONALITIES, getAiPersonalityWithFallback } from '@/lib/utils/settings-utils';
+import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { useFormContext } from 'react-hook-form';
 
-export const AiPersonalitySelector: FC = () => {
-  const { control } = useFormContext<UserSettings>();
+export const AiPersonalitySelector = () => {
+  const { updateAiPersonality } = useSettings();
+  const form = useFormContext();
 
   return (
     <FormField
-      control={control}
+      control={form.control}
       name="preferences.aiPersonality"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>AI Assistant Personality</FormLabel>
-          <Select 
-            onValueChange={field.onChange} 
-            defaultValue={getAiPersonalityWithFallback(field.value)}
-          >
-            <FormControl>
+          <FormLabel>AI Personality</FormLabel>
+          <FormControl>
+            <Select
+              value={field.value}
+              onValueChange={(value: "HAL9000" | "GLADOS" | "JARVIS") => {
+                field.onChange(value);
+                updateAiPersonality(value);
+              }}
+            >
               <SelectTrigger>
-                <SelectValue placeholder="Select an AI personality" />
+                <SelectValue placeholder="Select a personality" />
               </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {Object.entries(AI_PERSONALITIES).map(([value, { name, description }]) => (
-                <SelectItem key={value} value={value}>
-                  <div className="flex flex-col">
-                    <span>{name}</span>
-                    <span className="text-xs text-muted-foreground">{description}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+              <SelectContent>
+                {Object.entries(AI_PERSONALITIES).map(([key, { name, description }]) => (
+                  <SelectItem key={key} value={key}>
+                    <div className="flex flex-col">
+                      <span>{name}</span>
+                      <span className="text-xs text-muted-foreground">{description}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormControl>
           <FormDescription>
-            Choose the personality of your AI assistant.
+            Choose the personality of your AI assistant
           </FormDescription>
         </FormItem>
       )}
