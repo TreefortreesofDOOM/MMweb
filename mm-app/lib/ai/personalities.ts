@@ -469,7 +469,7 @@ export function getPersonalizedGreeting(
     
     return pattern
         .replace('{name}', userName)
-        .replace('{title}', userContext.role === 'patron' && useFormal ? 'Mr./Ms.' : '');
+        .replace('{title}', userContext.role === 'collector' && useFormal ? 'Mr./Ms.' : '');
 }
 
 export function processMessageWithPersonality(
@@ -490,7 +490,7 @@ export function processMessageWithPersonality(
         if (message.toLowerCase().includes(quirk.trigger.toLowerCase())) {
             processedMessage = getRandomResponse(quirk.responses)
                 .replace('{name}', userName)
-                .replace('{title}', userContext.role === 'patron' && useFormal ? 'Mr./Ms.' : '');
+                .replace('{title}', userContext.role === 'collector' && useFormal ? 'Mr./Ms.' : '');
         }
     });
 

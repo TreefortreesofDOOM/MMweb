@@ -156,21 +156,53 @@ useEffect(() => {
 - Missing proper state initialization
 - Incomplete effect cleanup
 
-#### B. Type System Gaps
+#### B. Type System - Role and Persona System
 ```typescript
-// Current (non-compliant)
-type AssistantPersona = 'curator' | 'mentor' | 'collector' | 'advisor'
+// 1. Database Layer - Source of Truth
+type UserRole = 'admin' | 'verified_artist' | 'emerging_artist' | 'patron' | 'user'
 
-// Should use const assertion pattern
+// 2. AI Assistant Layer - Derived from UserRole + Context
 const ASSISTANT_PERSONAS = {
-  CURATOR: 'curator',
-  MENTOR: 'mentor',
-  COLLECTOR: 'collector',
-  ADVISOR: 'advisor'
+  CURATOR: 'curator',    // Gallery/exhibition guidance
+  MENTOR: 'mentor',      // Artist development
+  COLLECTOR: 'collector', // Art appreciation/collection
+  ADVISOR: 'advisor'     // Platform oversight
 } as const
 
 type AssistantPersona = typeof ASSISTANT_PERSONAS[keyof typeof ASSISTANT_PERSONAS]
+
+// Base role-to-persona mapping
+const PERSONA_MAPPING = {
+  admin: ASSISTANT_PERSONAS.ADVISOR,
+  emerging_artist: ASSISTANT_PERSONAS.MENTOR,
+  verified_artist: ASSISTANT_PERSONAS.MENTOR,
+  patron: ASSISTANT_PERSONAS.COLLECTOR,
+  user: ASSISTANT_PERSONAS.COLLECTOR
+} as const
+
+// Personas can be adjusted based on context
+// Example: A verified_artist viewing a gallery page might get
+// a combination of MENTOR + CURATOR personas for better context
 ```
+
+### Role and Persona System Evolution
+- ✅ UserRole as single source of truth in database
+- ✅ Context-aware persona selection
+- 🚧 Persona combination system
+- ⏳ Dynamic persona adjustment based on user behavior
+- ⏳ Analytics for persona effectiveness
+
+### Cleanup Needed
+- 🚨 Remove outdated `AssistantRole` type in chat/route.ts (use AssistantPersona)
+- 🚨 Remove legacy chat role values ('gallery', 'artist', 'patron', 'visitor')
+- 🚨 Update any remaining role mappings to use PERSONA_MAPPING
+- 🚨 Audit for any remaining hardcoded role strings
+
+### Next Steps for Role-Persona System
+1. Implement type-safe persona combination logic
+2. Add context-based persona weighting
+3. Create analytics for tracking persona effectiveness
+4. Document persona selection criteria per context
 
 ### 4. Implementation Fixes
 
@@ -180,18 +212,22 @@ interface UnifiedAIProviderProps {
   children: React.ReactNode
 }
 
-function UnifiedAIProvider({ children }: UnifiedAIProviderProps) {
-  const [state, dispatch] = useReducer(unifiedAIReducer, initialState)
-  
-  // Implement error boundary
-  return (
-    <ErrorBoundary fallback={<AIFallbackUI />}>
-      <UnifiedAIContext.Provider value={{ state, dispatch }}>
-        {children}
-      </UnifiedAIContext.Provider>
-    </ErrorBoundary>
-  )
+// Simplified Type Structure
+// Single source of truth for roles
+type UserRole = 'admin' | 'verified_artist' | 'emerging_artist' | 'patron' | 'user'
+
+// Chat roles are mapped to AssistantPersona at runtime
+function mapChatRoleToPersona(role: string): AssistantPersona {
+    switch (role) {
+        case 'gallery': return 'curator';
+        case 'artist': return 'mentor';
+        case 'patron': return 'collector';
+        default: return 'curator';
+    }
 }
+
+// Removed redundant AIRole type in favor of direct mapping to AssistantPersona
+// This ensures type safety and eliminates role duplication
 ```
 
 #### B. Hook Pattern
@@ -235,3 +271,80 @@ Following proper data flow patterns:
    - Optimize re-renders
    - Implement proper memoization
    - Add loading states
+
+### 7. Architectural Concerns
+
+#### A. Separation of Concerns
+
+1. **Current Issues**
+   - Mixing of database roles and AI chat roles in type definitions
+   - Redundant role mapping logic across components
+   - Tight coupling between UnifiedAI context and API route handlers
+
+2. **Recommended Structure**
+   - Database Layer: Use `UserRole` type strictly for database interactions
+   - Application Layer: Map database roles to domain-specific roles (e.g., `AIRole`, `ChatRole`)
+   - Presentation Layer: Use view-specific types for UI components
+
+3. **Benefits**
+   - Clear boundaries between data, logic, and presentation
+   - Easier to modify one layer without affecting others
+   - Improved testability and maintainability
+
+#### B. Type System Optimization
+
+1. **Current Anti-patterns**
+   - Creating custom types where primitive types suffice
+   - Redundant type definitions across different contexts
+   - Over-specific type constraints limiting reusability
+
+2. **Best Practices**
+   ```typescript
+   // Instead of custom types for basic concepts
+   type Status = 'loading' | 'success' | 'error'  // ❌
+
+   // Use standardized types from project
+   import { RequestStatus } from '@/lib/types/common'  // ✅
+   ```
+
+3. **Type Hierarchy**
+   ```typescript
+   // Database Layer
+   type UserRole = 'admin' | 'verified_artist' | 'emerging_artist' | 'patron' | 'user'
+
+   // Application Layer THIS IS REDUNDANT AND SHOULD BE REMOVED.
+   type AIRole = 'gallery' | 'artist' | 'patron' | 'visitor'
+
+   // View Layer
+   interface AIViewProps {
+     role: AIRole
+     // view-specific props
+   }
+   ```
+
+4. **Role Mapping Strategy**
+   - Keep role mapping logic in a single location
+   - Use type guards for runtime validation
+   - Implement proper error handling for invalid mappings
+
+### 8. Refactoring Priorities
+
+1. **Immediate**
+   - Move role mapping to a dedicated utility
+   - Standardize common types across the application
+   - Remove redundant type definitions
+
+2. **Short-term**
+   - Implement proper layer separation
+   - Add type validation at boundaries
+   - Update documentation with type usage guidelines
+
+3. **Long-term**
+   - Create comprehensive type system documentation
+   - Implement automated type checks in CI
+   - Regular type system audits
+
+#### C. Type System Audit
+
+1. **Essential Types**
+   ```

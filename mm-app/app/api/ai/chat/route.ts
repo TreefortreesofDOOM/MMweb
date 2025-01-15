@@ -10,8 +10,7 @@ import { AIFunction } from '@/lib/ai/providers/base';
 import { artworkTools } from '@/lib/ai/gemini';
 import { env } from '@/lib/env';
 import type { UserRole } from '@/lib/navigation/types';
-
-type AssistantRole = UserContext['role'];
+import { type AssistantPersona, PERSONA_MAPPING } from '@/lib/unified-ai/types';
 
 interface SimilarityMatch {
   id: string;
@@ -29,7 +28,7 @@ interface ChatRequest {
   prompt: string;
   artworkId?: string;
   imageUrl?: string;
-  role?: AssistantRole;
+  role?: AssistantPersona;
   chatHistory?: Content[];
   context?: {
     data?: {
@@ -39,7 +38,7 @@ interface ChatRequest {
   };
   systemInstruction?: string;
   userContext?: Omit<UserContext, 'role'> & {
-    role: AssistantRole;
+    role: UserRole;
   };
 }
 
@@ -76,7 +75,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       prompt, 
       artworkId, 
       imageUrl, 
-      role = profile?.mapped_role || 'patron',  // Use profile role as default
+      role = PERSONA_MAPPING[(profile?.mapped_role as UserRole) || 'user'],
       chatHistory = [],
       context,
       systemInstruction: customInstruction,
@@ -103,32 +102,20 @@ export async function POST(request: Request): Promise<NextResponse> {
         artworkContext = {
           artwork: {
             title: artwork.title,
-            description: artwork.description,
-            price: artwork.price
+            description: artwork.description || '',
+            price: artwork.price || 0
           }
         };
       }
     }
 
-    // Get the original database role and ensure it's a valid role type
-    const dbRole = userContext?.role as UserRole | undefined;
-
-    // Map database role to AI chat role
-    const chatRole = dbRole === 'admin' 
-      ? 'gallery'
-      : dbRole === 'verified_artist' || dbRole === 'emerging_artist'
-        ? 'artist'
-        : dbRole === 'patron'
-          ? 'patron'
-          : 'visitor';
-
-    // Build context with mapped role
-    const artworkContextWithRole = {
-      ...artworkContext,
+    // Build complete AI context with artwork and user info
+    const aiContext = {
       user: userContext ? {
         ...userContext,
-        role: chatRole
-      } : undefined
+        role
+      } : undefined,
+      ...artworkContext
     };
 
     // Build system instruction with analysis context if available
@@ -143,11 +130,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       const { instruction } = await buildSystemInstruction(
         role,
         {
-          ...artworkContext,
-          user: userContext ? {
-            ...userContext,
-            role: chatRole
-          } : undefined,
+          ...aiContext,
           personaContext: analysisContext
         }
       );

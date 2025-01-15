@@ -1,6 +1,7 @@
 import { Content } from "@google/generative-ai";
 import { applyPersonalityToInstruction, PERSONALITIES } from './personalities';
 import type { PortfolioData } from './portfolio-data-collector'
+import { type AssistantPersona } from '@/lib/unified-ai/types';
 
 let agentName = "Meaning Machine AI";
 // Types
@@ -18,7 +19,7 @@ export interface ArtworkContext {
     similarArtworks?: any[];
     user?: {
         id: string;
-        role: 'gallery' | 'artist' | 'patron' | 'visitor' | 'anonymous' | 'analytics';
+        role: AssistantPersona;
         [key: string]: any;
     };
     characterPersonality?: string;
@@ -282,7 +283,7 @@ ${info.best_practices.map(practice => `- ${practice}`).join('\n')}
     if (context.characterPersonality && PERSONALITIES[context.characterPersonality as keyof typeof PERSONALITIES]) {
         const personality = PERSONALITIES[context.characterPersonality as keyof typeof PERSONALITIES];
         instruction = applyPersonalityToInstruction(instruction, personality, {
-            role: context.user?.role || 'visitor',
+            role: context.user?.role || 'curator',
             id: context.user?.id || '',
             displayName: context.user?.displayName
         });

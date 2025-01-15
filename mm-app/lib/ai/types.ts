@@ -1,4 +1,5 @@
 import { Content } from "@google/generative-ai";
+import { type AssistantPersona } from '@/lib/unified-ai/types';
 
 export interface UserContext {
     id: string;
@@ -6,7 +7,7 @@ export interface UserContext {
     firstName?: string;  // From database first_name
     lastName?: string;   // From database last_name
     email?: string;
-    role: 'gallery' | 'artist' | 'patron' | 'visitor' | 'anonymous' | 'analytics';
+    role: AssistantPersona;
 }
 
 export interface AssistantContext {
@@ -42,7 +43,7 @@ export function getUserDisplayName(userContext: UserContext, formal: boolean = f
     if (userContext.firstName || userContext.lastName) {
         if (formal && userContext.lastName) {
             // Formal: "Mr./Ms. Smith"
-            return `${userContext.role === 'patron' ? 'Mr./Ms.' : ''} ${userContext.lastName}`;
+            return `${userContext.role === 'collector' ? 'Mr./Ms.' : ''} ${userContext.lastName}`;
         } else if (userContext.firstName) {
             // Casual: "John"
             return userContext.firstName;
@@ -58,7 +59,7 @@ export function getUserDisplayName(userContext: UserContext, formal: boolean = f
 
 export function getFullName(userContext: UserContext, formal: boolean = false): string {
     if (userContext.firstName && userContext.lastName) {
-        if (formal && userContext.role === 'patron') {
+        if (formal && userContext.role === 'collector') {
             return `Mr./Ms. ${userContext.firstName} ${userContext.lastName}`;
         }
         return `${userContext.firstName} ${userContext.lastName}`;
@@ -66,15 +67,17 @@ export function getFullName(userContext: UserContext, formal: boolean = false): 
     return getUserDisplayName(userContext, formal);
 }
 
-export function getRoleBasedFallback(role: UserContext['role']): string {
+export function getRoleBasedFallback(role: AssistantPersona): string {
     switch (role) {
-        case 'artist':
+        case 'mentor':
             return 'artist';
-        case 'patron':
+        case 'collector':
             return 'collector';
-        case 'visitor':
-            return 'visitor';
+        case 'curator':
+            return 'curator';
+        case 'advisor':
+            return 'admin';
         default:
-            return 'valued guest';
+            return 'visitor';
     }
 } 
