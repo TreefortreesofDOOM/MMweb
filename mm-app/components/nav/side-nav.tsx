@@ -97,7 +97,8 @@ export function SideNav({ config }: SideNavProps) {
           "absolute right-0 top-6 translate-x-[100%] rounded-l-none border border-l-0",
           "hover:bg-muted",
           "focus-visible:ring-offset-[1px] focus-visible:ring-offset-border",
-          "h-12 w-5 p-0"
+          "h-12 w-5 p-0",
+          "z-20"
         )}
         onClick={() => setIsCollapsed(!isCollapsed)}
         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
