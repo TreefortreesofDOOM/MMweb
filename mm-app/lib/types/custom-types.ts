@@ -2,8 +2,8 @@ import type { Database } from './database.types'
 
 // Artist Role Types
 export const ARTIST_ROLES = {
-  VERIFIED: 'verified',
-  EMERGING: 'emerging',
+  VERIFIED: 'verified_artist',
+  EMERGING: 'emerging_artist',
 } as const
 
 export type ArtistRole = typeof ARTIST_ROLES[keyof typeof ARTIST_ROLES]

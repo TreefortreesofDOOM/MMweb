@@ -142,21 +142,22 @@ export async function createArtwork(formData: FormData) {
         status: isPublished ? 'published' : 'draft',
         display_order: nextOrder
       })
-      .select(`
-        *,
-        profiles (
-          id,
-          name,
-          avatar_url,
-          bio
-        )
-      `)
+      .select('id')
       .single();
 
     if (artworkError) throw artworkError;
 
+    // Get the full artwork details from the view
+    const { data: artworkWithArtist, error: viewError } = await supabase
+      .from('artworks_with_artist')
+      .select('*')
+      .eq('id', artwork.id)
+      .single();
+
+    if (viewError) throw viewError;
+
     // Generate and store embeddings for the artwork
-    if (artwork) {
+    if (artworkWithArtist) {
       try {
         // Include styles, techniques, and keywords in the text for embeddings
         const fullText = [
@@ -167,14 +168,14 @@ export async function createArtwork(formData: FormData) {
           ...keywords
         ].join(' ');
         
-        await updateArtworkEmbeddings(artwork.id, title, fullText);
+        await updateArtworkEmbeddings(artworkWithArtist.id, title, fullText);
       } catch (embeddingError) {
         console.error('Error generating embeddings:', embeddingError);
         // Don't fail the artwork creation if embeddings fail
       }
     }
 
-    return { artwork };
+    return { artwork: artworkWithArtist };
   } catch (error: any) {
     console.error('Error creating artwork:', error);
     return { error: error.message };

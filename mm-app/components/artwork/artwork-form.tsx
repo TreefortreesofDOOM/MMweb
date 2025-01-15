@@ -220,6 +220,24 @@ export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
                 </p>
               )}
             </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="price">Price (USD)</Label>
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                min="0"
+                max="1000000"
+                {...form.register('price')}
+                className={form.formState.errors.price ? 'border-red-500' : ''}
+              />
+              {form.formState.errors.price && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.price.message}
+                </p>
+              )}
+            </div>
 
             <div className="space-y-2">
               <Label>Images</Label>
@@ -267,24 +285,6 @@ export function ArtworkForm({ artwork, userId }: ArtworkFormProps) {
               {form.formState.errors.description && (
                 <p className="text-sm text-red-500">
                   {form.formState.errors.description.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="price">Price (USD)</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                min="0"
-                max="1000000"
-                {...form.register('price')}
-                className={form.formState.errors.price ? 'border-red-500' : ''}
-              />
-              {form.formState.errors.price && (
-                <p className="text-sm text-red-500">
-                  {form.formState.errors.price.message}
                 </p>
               )}
             </div>
