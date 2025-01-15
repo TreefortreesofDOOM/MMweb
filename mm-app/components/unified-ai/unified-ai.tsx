@@ -12,22 +12,32 @@ import { UnifiedAIAnalysisView } from './unified-ai-analysis-view'
 import type { AnalysisResult, AIContext } from '@/lib/unified-ai/types'
 import { updateProfileBio } from '@/lib/actions/profile'
 import { useToast } from '@/components/ui/use-toast'
+import { useContextAwareness } from '@/lib/unified-ai/hooks/use-context-awareness'
 
 export const UnifiedAI = () => {
   const mode = useUnifiedAIMode()
-  const { isOpen, isMinimized } = useUnifiedAIVisibility()
-  const context = useUnifiedAIContext() as AIContext
-  const websiteUrl = context.data?.websiteUrl
+  const { isOpen } = useUnifiedAIVisibility()
+  const { pageContext } = useUnifiedAIContext()
+  const websiteUrl = pageContext.data?.websiteUrl
   const { toast } = useToast()
 
   // Initialize analysis and chat hooks
+  /*
+  It looks like this is leftover code from an earlier implementation 
+  where analysis was handled directly in the parent component, 
+  but has since been moved down to child components 
+  for better separation of concerns. 
+  We could safely remove these unused destructured values
+
   const { isAnalyzing, analyze } = useAnalysis({
     onError: (error) => {
       console.error('Analysis error:', error)
     }
   })
+*/
+useContextAwareness()  
 
-  const { isLoading: isChatLoading, sendMessage } = useChat({
+  const { sendMessage } = useChat({
     onError: (error) => {
       console.error('Chat error:', error)
     }
@@ -36,15 +46,16 @@ export const UnifiedAI = () => {
   // Handle mode transitions
   const handleAnalysisRequest = async () => {
     try {
-      await analyze('content_analysis', 'Sample content for analysis')
+      // Remove sample analysis - this was a development placeholder
+      // await analyze('content_analysis', 'Sample content for analysis')
     } catch (error) {
-      console.error('Failed to start analysis:', error)
+      console.error('Analysis request failed:', error)
     }
   }
 
   const handleChatRequest = async () => {
     try {
-      await sendMessage('Hello! I need some assistance.')
+      await sendMessage('Hi!.')
     } catch (error) {
       console.error('Failed to start chat:', error)
     }
@@ -63,7 +74,7 @@ export const UnifiedAI = () => {
       
       // Handle artwork analysis results
       if (result.type.startsWith('artwork_') && result.status === 'success') {
-        const callbacks = context.data?.artworkCallbacks
+        const callbacks = pageContext.data?.artworkCallbacks
         if (!callbacks) {
           console.warn('No artwork callbacks registered')
           return

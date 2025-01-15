@@ -30,12 +30,12 @@ export const UnifiedAIButton = ({
   }
 
   return (
-    <div className="absolute top-6 -left-8">
+    <div className="absolute top-6 -left-10">
       <Button
         variant="ghost"
         size="icon"
         className={cn(
-          "h-8 w-8 rounded-l-full border border-r-0 bg-background shadow-md",
+          "h-10 w-10 rounded-l-full border border-r-0 bg-background shadow-md",
           className
         )}
         onClick={handleClick}
@@ -43,7 +43,7 @@ export const UnifiedAIButton = ({
         aria-label={ariaLabel || `Open AI Assistant (${mode} mode)`}
         tabIndex={0}
       >
-        <MessageCircle className="h-4 w-4" />
+        <MessageCircle className="h-5 w-5" />
         <span className="sr-only">Open AI Assistant</span>
       </Button>
     </div>

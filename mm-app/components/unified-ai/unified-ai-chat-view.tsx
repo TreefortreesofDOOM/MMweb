@@ -8,8 +8,7 @@ import { cn } from '@/lib/utils'
 import { useUnifiedAIContext, useUnifiedAIActions } from '@/lib/unified-ai/hooks'
 import { useChat } from '@/lib/unified-ai/use-chat'
 import { stagger } from '@/lib/unified-ai/animations'
-import type { UnifiedAIChatViewProps } from '@/lib/unified-ai/types'
-import { personaMapping } from '@/lib/unified-ai/types'
+import type { UnifiedAIChatViewProps, UnifiedAIContextType } from '@/lib/unified-ai/types'
 import { useAuth } from '@/hooks/use-auth'
 
 export const UnifiedAIChatView = ({
@@ -17,23 +16,24 @@ export const UnifiedAIChatView = ({
   onAnalysisRequest
 }: UnifiedAIChatViewProps) => {
   const [input, setInput] = useState('')
-  const { conversation, pageContext } = useUnifiedAIContext()
+  const { conversation, pageContext, analysis } = useUnifiedAIContext()
+  const activeCharacter = pageContext.characterPersonality?.name || 'JARVIS'
+  const contextSuggestion = pageContext.personaContext || ''
+  const activePersona = pageContext.persona
   const { setMode } = useUnifiedAIActions()
   const { isLoading, sendMessage } = useChat()
   const { profile } = useAuth()
 
-  // Get active personality info
-  const activeCharacter = pageContext.characterPersonality || 'JARVIS'
-  const contextSuggestion = pageContext.personaContext || ''
-  const activePersona = profile?.artist_type === 'verified' ? 'mentor' : 
-                       profile?.artist_type === 'emerging' ? 'mentor' : 
-                       'collector'
-
   // Debug user role and persona mapping
   console.log('User:', profile)
   console.log('User role:', profile?.artist_type)
-  console.log('Persona mapping:', personaMapping)
+  console.log('PageContext:', pageContext)
+  console.log('CharacterPersonality:', pageContext.characterPersonality)
   console.log('Active persona:', activePersona)
+  console.log('Active character:', activeCharacter)
+
+  // Count completed analysis results
+  const completedAnalysisCount = analysis.filter(result => result.status === 'success').length
 
   const handleAnalysisClick = () => {
     setMode('analysis')
@@ -79,6 +79,21 @@ export const UnifiedAIChatView = ({
         {contextSuggestion && (
           <div className="rounded border border-border/50 bg-background/50 p-2">
             <span className="text-[11px] text-muted-foreground">{contextSuggestion}</span>
+          </div>
+        )}
+        {completedAnalysisCount > 0 && (
+          <div className="flex items-center justify-between rounded border border-border/50 bg-background/50 p-2">
+            <span className="text-[11px] text-muted-foreground">
+              {completedAnalysisCount} analysis result{completedAnalysisCount !== 1 ? 's' : ''} available
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-[11px]"
+              onClick={handleAnalysisClick}
+            >
+              View Analysis
+            </Button>
           </div>
         )}
       </motion.div>
