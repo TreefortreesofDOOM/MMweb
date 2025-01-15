@@ -5,10 +5,9 @@ import { Content } from '@google/generative-ai';
 import { buildSystemInstruction } from '@/lib/ai/instructions';
 import { UserContext, ArtworkContext } from '@/lib/ai/types';
 import { findRelevantChatHistory, formatChatContext } from '@/lib/ai/chat-history';
-import { personaMapping, type AssistantPersona } from '@/lib/unified-ai/types';
 import { UnifiedAIClient } from '@/lib/ai/unified-client';
 import { AIFunction } from '@/lib/ai/providers/base';
-import { artworkTools } from '@/lib/ai/gemini';  // TODO: Move these to a provider-agnostic location
+import { artworkTools } from '@/lib/ai/gemini';
 import { env } from '@/lib/env';
 import type { UserRole } from '@/lib/navigation/types';
 
@@ -20,13 +19,24 @@ interface SimilarityMatch {
   similarity: number;
 }
 
+interface AnalysisResult {
+  type: string;
+  content: string;
+  details: string[];
+}
+
 interface ChatRequest {
   prompt: string;
   artworkId?: string;
   imageUrl?: string;
   role?: AssistantRole;
   chatHistory?: Content[];
-  context?: string;
+  context?: {
+    data?: {
+      artworkId?: string;
+    };
+    analysis?: AnalysisResult[];
+  };
   systemInstruction?: string;
   userContext?: Omit<UserContext, 'role'> & {
     role: AssistantRole;
@@ -68,7 +78,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       imageUrl, 
       role = profile?.mapped_role || 'patron',  // Use profile role as default
       chatHistory = [],
-      context: customContext,
+      context,
       systemInstruction: customInstruction,
       userContext
     } = await request.json() as ChatRequest;
@@ -82,11 +92,11 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     // Get artwork details if artworkId is provided
     let artworkContext: ArtworkContext | undefined;
-    if (artworkId) {
+    if (artworkId || context?.data?.artworkId) {
       const { data: artwork } = await supabase
         .from('artworks')
         .select('*')
-        .eq('id', artworkId)
+        .eq('id', artworkId || context?.data?.artworkId)
         .single();
 
       if (artwork) {
@@ -100,24 +110,50 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     }
 
-    // Build system instruction with context
-    const { instruction, contextMessage } = buildSystemInstruction(
-      personaMapping[role === 'gallery' ? 'admin' : 
-                    role === 'artist' ? 'artist' : 
-                    role === 'patron' ? 'patron' : 'user'], 
-      {
-        artwork: artworkContext?.artwork,
-        user: userContext ? {
-          ...userContext,
-          role: userContext.role === 'gallery' ? 'gallery' : 
-                userContext.role === 'artist' ? 'artist' : 'patron'
-        } : {
-          id: userId,
-          role: role === 'gallery' ? 'gallery' : 
-                role === 'artist' ? 'artist' : 'patron'
+    // Get the original database role and ensure it's a valid role type
+    const dbRole = userContext?.role as UserRole | undefined;
+
+    // Map database role to AI chat role
+    const chatRole = dbRole === 'admin' 
+      ? 'gallery'
+      : dbRole === 'verified_artist' || dbRole === 'emerging_artist'
+        ? 'artist'
+        : dbRole === 'patron'
+          ? 'patron'
+          : 'visitor';
+
+    // Build context with mapped role
+    const artworkContextWithRole = {
+      ...artworkContext,
+      user: userContext ? {
+        ...userContext,
+        role: chatRole
+      } : undefined
+    };
+
+    // Build system instruction with analysis context if available
+    let systemInstruction = customInstruction;
+    if (!systemInstruction) {
+      const analysisContext = context?.analysis?.length 
+        ? `\n\nThe following analysis results are available:\n${context.analysis.map(result => 
+            `- ${result.type}: ${result.content}${result.details.length ? `\nDetails:\n${result.details.map(d => `  • ${d}`).join('\n')}` : ''}`
+          ).join('\n\n')}`
+        : '';
+
+      const { instruction } = await buildSystemInstruction(
+        role,
+        {
+          ...artworkContext,
+          user: userContext ? {
+            ...userContext,
+            role: chatRole
+          } : undefined,
+          personaContext: analysisContext
         }
-      }
-    );
+      );
+      
+      systemInstruction = instruction;
+    }
 
     // Initialize AI client
     const ai = new UnifiedAIClient({
@@ -197,9 +233,9 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     // Convert chat history to unified format
     const unifiedChatHistory = [
-      ...(contextMessage ? [{
+      ...(systemInstruction ? [{
         role: 'system' as const,
-        content: contextMessage.parts[0].text || ''
+        content: systemInstruction
       }] : []),
       ...chatHistory.map(msg => ({
         role: msg.role === 'model' ? 'assistant' as const : msg.role as 'user' | 'system',
@@ -211,12 +247,12 @@ export async function POST(request: Request): Promise<NextResponse> {
     const response = await ai.sendMessage(prompt, {
       temperature: 0.5,
       functions,
-      systemInstruction: customInstruction || instruction,
-      context: customContext || JSON.stringify({ 
+      systemInstruction: customInstruction || systemInstruction,
+      context: context?.data?.artworkId ? JSON.stringify({ 
         userId,
         role,
         ...userContext 
-      }),
+      }) : undefined,
       imageUrl,
       chatHistory: unifiedChatHistory
     });
@@ -233,15 +269,19 @@ export async function POST(request: Request): Promise<NextResponse> {
         assistant_type: role,
         message: prompt,
         response: response.content,
-        artwork_id: artworkId,
+        artwork_id: artworkId || context?.data?.artworkId,
         metadata: {
           imageUrl,
           ...response.metadata
         },
         context: {
-          systemInstruction: customInstruction || instruction,
+          systemInstruction: customInstruction || systemInstruction,
           userContext,
-          customContext
+          customContext: context?.data?.artworkId ? JSON.stringify({ 
+            userId,
+            role,
+            ...userContext 
+          }) : undefined
         },
         message_embedding: messageEmbedding,
         response_embedding: responseEmbedding
