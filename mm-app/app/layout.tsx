@@ -80,7 +80,6 @@ export default async function RootLayout({
                       userFullName={userProfile?.full_name}
                     />
                     <main>{children}</main>
-                    <UnifiedAI />
                   </div>
                   <Toaster />
                 </UnifiedAIProvider>

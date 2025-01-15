@@ -2,7 +2,6 @@ import { type ReactNode, type ReactElement } from 'react';
 import { createClient } from '@/lib/supabase/supabase-server';
 import { redirect } from 'next/navigation';
 import { RoleNav } from '@/components/nav/role-nav';
-import { UnifiedAIProvider } from '@/components/unified-ai/unified-ai-provider';
 import { ArtistProvider } from '@/components/providers/artist-provider';
 
 export default async function ProtectedLayout({
@@ -26,13 +25,11 @@ export default async function ProtectedLayout({
 
   return (
     <div className="min-h-screen">
-      <UnifiedAIProvider>
-        <ArtistProvider profile={profile}>
-          <RoleNav role={profile?.role ?? 'user'}>
-            {children}
-          </RoleNav>
-        </ArtistProvider>
-      </UnifiedAIProvider>
+      <ArtistProvider profile={profile}>
+        <RoleNav role={profile?.role ?? 'user'}>
+          {children}
+        </RoleNav>
+      </ArtistProvider>
     </div>
   );
 } 
