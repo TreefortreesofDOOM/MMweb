@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react'
 import type { UserRole } from '@/lib/navigation/types'
+import { PERSONALITIES } from '@/lib/ai/personalities'
 
 export interface Message {
   role: 'user' | 'assistant'
@@ -9,21 +10,60 @@ export interface Message {
 
 export type AIMode = 'chat' | 'analysis'
 
-// Assistant Personas
-export type AssistantPersona = 'curator' | 'mentor' | 'collector' | 'advisor'
-
-// Role to Persona mapping
-export const personaMapping: Record<UserRole, AssistantPersona> = {
-  admin: 'advisor',
-  emerging_artist: 'mentor',
-  verified_artist: 'mentor',
-  artist: 'mentor',
-  patron: 'collector',
-  user: 'collector'
+// Assistant Personas with const assertion
+export const ASSISTANT_PERSONAS = {
+  CURATOR: 'curator',
+  MENTOR: 'mentor',
+  COLLECTOR: 'collector',
+  ADVISOR: 'advisor'
 } as const
 
+export type AssistantPersona = typeof ASSISTANT_PERSONAS[keyof typeof ASSISTANT_PERSONAS]
+
+// Role to Persona mapping with improved type safety
+export const PERSONA_MAPPING = {
+  admin: ASSISTANT_PERSONAS.ADVISOR,
+  emerging_artist: ASSISTANT_PERSONAS.MENTOR,
+  verified_artist: ASSISTANT_PERSONAS.MENTOR,
+  artist: ASSISTANT_PERSONAS.MENTOR,
+  patron: ASSISTANT_PERSONAS.COLLECTOR,
+  user: ASSISTANT_PERSONAS.COLLECTOR
+} as const
+
+export type PersonaMappingType = typeof PERSONA_MAPPING
+
+// Profile state with discriminated union
+export interface ProfileLoading {
+  status: 'loading'
+}
+
+export interface ProfileError {
+  status: 'error'
+  error: Error
+}
+
+export interface ProfileSuccess {
+  status: 'success'
+  data: {
+    artist_type: UserRole
+    name: string | null | undefined
+    bio: string | null | undefined
+    website?: string | null
+  }
+}
+
+export type ProfileState = ProfileLoading | ProfileError | ProfileSuccess
+
 // Context types
-export type ViewContext = 'general' | 'profile' | 'artwork' | 'gallery' | 'store' | 'collection' | 'portfolio'
+export type ViewContext = 
+  | 'general'
+  | 'profile'
+  | 'portfolio'
+  | 'artwork'
+  | 'analytics'
+  | 'gallery'
+  | 'store'
+  | 'collection'
 
 /**
  * Parameters used for image generation
@@ -37,30 +77,46 @@ export interface GenerationParameters {
 }
 
 /**
- * Context information about how the AI generated the content
+ * Context information about how the AI generated the content.
+ * Contains both global AI settings and page-specific context.
  */
 export interface AIContext {
-  route?: string
-  pageType?: string
-  persona?: string
-  websiteUrl?: string
-  artworkId?: string
-  galleryId?: string
-  profileId?: string
+  // Global AI settings
+  model?: string
+  prompt?: string
+  parameters?: GenerationParameters
+  negativePrompt?: string
+  modelVersion?: string
+  
+  // Page-specific context (required for API calls and storage)
+  route: string
+  pageType: ViewContext
+  persona: AssistantPersona
   personaContext?: string
-  characterPersonality?: string
-  pageContext?: {
-    route: string
-    pageType: ViewContext
-    persona: AssistantPersona
-    data?: {
-      websiteUrl?: string
-      artworkCallbacks?: {
-        onApplyDescription: (description: string) => void
-        onApplyStyles: (styles: string[]) => void
-        onApplyTechniques: (techniques: string[]) => void
-        onApplyKeywords: (keywords: string[]) => void
+  characterPersonality?: {
+    name: string
+    description: string
+    traits: string[]
+    speechPatterns: {
+      greetings: string[]
+      transitions: string[]
+      closings: string[]
+      fillers: string[]
+      userAddressing: {
+        named: string[]
+        unnamed: string[]
       }
+    }
+    emotionalTone: {
+      primary: string
+      secondary: string[]
+    }
+    quirks?: {
+      trigger: string
+      responses: string[]
+    }[]
+    contextBehaviors?: {
+      [key: string]: string
     }
   }
   data?: {
@@ -72,13 +128,6 @@ export interface AIContext {
       onApplyKeywords: (keywords: string[]) => void
     }
   }
-  // Optional generation fields
-  model?: string
-  prompt?: string
-  parameters?: GenerationParameters
-  negativePrompt?: string
-  modelVersion?: string
-  [key: string]: unknown // Allow for additional context fields
 }
 
 /**
@@ -111,6 +160,10 @@ export interface AnalysisResult {
   }
 }
 
+/**
+ * State for the UnifiedAI system.
+ * Maintains conversation, analysis results, and current page context.
+ */
 export interface UnifiedAIState {
   mode: AIMode
   isOpen: boolean
@@ -119,12 +172,12 @@ export interface UnifiedAIState {
   context: {
     conversation: Message[]
     analysis: AnalysisResult[]
-    pageContext: AIContext
+    pageContext: AIContext  // Full AIContext needed for API calls and storage
   }
 }
 
 export interface UnifiedAIAction {
-  type: 'SET_MODE' | 'SET_OPEN' | 'SET_MINIMIZED' | 'ADD_MESSAGE' | 'ADD_ANALYSIS' | 'RESET'
+  type: 'SET_MODE' | 'SET_OPEN' | 'SET_MINIMIZED' | 'ADD_MESSAGE' | 'ADD_ANALYSIS' | 'SET_PAGE_CONTEXT' | 'RESET'
   payload?: any
 }
 
@@ -177,7 +230,6 @@ export interface UnifiedAIAnalysisViewProps {
 
 export const ANALYSIS_TYPES = [
   'bio_extraction',
-  'content_analysis',
   'style_analysis',
   'theme_analysis',
   'technical_analysis',
@@ -215,4 +267,56 @@ export interface PortfolioAnalysisResult {
   type: PortfolioAnalysisType
   recommendations: PortfolioRecommendations
   error?: string
-} 
+}
+
+export const CONTEXT_ANALYSIS_MAPPING: Record<ViewContext, AnalysisType[]> = {
+  general: [],
+  profile: ['bio_extraction'],
+  portfolio: ['portfolio_composition', 'portfolio_presentation', 'portfolio_pricing', 'portfolio_market'],
+  artwork: ['artwork_description', 'artwork_style', 'artwork_techniques', 'artwork_keywords'],
+  analytics: ['analytics'],
+  gallery: [],
+  store: ['analytics'],
+  collection: ['analytics']
+} as const
+
+export type PageContext = keyof typeof CONTEXT_ANALYSIS_MAPPING
+export type AnalysisTypesByContext = typeof CONTEXT_ANALYSIS_MAPPING[PageContext]
+
+// AI Personalities
+export type AIPersonality = 'HAL9000' | 'GLADOS' | 'JARVIS' 
+
+// Settings state with discriminated union
+export interface SettingsLoading {
+  status: 'loading'
+}
+
+export interface SettingsError {
+  status: 'error'
+  error: Error
+}
+
+export interface AIPreferences {
+  aiPersonality: keyof typeof PERSONALITIES
+  language?: string
+  tone?: 'formal' | 'casual'
+  responseLength?: 'concise' | 'detailed'
+}
+
+export interface SettingsSuccess {
+  status: 'success'
+  data: {
+    preferences: AIPreferences
+  }
+}
+
+export type SettingsState = SettingsLoading | SettingsError | SettingsSuccess
+
+// Default AI settings
+export const DEFAULT_AI_SETTINGS: AIPreferences = {
+  aiPersonality: 'JARVIS',
+  tone: 'formal',
+  responseLength: 'concise'
+} as const
+
+// ... existing code ... 

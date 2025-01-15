@@ -1,6 +1,14 @@
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
-import { type AIContext, type ViewContext, type AssistantPersona, personaMapping } from '../types'
+import { 
+  type AIContext,
+  type ViewContext, 
+  type AssistantPersona,
+  type ProfileState,
+  PERSONA_MAPPING,
+  ASSISTANT_PERSONAS,
+  CONTEXT_ANALYSIS_MAPPING
+} from '../types'
 import { useUnifiedAI } from '../context'
 import { useAuth } from '@/hooks/use-auth'
 import { PERSONALITIES, getPersonalizedContext } from '@/lib/ai/personalities'
@@ -10,7 +18,7 @@ import type { UserRole } from '@/lib/navigation/types'
 export const useContextAwareness = () => {
   const pathname = usePathname()
   const { state, dispatch } = useUnifiedAI()
-  const { user } = useAuth()
+  const { user, profile, isLoaded } = useAuth()
 
   useEffect(() => {
     const determinePageContext = async (): Promise<AIContext> => {
@@ -69,14 +77,33 @@ export const useContextAwareness = () => {
         }
       }
 
-      // Get persona based on user role
-      const persona = user?.role ? personaMapping[user.role as UserRole] : personaMapping.user
+      // Wait for auth to be loaded
+      if (!isLoaded) {
+        console.log('Waiting for auth to load...')
+        return state.context.pageContext
+      }
+
+      // Debug log profile and role
+      console.log('Profile:', profile)
+      console.log('Profile Role:', profile?.role)
+
+      // Get persona based on profile role (source of truth)
+      const persona = profile?.role ? PERSONA_MAPPING[profile.role as UserRole] : PERSONA_MAPPING.user
+      console.log('Mapped Persona:', persona)
 
       // Get user's preferred AI personality from settings
       const settings = await getSettings()
-      const preferredCharacter = settings?.preferences?.aiPersonality?.toUpperCase() || 'JARVIS'
+      console.log('Settings:', settings)
+      console.log('AI Preferences:', settings?.preferences?.aiPersonality)
+
+      const preferredCharacter = settings?.preferences?.aiPersonality || 'JARVIS'
+      console.log('Preferred Character:', preferredCharacter)
+
       const characterPersonality = PERSONALITIES[preferredCharacter as keyof typeof PERSONALITIES]
+      console.log('Character Personality:', characterPersonality)
+
       const rolePersonality = persona ? PERSONALITIES[persona.toUpperCase() as keyof typeof PERSONALITIES] : null
+      console.log('Role Personality:', rolePersonality)
 
       // Combine context behaviors
       const personaContext = rolePersonality 
@@ -88,57 +115,17 @@ export const useContextAwareness = () => {
         pageType,
         persona,
         personaContext,
-        characterPersonality: characterPersonality.name,
-        data: {
-          ...contextData
-        }
+        characterPersonality,
+        data: contextData
       }
     }
 
-    // Update to handle async function
-    determinePageContext().then(pageContext => {
-      dispatch({
-        type: 'SET_PAGE_CONTEXT',
-        payload: pageContext
-      })
+    // Update context when pathname or auth changes
+    determinePageContext().then(context => {
+      console.log('Dispatching context update:', context)
+      dispatch({ type: 'SET_PAGE_CONTEXT', payload: context })
     })
+  }, [pathname, dispatch, user?.id, profile?.role, isLoaded])
 
-  }, [pathname, dispatch, user?.role, user?.id])
-
-  const suggestAssistant = () => {
-    const currentPageContext = state.context.pageContext as AIContext | undefined
-    
-    switch (currentPageContext?.pageType) {
-      case 'profile':
-        return {
-          mode: 'analysis' as const,
-          type: 'bio_extraction'
-        }
-      case 'portfolio':
-        return {
-          mode: 'analysis' as const,
-          type: 'portfolio-analysis'
-        }
-      case 'artwork':
-        return {
-          mode: 'analysis' as const,
-          type: 'artwork-analysis'  
-        }
-      case 'gallery':
-        return {
-          mode: 'chat' as const,
-          type: 'gallery-assistant'
-        }
-      default:
-        return {
-          mode: 'chat' as const,
-          type: 'general-assistant'
-        }
-    }
-  }
-
-  return {
-    pageContext: state.context.pageContext as AIContext,
-    suggestedAssistant: suggestAssistant()
-  }
+  return state.context.pageContext
 } 

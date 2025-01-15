@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useUnifiedAIActions } from './hooks'
-import type { Message } from './types'
+import { useUnifiedAIActions, useUnifiedAIContext } from './hooks'
+import { useUnifiedAI } from './context'
+import type { Message, AnalysisResult } from './types'
 import type { Content } from '@google/generative-ai'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -33,6 +34,8 @@ export function useChat(options: UseChatOptions = {}) {
   const [hasInitialContext, setHasInitialContext] = useState(false)
   const { addMessage, setMode } = useUnifiedAIActions()
   const { profile } = useAuth()
+  const { state } = useUnifiedAI()
+  const { analysis } = state.context
 
   const sendMessage = async (content: string) => {
     try {
@@ -58,6 +61,15 @@ export function useChat(options: UseChatOptions = {}) {
         website: profile?.website
       } : undefined
 
+      // Get completed analysis results
+      const completedAnalysis = analysis.filter(result => 
+        result.status === 'success'
+      ).map(result => ({
+        type: result.type,
+        content: result.content,
+        details: result.results?.details || []
+      }))
+
       // Call the chat API route
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
@@ -65,7 +77,10 @@ export function useChat(options: UseChatOptions = {}) {
         body: JSON.stringify({
           prompt: content,
           chatHistory,
-          context: options.context,
+          context: {
+            ...options.context,
+            analysis: completedAnalysis
+          },
           systemInstruction: options.systemInstruction,
           role: options.role || profile?.artist_type,
           artworkId: options.artworkId,

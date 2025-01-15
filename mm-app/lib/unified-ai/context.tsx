@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { createContext, useContext, useReducer, type ReactNode, type Dispatch } from 'react'
 import type { AIMode, UnifiedAIState, Message, AnalysisResult, AIContext } from './types'
+import { PERSONALITIES } from '@/lib/ai/personalities'
 
 type UnifiedAIAction = 
   | { type: 'SET_MODE'; payload: AIMode }
@@ -25,7 +26,8 @@ const initialState: UnifiedAIState = {
     pageContext: {
       route: '/',
       pageType: 'general',
-      persona: 'collector'
+      persona: 'collector',
+      characterPersonality: PERSONALITIES.JARVIS
     }
   }
 }
@@ -65,6 +67,7 @@ function unifiedAIReducer(state: UnifiedAIState, action: UnifiedAIAction): Unifi
         }
       }
     case 'SET_PAGE_CONTEXT':
+      console.log('SET_PAGE_CONTEXT payload:', action.payload)
       return {
         ...state,
         context: {
