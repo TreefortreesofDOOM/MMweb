@@ -85,15 +85,15 @@ export async function POST(request: Request) {
         promptLength: prompt.length
       })
 
-      // Get response from Gemini
-      console.log('Sending request to Gemini for type:', type)
+      // Get response from AI
+      console.log('Sending request to AI for type:', type)
       const response = await client.sendMessage(prompt, { 
         imageUrl, 
         temperature,
         systemInstruction: `You are an expert art curator and critic. Analyze the provided artwork image according to the prompt. Only respond with the analysis, no other additional text.`
       })
 
-      console.log('Received response from Gemini:', {
+      console.log('Received response from AI:', {
         type,
         hasContent: !!response.content,
         contentLength: response.content?.length

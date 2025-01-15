@@ -45,20 +45,26 @@ export function ArtworkAIAnalysis({
 
   // Register callbacks with unified-ai context
   useEffect(() => {
-    dispatch({
-      type: 'SET_PAGE_CONTEXT',
-      payload: {
-        data: {
-          artworkCallbacks: {
-            onApplyDescription,
-            onApplyStyles,
-            onApplyTechniques,
-            onApplyKeywords
-          }
+    // Only set page context if we're in artwork mode
+    if (mode === 'create' || mode === 'edit') {
+      dispatch({
+        type: 'SET_PAGE_CONTEXT',
+        payload: {
+          data: {
+            artworkCallbacks: {
+              onApplyDescription,
+              onApplyStyles,
+              onApplyTechniques,
+              onApplyKeywords
+            }
+          },
+          route: '/artwork',
+          pageType: 'artwork',
+          persona: 'advisor'
         }
-      }
-    })
-  }, [onApplyDescription, onApplyStyles, onApplyTechniques, onApplyKeywords, dispatch])
+      })
+    }
+  }, [onApplyDescription, onApplyStyles, onApplyTechniques, onApplyKeywords, dispatch, mode])
 
   // Only auto-analyze in create mode when imageUrl is first set
   useEffect(() => {
@@ -161,7 +167,7 @@ export function ArtworkAIAnalysis({
                 ? "Analyzing your artwork..."
                 : mode === 'edit'
                   ? "Click Analyze to update the AI analysis."
-                  : "Click the floating assistant in the bottom right to view insights and suggestions."}
+                  : "Click the chat icon to view insights and suggestions."}
             </p>
           </div>
           <div className="min-w-[120px] text-right">
