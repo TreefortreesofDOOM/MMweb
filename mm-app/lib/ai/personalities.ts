@@ -1,5 +1,6 @@
 import { Content } from "@google/generative-ai";
 import { UserContext, getUserDisplayName, getRoleBasedFallback, getFullName } from "./types";
+import type { ViewContext } from '@/lib/unified-ai/types'
 
 // Simpler interface
 export interface Personality {
@@ -538,10 +539,7 @@ Remember:
     return personalityWrapper;
 }
 
-export function getPersonalizedContext(
-    personality: Personality,
-    pageType: 'artwork' | 'gallery' | 'profile' | 'store' | 'collection' | 'portfolio' | 'general'
-): string {
+export function getPersonalizedContext(personality: any, pageType: ViewContext) {
     if (!personality.contextBehaviors) {
         return "Consider the context and purpose of what you are viewing.";
     }

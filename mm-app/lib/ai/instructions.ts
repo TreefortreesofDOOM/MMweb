@@ -18,7 +18,7 @@ export interface ArtworkContext {
     similarArtworks?: any[];
     user?: {
         id: string;
-        role: 'gallery' | 'artist' | 'patron';
+        role: 'gallery' | 'artist' | 'patron' | 'visitor' | 'anonymous' | 'analytics';
         [key: string]: any;
     };
     characterPersonality?: string;

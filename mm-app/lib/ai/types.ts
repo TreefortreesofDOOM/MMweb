@@ -6,7 +6,7 @@ export interface UserContext {
     firstName?: string;  // From database first_name
     lastName?: string;   // From database last_name
     email?: string;
-    role: 'artist' | 'patron' | 'gallery' | 'visitor' | 'anonymous' | 'analytics';
+    role: 'gallery' | 'artist' | 'patron' | 'visitor' | 'anonymous' | 'analytics';
 }
 
 export interface AssistantContext {
