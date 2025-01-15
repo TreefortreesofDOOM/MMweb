@@ -1,7 +1,6 @@
 'use client'
 
 import { Suspense } from 'react'
-import { UnifiedAIProvider } from '@/components/unified-ai/unified-ai-provider'
 import { PortfolioProgressProvider } from '@/components/providers/portfolio-progress-provider'
 
 export default function AnalyzePortfolioLayout({
@@ -12,11 +11,9 @@ export default function AnalyzePortfolioLayout({
   return (
     <Suspense>
       <PortfolioProgressProvider>
-        <UnifiedAIProvider>
-          <Suspense>
-            {children}
-          </Suspense>
-        </UnifiedAIProvider>
+        <Suspense>
+          {children}
+        </Suspense>
       </PortfolioProgressProvider>
     </Suspense>
   )
