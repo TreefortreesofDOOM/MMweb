@@ -12,7 +12,7 @@ import { ArtistBadge } from '@/components/ui/artist-badge';
 import Link from 'next/link';
 import { signOutAction } from '@/lib/actions';
 import { Settings, User } from 'lucide-react';
-import type { UserRole } from '@/lib/navigation/types';
+import type { UserRole } from '@/lib/types/custom-types';
 
 interface UserNavProps {
   userEmail?: string | null;
@@ -34,12 +34,6 @@ export function UserNav({ userEmail, avatarUrl, fullName, userRole }: UserNavPro
     return userEmail?.[0].toUpperCase() || '?';
   };
 
-  const getArtistBadgeType = () => {
-    if (userRole === 'verified_artist') return 'verified';
-    if (userRole === 'emerging_artist') return 'emerging';
-    return null;
-  };
-
   if (!userEmail) {
     return (
       <div className="flex items-center gap-4">
@@ -48,63 +42,60 @@ export function UserNav({ userEmail, avatarUrl, fullName, userRole }: UserNavPro
             Sign In
           </Button>
         </Link>
-        <Link href="/sign-up">
-          <Button size="sm">Sign Up</Button>
-        </Link>
       </div>
     );
   }
 
-  const badgeType = getArtistBadgeType();
-
   return (
-    <div className="flex items-center gap-4">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={avatarUrl || ''} alt={fullName || userEmail} />
-              <AvatarFallback>{getInitials()}</AvatarFallback>
-            </Avatar>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <div className="flex flex-col gap-2 p-2">
-            <div className="flex flex-col space-y-1">
-              {fullName && (
-                <p className="text-sm font-medium">{fullName}</p>
-              )}
-              <p className="text-xs text-muted-foreground truncate">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={avatarUrl || undefined} alt={fullName || userEmail} />
+            <AvatarFallback>{getInitials()}</AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <div className="flex items-center justify-start gap-2 p-2">
+          <div className="flex flex-col space-y-1">
+            {fullName && (
+              <p className="text-sm font-medium leading-none">{fullName}</p>
+            )}
+            {userEmail && (
+              <p className="text-xs leading-none text-muted-foreground">
                 {userEmail}
               </p>
-            </div>
-            {badgeType && (
-              <ArtistBadge 
-                type={badgeType} 
-                showTooltip={false}
-                className="w-fit"
-              />
             )}
           </div>
-          <DropdownMenuItem asChild>
-            <Link href="/profile" className="cursor-pointer">
-              <User className="mr-2 h-4 w-4" />
-              <span>View Profile</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/settings" className="cursor-pointer">
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </Link>
-          </DropdownMenuItem>
-          <form action={signOutAction}>
-            <DropdownMenuItem asChild>
-              <button className="w-full">Sign out</button>
-            </DropdownMenuItem>
-          </form>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+        </div>
+        {userRole && (userRole === 'verified_artist' || userRole === 'emerging_artist') && (
+          <div className="p-2">
+            <ArtistBadge role={userRole} />
+          </div>
+        )}
+        <DropdownMenuItem asChild>
+          <Link href="/profile" className="cursor-pointer">
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/settings" className="cursor-pointer">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onSelect={async (event) => {
+            event.preventDefault();
+            await signOutAction();
+          }}
+        >
+          Sign out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 } 

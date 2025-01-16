@@ -3,28 +3,32 @@
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CheckCircle2, Star } from 'lucide-react';
+import { type UserRole } from '@/lib/types/custom-types';
+import { isVerifiedArtist } from '@/lib/utils/role-utils';
 
 export interface ArtistBadgeProps {
-  type: 'verified' | 'emerging';
+  role: UserRole;
   className?: string;
   showTooltip?: boolean;
 }
 
-export const ArtistBadge = ({ type, className, showTooltip = true }: ArtistBadgeProps) => {
+export const ArtistBadge = ({ role, className, showTooltip = true }: ArtistBadgeProps) => {
+  const isVerified = isVerifiedArtist(role);
+  
   const badge = (
     <Badge
-      variant={type === 'verified' ? 'default' : 'secondary'}
+      variant={isVerified ? 'default' : 'secondary'}
       className={className}
       role="status"
-      aria-label={type === 'verified' ? 'Verified Artist Status' : 'Emerging Artist Status'}
+      aria-label={isVerified ? 'Verified Artist Status' : 'Emerging Artist Status'}
       tabIndex={0}
     >
-      {type === 'verified' ? (
+      {isVerified ? (
         <CheckCircle2 className="h-3 w-3 mr-1" aria-hidden="true" />
       ) : (
         <Star className="h-3 w-3 mr-1" aria-hidden="true" />
       )}
-      {type === 'verified' ? 'Verified Artist' : 'Emerging Artist'}
+      {isVerified ? 'Verified Artist' : 'Emerging Artist'}
     </Badge>
   );
 
@@ -40,10 +44,10 @@ export const ArtistBadge = ({ type, className, showTooltip = true }: ArtistBadge
         </TooltipTrigger>
         <TooltipContent
           role="tooltip"
-          aria-label={type === 'verified' ? 'About verified artist status' : 'About emerging artist status'}
+          aria-label={isVerified ? 'About verified artist status' : 'About emerging artist status'}
         >
           <p>
-            {type === 'verified'
+            {isVerified
               ? 'This artist has been verified by our team'
               : 'This artist is building their portfolio'}
           </p>
@@ -51,4 +55,4 @@ export const ArtistBadge = ({ type, className, showTooltip = true }: ArtistBadge
       </Tooltip>
     </TooltipProvider>
   );
-} 
+}; 

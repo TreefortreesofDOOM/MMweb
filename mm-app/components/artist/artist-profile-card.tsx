@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { FollowButton } from '@/components/social'
 import { ArtistBadge } from '@/components/ui/artist-badge'
 import { MapPin } from 'lucide-react'
-import type { ArtistRole } from '@/lib/types/custom-types'
+import type { UserRole } from '@/lib/types/custom-types'
 import { Badge } from "@/components/ui/badge"
 import { useUser } from '@/hooks/use-user'
 
@@ -17,7 +17,7 @@ interface Artist {
   website: string | null;
   instagram: string | null;
   location: string | null;
-  artist_type: ArtistRole;
+  role: UserRole;
   medium?: string[];
 }
 
@@ -48,48 +48,45 @@ export function ArtistProfileCard({
   // Common header content
   const HeaderContent = () => (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        <Avatar className="h-20 w-20">
+      <div className="flex items-center space-x-4">
+        <Avatar className="h-12 w-12">
           <AvatarImage src={artist.avatar_url || ''} alt={artist.full_name} />
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
         <div>
-          <CardTitle className="text-3xl">{artist.full_name}</CardTitle>
+          <CardTitle className="text-xl">{artist.full_name}</CardTitle>
           {artist.location && (
-            <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-              <MapPin className="h-4 w-4" aria-hidden="true" />
-              <span>{artist.location}</span>
+            <div className="flex items-center text-sm text-muted-foreground mt-1">
+              <MapPin className="mr-1 h-4 w-4" />
+              {artist.location}
             </div>
-          )}
-          {!isPublicRoute && showBadge && (
-            <ArtistBadge type={artist.artist_type} className="mt-2" />
           )}
         </div>
       </div>
-      {showFollow && !isOwnProfile && <FollowButton artistId={artist.id} />}
+      {showFollow && !isOwnProfile && (
+        <FollowButton artistId={artist.id} />
+      )}
     </div>
   );
 
-  // Common content sections
+  // Bio section
   const BioSection = () => (
     artist.bio && (
-      <div>
-        <h2 className="text-lg font-semibold mb-2">About the Artist</h2>
-        <p className="text-muted-foreground">{artist.bio}</p>
+      <div className="space-y-1">
+        <h3 className="text-sm font-medium">About</h3>
+        <p className="text-sm text-muted-foreground">{artist.bio}</p>
       </div>
     )
   );
 
+  // Mediums section
   const MediumsSection = () => (
     artist.medium && artist.medium.length > 0 && (
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Mediums</h2>
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium">Mediums</h3>
         <div className="flex flex-wrap gap-1">
           {artist.medium.map((medium) => (
-            <Badge
-              key={medium}
-              variant="secondary"
-            >
+            <Badge key={medium} variant="secondary">
               {medium}
             </Badge>
           ))}
@@ -98,41 +95,44 @@ export function ArtistProfileCard({
     )
   );
 
+  // Links section
   const LinksSection = () => (
-    <div className="space-y-2">
-      {artist.website && (
-        <p>
-          <span className="font-medium">Website: </span>
-          <a 
-            href={artist.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            {artist.website}
-          </a>
-        </p>
-      )}
-      {artist.instagram && (
-        <p>
-          <span className="font-medium">Instagram: </span>
-          <a 
-            href={`https://instagram.com/${artist.instagram.replace('@', '')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            {artist.instagram}
-          </a>
-        </p>
-      )}
-    </div>
+    (artist.website || artist.instagram) && (
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium">Links</h3>
+        <div className="flex flex-wrap gap-2">
+          {artist.website && (
+            <a
+              href={artist.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-blue-600 hover:underline"
+            >
+              Website
+            </a>
+          )}
+          {artist.instagram && (
+            <a
+              href={`https://instagram.com/${artist.instagram}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-blue-600 hover:underline"
+            >
+              Instagram
+            </a>
+          )}
+        </div>
+      </div>
+    )
   );
 
   return (
     <Card className={className}>
       <CardHeader>
         <HeaderContent />
+        {showBadge && (artist.role === 'verified_artist' || artist.role === 'emerging_artist') && (
+          <ArtistBadge role={artist.role} className="mt-2" />
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         <BioSection />

@@ -67,9 +67,8 @@ export const SettingsForm: FC<SettingsFormProps> = () => {
       const userRole = profile?.role || defaultSettings.role.current;
       if (canUpdateRoleSettings(userRole)) {
         const roleResult = await updateSettings('role', {
-          medium: values.role.medium,
-          artist_type: values.role.artist_type,
-          artist_status: values.role.artist_status,
+          current: values.role.current,
+          medium: values.role.medium
         });
         if (!roleResult.success) {
           throw new Error(roleResult.error);

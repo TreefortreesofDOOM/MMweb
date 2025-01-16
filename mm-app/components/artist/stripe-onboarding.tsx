@@ -1,21 +1,35 @@
+'use client'
+
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useToast } from '@/components/ui/use-toast';
+import { isVerifiedArtist } from '@/lib/types/custom-types';
+import type { UserRole } from '@/lib/types/custom-types';
 
 interface StripeOnboardingProps {
-  stripeAccountId: string | null;
-  onboardingComplete: boolean;
+  readonly stripeAccountId: string | null;
+  readonly onboardingComplete: boolean;
+  readonly userRole: UserRole;
 }
 
-export function StripeOnboarding({ stripeAccountId, onboardingComplete }: StripeOnboardingProps) {
+export function StripeOnboarding({ 
+  stripeAccountId, 
+  onboardingComplete,
+  userRole 
+}: StripeOnboardingProps) {
   const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleSetupStripe = async () => {
+  // Early return if not a verified artist
+  if (!isVerifiedArtist(userRole)) {
+    return null;
+  }
+
+  const handleSetupStripe = async (): Promise<void> => {
     try {
       setLoading(true);
-      setError(null);
       
       const response = await fetch('/api/stripe/connect', {
         method: 'POST',
@@ -34,16 +48,19 @@ export function StripeOnboarding({ stripeAccountId, onboardingComplete }: Stripe
       window.location.href = url;
     } catch (error) {
       console.error('Error setting up Stripe:', error);
-      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : 'An unexpected error occurred'
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleOpenDashboard = async () => {
+  const handleOpenDashboard = async (): Promise<void> => {
     try {
       setLoading(true);
-      setError(null);
       
       const response = await fetch('/api/stripe/login-link', {
         method: 'POST',
@@ -59,58 +76,50 @@ export function StripeOnboarding({ stripeAccountId, onboardingComplete }: Stripe
       }
 
       const { url } = await response.json();
-      window.open(url, '_blank');
+      window.location.href = url;
     } catch (error) {
       console.error('Error accessing Stripe dashboard:', error);
-      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : 'An unexpected error occurred'
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  if (onboardingComplete) {
+  if (!stripeAccountId) {
     return (
-      <div className="rounded-lg border p-4 bg-green-50">
-        <h3 className="font-semibold text-green-700">Stripe Account Connected</h3>
-        <p className="text-sm text-green-600 mt-1">
-          Your Stripe account is fully set up and ready to receive payments.
-        </p>
-        <Button
-          variant="outline"
-          className="mt-4"
-          onClick={handleOpenDashboard}
-          disabled={loading}
-        >
-          {loading ? 'Loading...' : 'View Stripe Dashboard'}
-        </Button>
-      </div>
+      <Button 
+        onClick={handleSetupStripe} 
+        disabled={loading}
+        aria-label="Set up Stripe account for payments"
+      >
+        {loading ? 'Setting up...' : 'Set up Stripe'}
+      </Button>
+    );
+  }
+
+  if (!onboardingComplete) {
+    return (
+      <Button 
+        onClick={handleSetupStripe}
+        disabled={loading}
+        aria-label="Complete Stripe onboarding"
+      >
+        {loading ? 'Loading...' : 'Complete Onboarding'}
+      </Button>
     );
   }
 
   return (
-    <div className="rounded-lg border p-4 bg-white">
-      <h3 className="font-semibold">
-        {stripeAccountId ? 'Complete Your Stripe Setup' : 'Set Up Payments'}
-      </h3>
-      <p className="text-sm text-gray-600 mt-1">
-        {stripeAccountId 
-          ? 'Please complete your Stripe account setup to start receiving payments.'
-          : 'Connect with Stripe to start selling your artwork and receive payments.'}
-      </p>
-      
-      {error && (
-        <div className="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded">
-          {error}
-        </div>
-      )}
-
-      <Button
-        onClick={handleSetupStripe}
-        disabled={loading}
-        className="mt-4"
-      >
-        {loading ? 'Loading...' : stripeAccountId ? 'Complete Setup' : 'Connect with Stripe'}
-      </Button>
-    </div>
+    <Button 
+      onClick={handleOpenDashboard}
+      disabled={loading}
+      aria-label="Open Stripe dashboard"
+    >
+      {loading ? 'Loading...' : 'Open Stripe Dashboard'}
+    </Button>
   );
 } 

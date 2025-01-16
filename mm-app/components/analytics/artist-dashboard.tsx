@@ -9,6 +9,8 @@ import { MetricsCard } from './ui/metrics-card'
 import { AnalyticsChart } from './ui/analytics-chart'
 import { EmptyState } from './ui/empty-state'
 import { formatPrice } from '@/lib/utils/common-utils'
+import { useAuth } from '@/hooks/use-auth'
+import { isVerifiedArtist } from '@/lib/utils/role-utils'
 
 interface ArtistDashboardProps {
   artistId: string
@@ -19,6 +21,7 @@ export function ArtistDashboard({ artistId }: ArtistDashboardProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
+  const { profile } = useAuth()
 
   useEffect(() => {
     async function fetchAnalytics() {
@@ -60,6 +63,8 @@ export function ArtistDashboard({ artistId }: ArtistDashboardProps) {
 
   const totalArtworkViews = data.artworkViews.reduce((sum, a) => sum + a.views, 0)
   const totalFavorites = data.artworkViews.reduce((sum, a) => sum + (a.favoriteCount || 0), 0)
+  const isVerified = profile ? isVerifiedArtist(profile.role) : false
+  const combinedViews = data.profileViews + totalArtworkViews
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -67,37 +72,44 @@ export function ArtistDashboard({ artistId }: ArtistDashboardProps) {
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="artworks">Artworks</TabsTrigger>
         <TabsTrigger value="gallery">Gallery</TabsTrigger>
-        <TabsTrigger value="sales">Sales</TabsTrigger>
+        <TabsTrigger value="sales" disabled={!isVerified}>Sales</TabsTrigger>
         <TabsTrigger value="engagement">Engagement</TabsTrigger>
-        <TabsTrigger value="collectors">Collectors</TabsTrigger>
+        <TabsTrigger value="collectors" disabled={!isVerified}>Collectors</TabsTrigger>
       </TabsList>
 
       <TabsContent value="overview" className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MetricsCard
+            title="Total Views"
+            value={combinedViews}
+            subtitle="Profile + Artwork Views"
+          />
+          <MetricsCard
             title="Profile Views"
             value={data.profileViews}
-            subtitle="Last 30 days"
+            subtitle="Direct Profile Visits"
           />
           <MetricsCard
             title="Artwork Views"
             value={totalArtworkViews}
-            subtitle="Last 30 days"
+            subtitle="All Artworks Combined"
           />
           <MetricsCard
-            title="Total Sales"
-            value={formatPrice(data.totalSales)}
-            subtitle="Last 30 days"
+            title="Total Favorites"
+            value={totalFavorites}
+            subtitle="Across All Artworks"
           />
-          <MetricsCard
-            title="Gallery Visits"
-            value={data.galleryVisits}
-            subtitle="Last 30 days"
-          />
+          {isVerified && (
+            <MetricsCard
+              title="Total Sales"
+              value={formatPrice(data.totalSales)}
+              subtitle="Last 30 days"
+            />
+          )}
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {data.revenueOverTime.length > 0 ? (
+          {isVerified && data.revenueOverTime.length > 0 ? (
             <AnalyticsChart
               title="Sales Over Time"
               data={data.revenueOverTime}
@@ -182,17 +194,21 @@ export function ArtistDashboard({ artistId }: ArtistDashboardProps) {
         <EmptyState message="Gallery analytics coming soon" />
       </TabsContent>
 
-      <TabsContent value="sales" className="space-y-4">
-        <EmptyState message="Sales analytics coming soon" />
-      </TabsContent>
+      {isVerified && (
+        <TabsContent value="sales" className="space-y-4">
+          <EmptyState message="Sales analytics coming soon" />
+        </TabsContent>
+      )}
 
       <TabsContent value="engagement" className="space-y-4">
         <EmptyState message="Engagement analytics coming soon" />
       </TabsContent>
 
-      <TabsContent value="collectors" className="space-y-4">
-        <EmptyState message="Collector analytics coming soon" />
-      </TabsContent>
+      {isVerified && (
+        <TabsContent value="collectors" className="space-y-4">
+          <EmptyState message="Collector analytics coming soon" />
+        </TabsContent>
+      )}
     </Tabs>
   )
 } 

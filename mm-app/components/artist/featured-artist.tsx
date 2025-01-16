@@ -1,12 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArtworkGallery } from "@/components/artwork/artwork-gallery";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 interface FeaturedArtistProps {
   artist: {

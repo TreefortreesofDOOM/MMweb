@@ -26,7 +26,7 @@ export const UnifiedAIChatView = ({
 
   // Debug user role and persona mapping
   console.log('User:', profile)
-  console.log('User role:', profile?.artist_type)
+  console.log('User role:', profile?.role)
   console.log('PageContext:', pageContext)
   console.log('CharacterPersonality:', pageContext.characterPersonality)
   console.log('Active persona:', activePersona)

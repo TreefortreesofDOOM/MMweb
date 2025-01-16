@@ -1,13 +1,13 @@
 'use client'
 
 import { createContext, useContext, type ReactNode } from 'react'
-import type { ArtistProfile, ArtistFeatures, VerificationRequirements } from '@/lib/types/custom-types'
-import { ARTIST_ROLES } from '@/lib/types/custom-types'
+import type { ArtistProfile } from '@/lib/types/custom-types'
+import { isVerifiedArtist, isEmergingArtist, getRolePermissions } from '@/lib/utils/role-utils'
 
 interface ArtistContextType {
   profile: ArtistProfile | null
-  features: ArtistFeatures | null
-  verificationProgress: VerificationRequirements | null
+  features: ReturnType<typeof getRolePermissions> | null
+  verificationProgress: number | null
   isVerifiedArtist: boolean
   isEmergingArtist: boolean
 }
@@ -20,24 +20,14 @@ interface ArtistProviderProps {
 }
 
 export function ArtistProvider({ children, profile }: ArtistProviderProps) {
-  // Default feature access based on role
-  const features: ArtistFeatures | null = profile ? {
-    maxArtworks: profile.artist_type === ARTIST_ROLES.VERIFIED ? Infinity : 10,
-    canAccessGallery: profile.artist_type === ARTIST_ROLES.VERIFIED,
-    canAccessAnalytics: profile.artist_type === ARTIST_ROLES.VERIFIED,
-    canAccessMessaging: profile.artist_type === ARTIST_ROLES.VERIFIED,
-    stripeRequirements: {
-      required: profile.artist_type === ARTIST_ROLES.VERIFIED,
-      minimumArtworks: 5
-    }
-  } : null
+  const features = profile ? getRolePermissions(profile.role) : null;
 
   const value = {
     profile,
     features,
-    verificationProgress: profile?.verificationProgress ?? null,
-    isVerifiedArtist: profile?.artist_type === ARTIST_ROLES.VERIFIED,
-    isEmergingArtist: profile?.artist_type === ARTIST_ROLES.EMERGING
+    verificationProgress: profile?.verification_progress ?? null,
+    isVerifiedArtist: isVerifiedArtist(profile?.role ?? null),
+    isEmergingArtist: isEmergingArtist(profile?.role ?? null)
   }
 
   return (
