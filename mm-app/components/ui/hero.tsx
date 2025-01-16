@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth";
-import { Building2, Clock, CreditCard, HelpCircle, MapPin, Mail, Sparkles, Brain, Palette, Heart, Target, Gem } from "lucide-react";
+import { Clock, CreditCard, HelpCircle, MapPin, Mail, Sparkles, Brain, Palette, Heart, Target, Gem, Quote } from "lucide-react";
 
 export default function Hero() {
   const { user } = useAuth();
@@ -106,6 +106,53 @@ export default function Hero() {
         </div>
       </div>
       
+      {/* Testimonials Section */}
+      <div className="w-full bg-muted/30 py-16">
+        <div className="max-w-6xl mx-auto text-center space-y-12">
+          <div className="space-y-4">
+            <h2 className="text-3xl font-bold">What Our Community Says</h2>
+            <p className="text-lg text-muted-foreground max-w-[600px] mx-auto">
+              Hear from artists and collectors who are part of our innovative art ecosystem.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center space-y-6 p-6 rounded-lg border bg-card">
+              <Quote className="h-8 w-8 text-primary" />
+              <p className="text-lg italic">
+                "The AI analysis of my portfolio helped me understand my artistic presentation and connect with collectors who appreciate my style."
+              </p>
+              <div>
+                <p className="font-semibold">Sarah Chen</p>
+                <p className="text-sm text-muted-foreground">Visual Artist</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center space-y-6 p-6 rounded-lg border bg-card">
+              <Quote className="h-8 w-8 text-primary" />
+              <p className="text-lg italic">
+                "The Trust Wall concept changed how I think about collecting art. It's made amazing pieces accessible while fairly supporting artists."
+              </p>
+              <div>
+                <p className="font-semibold">Marcus Rodriguez</p>
+                <p className="text-sm text-muted-foreground">Art Collector</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center space-y-6 p-6 rounded-lg border bg-card">
+              <Quote className="h-8 w-8 text-primary" />
+              <p className="text-lg italic">
+                "24/7 access and the AI assistant make exploring art a truly personal experience. It's like having a private gallery tour anytime."
+              </p>
+              <div>
+                <p className="font-semibold">Jordan Taylor</p>
+                <p className="text-sm text-muted-foreground">First-Time Collector</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Trust Wall Section */}
       <div className="text-center space-y-6 max-w-3xl mx-auto">
         <h2 className="text-3xl font-bold">Innovative Models for Art Ownership</h2>

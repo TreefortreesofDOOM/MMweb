@@ -22,8 +22,7 @@
         - qr-code-feature.md
         - registration-flow.md
         - stripe-store.md
-    - database_schema_20250112_190620.md
-    - database_schema_20250114_105116.md
+    - database_schema_20250116_145837.md
     - deferred.md
     - deployment-checklist.md
     - directory_structure.md
@@ -32,9 +31,11 @@
     - navigation.md
     - patron-role.md
     - project_overview.md
+    - role-system.md
     - stripe-store-tasks.md
     - task_list.md
     - uxTodo2.md
+    - verification-system.md
 - **app/**
     - **(admin)/**
         - **admin-dashboard/**
@@ -246,6 +247,7 @@
     - **artist/**
         - ai-artist-assistant.tsx
         - artist-profile-card.tsx
+        - artist-search.tsx
         - feature-coming-soon.tsx
         - featured-artist.tsx
         - stripe-onboarding.tsx
@@ -430,7 +432,6 @@
         - implementationBackup.md
         - implementationPriority.md
         - multi-upload-queue.md
-        - role-system.md
         - settings-system.md
     - **pages/**
         - portfolio.md
@@ -448,7 +449,6 @@
     - oldMasterRoadmap.md
     - progressReport.md
     - roadmap2.md
-    - verification-system.md
 - **hooks/**
     - use-analytics.ts
     - use-artist.ts
@@ -532,6 +532,7 @@
     - **analytics/**
         - analytics.ts
         - track.ts
+        - verification-tracking.ts
     - **constants/**
         - error-codes.ts
         - mediums.ts
@@ -593,6 +594,7 @@
         - patron-utils.ts
         - post-artwork-utils.ts
         - result.ts
+        - role-utils.ts
         - settings-utils.ts
     - **vertex-ai/**
         - ai-search.ts
@@ -743,11 +745,14 @@
         - 20240407000001_add_mm_ai_profile.sql
         - 20240408000001_add_gallery_events.sql
         - 20240408000002_add_artworks_with_artist_view.sql
+        - 20240417000001_rename_verification_status.sql
         - 20240420000001_add_store_tables.sql
         - 20240420000002_add_store_orders.sql
         - 20240421000001_add_payment_link_and_inventory.sql
         - 20240421000001_add_store_price_rules.sql
         - 20240421000002_add_payment_link_id.sql
+        - 20240422000001_consolidate_artist_roles.sql
+        - 20240422000002_update_analytics_roles.sql
         - 20241224140133_enable_storage_rls.sql
         - 20241224140420_ensure_artwork_bucket.sql
         - 20241224144027_remote_schema.sql

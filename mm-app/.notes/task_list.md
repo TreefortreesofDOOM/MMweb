@@ -1,9 +1,19 @@
 # Task List
 
+## Mobile Responsiveness testing and fixing
+   - [ ] Test on mobile devices
+   - [ ] Fix any issues
+   - [ ] Add mobile responsiveness to all components
+   - [ ] Add mobile responsiveness to all pages
+   - [ ] SideNav and unified-ai drawer should be mobile responsive. On desktop they should push the content. On mobile they should go over the content. 
+
 ## Bugs
 
 - the count does not work on admin dashboard for pending applications.
 - upload image progress bar does not have animation.
+
+# Minor Features
+- In the application process. Send a link to the user's pubilc portfolio with the application. Make sure the user knows it's being sent. 
 
 ## High Priority
 
@@ -28,6 +38,8 @@
    - We should recommend patrons to artists they might like based on an analysis of their collection and artist's content.
    - We should also recommend artists to patrons they might like based on an analysis of their collection and artist's content.
    - We should also recommend patrons to each other based on an analysis of their collection and each other's content.
+   **Components**
+   - [ ] Add a component in the MainNav header for notifications.
 
 ### Patron Collection View Improvements
 1. Error Handling
@@ -99,9 +111,9 @@
    - [ ] Add unit tests
    - [ ] Add end-to-end tests 
 
-### Patron Collection View Improvements
+### Improvements
 1. DRY Improvements
-   - [ ] Create shared utilities for common collection operations
+   - [ ] Create shared utilities for common operations
    - [ ] Refactor duplicate logic in batch operations
    - [ ] Standardize error handling patterns
 
