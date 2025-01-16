@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/supabase-server';
 import DashboardClient from './dashboard-client';
+import type { UserRole } from '@/lib/types/custom-types';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -18,7 +19,7 @@ export default async function DashboardPage() {
   // Get artist's profile with type assertion
   const { data: profile } = await supabase
     .from('profiles')
-    .select('stripe_account_id, stripe_onboarding_complete, exhibition_badge')
+    .select('stripe_account_id, stripe_onboarding_complete, exhibition_badge, role')
     .eq('id', user.id)
     .single();
 
@@ -28,7 +29,8 @@ export default async function DashboardPage() {
       id: user.id,
       stripe_account_id: profile?.stripe_account_id,
       stripe_onboarding_complete: profile?.stripe_onboarding_complete,
-      exhibition_badge: profile?.exhibition_badge
+      exhibition_badge: profile?.exhibition_badge,
+      role: profile?.role as UserRole
     }}
   />;
 } 

@@ -6,13 +6,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { checkVerificationRequirements } from '@/lib/actions/verification';
-import type { Database } from '@/lib/database.types';
 import { ValidationTracker } from '@/components/validation/validation-tracker';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-
-type UserRole = Database['public']['Enums']['user_role'];
+import type { UserRole } from '@/lib/types/custom-types';
+import { isVerifiedArtist, isEmergingArtist } from '@/lib/types/custom-types';
 
 export default async function VerificationPage() {
   const supabase = await createClient();
@@ -25,7 +24,7 @@ export default async function VerificationPage() {
   // Only fetch what we need from the profile
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, verification_status, verification_progress, exhibition_badge')
+    .select('role, application_status, verification_progress, exhibition_badge')
     .eq('id', user.id)
     .single();
 
@@ -33,11 +32,11 @@ export default async function VerificationPage() {
     return redirect('/profile');
   }
 
-  // Check access based on role
-  const isEmergingArtist = profile.role === 'emerging_artist';
-  const isVerifiedArtist = profile.role === 'verified_artist';
+  // Check access based on role using helper functions
+  const hasVerifiedAccess = isVerifiedArtist(profile.role);
+  const hasEmergingAccess = isEmergingArtist(profile.role);
   
-  if (!isEmergingArtist && !isVerifiedArtist) {
+  if (!hasVerifiedAccess && !hasEmergingAccess) {
     return redirect('/profile');
   }
 
@@ -52,19 +51,19 @@ export default async function VerificationPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold">Artist Verification</h1>
-              {isVerifiedArtist ? (
+              {hasVerifiedAccess ? (
                 <Badge variant="outline" className="gap-1">
                   <CheckCircle2 className="h-3 w-3" />
                   Verified Artist
                 </Badge>
-              ) : isEmergingArtist ? (
+              ) : hasEmergingAccess ? (
                 <Badge variant="secondary" className="gap-1">
                   <AlertCircle className="h-3 w-3" />
                   Emerging Artist
                 </Badge>
               ) : null}
             </div>
-            {!isVerifiedArtist && (
+            {!hasVerifiedAccess && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span>{progress}% Complete</span>
                 <Progress value={progress} className="w-24 h-2" />
@@ -73,7 +72,7 @@ export default async function VerificationPage() {
           </div>
 
           {/* Main Content */}
-          {isVerifiedArtist ? (
+          {hasVerifiedAccess ? (
             <Card>
               <CardHeader>
                 <CardTitle>Verification Complete</CardTitle>

@@ -7,75 +7,11 @@ import { AlertCircle, Loader2 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
-import { ARTIST_ROLES, type ArtistRole } from '@/lib/types/custom-types'
+import type { UserRole } from '@/lib/types/custom-types'
 import { searchArtists } from '@/lib/utils/artist-search-utils'
 import { trackArtistDirectoryView } from '@/lib/actions/analytics'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useDebounce } from '@/hooks/use-debounce'
-import dynamic from 'next/dynamic'
-
-// Create a client-only search form component
-const SearchForm = dynamic(() => Promise.resolve(({ 
-  searchQuery, 
-  setSearchQuery, 
-  artistType, 
-  setArtistType,
-  sortBy,
-  setSortBy,
-  sortOrder,
-  setSortOrder 
-}: {
-  searchQuery: string;
-  setSearchQuery: (value: string) => void;
-  artistType: string;
-  setArtistType: (value: string) => void;
-  sortBy: 'created_at' | 'view_count' | 'name';
-  setSortBy: (value: 'created_at' | 'view_count' | 'name') => void;
-  sortOrder: 'asc' | 'desc';
-  setSortOrder: (value: 'asc' | 'desc') => void;
-}) => (
-  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-    <Input
-      type="search"
-      placeholder="Search artists..."
-      value={searchQuery}
-      onChange={(e) => setSearchQuery(e.target.value)}
-      className="sm:max-w-xs"
-    />
-    <div className="flex gap-2">
-      <Select value={artistType} onValueChange={setArtistType}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Artist type" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All types</SelectItem>
-          <SelectItem value={ARTIST_ROLES.VERIFIED}>Verified</SelectItem>
-          <SelectItem value={ARTIST_ROLES.EMERGING}>Emerging</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Sort by" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="created_at">Date joined</SelectItem>
-          <SelectItem value="view_count">Popularity</SelectItem>
-          <SelectItem value="name">Name</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as typeof sortOrder)}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Sort order" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="desc">Descending</SelectItem>
-          <SelectItem value="asc">Ascending</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-  </div>
-)), { ssr: false })
+import { useDebounceValue } from '@/hooks/use-debounce'
+import { ArtistSearch, type ArtistFilters } from '@/components/artist/artist-search'
 
 const ARTISTS_PER_PAGE = 12
 
@@ -91,14 +27,12 @@ interface DbArtist {
   created_at: string;
   exhibition_badge: boolean | null;
   view_count: number | null;
-  artist_type: string | null;
-  role: string;
+  role: UserRole;
   artworks: { count: number }[];
   location: string | null;
 }
 
-export type ArtistWithCount = Omit<DbArtist, 'artist_type'> & {
-  artist_type?: ArtistRole;
+export type ArtistWithCount = DbArtist & {
   artworks: [{ count: number }];
 }
 
@@ -117,17 +51,21 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
   const [artists, setArtists] = useState<ArtistWithCount[]>(() => 
     initialArtists.map(artist => ({
       ...artist,
-      artist_type: artist.artist_type as ArtistRole,
       artworks: [{ count: artist.artworks?.[0]?.count || 0 }]
     }))
   )
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(initialArtists.length === ARTISTS_PER_PAGE)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [artistType, setArtistType] = useState<string>('')
-  const [sortBy, setSortBy] = useState<'created_at' | 'view_count' | 'name'>('created_at')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  
+  // Combine all filters into a single state object
+  const [filters, setFilters] = useState<ArtistFilters>({
+    query: '',
+    artistType: 'all',
+    sortBy: 'created_at',
+    sortOrder: 'desc'
+  })
+
   const { toast } = useToast()
   
   const { ref, inView } = useInView({
@@ -135,7 +73,7 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
     rootMargin: '100px',
   })
 
-  const debouncedSearch = useDebounce(searchQuery, 300)
+  const debouncedQuery = useDebounceValue(filters.query, 300)
 
   const fetchArtists = useCallback(async () => {
     if (fetchingRef.current) return false;
@@ -146,10 +84,10 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
       setError(null);
       
       const { artists: newArtists, hasMore: moreResults } = await searchArtists({
-        query: debouncedSearch,
-        artistType: artistType === 'all' ? undefined : artistType,
-        sortBy,
-        sortOrder,
+        query: debouncedQuery,
+        artistType: filters.artistType === 'all' ? undefined : filters.artistType,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
         page: currentPageRef.current
       })
 
@@ -224,7 +162,7 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
       fetchingRef.current = false;
       setIsLoading(false);
     }
-  }, [debouncedSearch, artistType, sortBy, sortOrder, toast])
+  }, [debouncedQuery, filters.artistType, filters.sortBy, filters.sortOrder, toast])
 
   const handleRetry = useCallback(() => {
     currentPageRef.current = 1;
@@ -240,13 +178,12 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
       return;
     }
 
-    const hasFilters = searchQuery || artistType || sortBy !== 'created_at' || sortOrder !== 'desc'
+    const hasFilters = filters.query || filters.artistType || filters.sortBy !== 'created_at' || filters.sortOrder !== 'desc'
     
     if (!hasFilters) {
       // Reset to initial state if no filters
       setArtists(initialArtists.map(artist => ({
         ...artist,
-        artist_type: artist.artist_type as ArtistRole,
         artworks: [{ count: artist.artworks?.[0]?.count || 0 }]
       })))
       currentPageRef.current = 2;
@@ -258,7 +195,7 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
     setArtists([])
     setHasMore(true)
     fetchArtists()
-  }, [debouncedSearch, artistType, sortBy, sortOrder, fetchArtists, initialArtists])
+  }, [debouncedQuery, filters.artistType, filters.sortBy, filters.sortOrder, fetchArtists, initialArtists])
 
   // Handle infinite scroll
   useEffect(() => {
@@ -304,7 +241,7 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
       
       setArtists(aiArtists.map(artist => ({
         ...artist,
-        artist_type: artist.artist_type as ArtistRole,
+        role: artist.role as UserRole,
         artworks: [{ count: artist.artworks?.[0]?.count || 0 }]
       })))
       setHasMore(false)
@@ -354,7 +291,7 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
         <AlertCircle className="h-4 w-4" aria-hidden="true" />
         <AlertTitle>No Artists Found</AlertTitle>
         <AlertDescription>
-          {searchQuery ? 'No artists match your search criteria.' : 'There are no approved artists to display at this time.'}
+          {filters.query ? 'No artists match your search criteria.' : 'There are no approved artists to display at this time.'}
         </AlertDescription>
       </Alert>
     )
@@ -362,18 +299,14 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
 
   return (
     <div className="space-y-6">
+      {/* Search form temporarily disabled
       <div className="flex flex-col gap-4">
-        <SearchForm
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          artistType={artistType}
-          setArtistType={setArtistType}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
+        <ArtistSearch
+          filters={filters}
+          setFilters={(newFilters) => setFilters(prev => ({ ...prev, ...newFilters }))}
         />
       </div>
+      */}
 
       <div 
         role="feed" 

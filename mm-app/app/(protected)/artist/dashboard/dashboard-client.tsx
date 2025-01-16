@@ -13,6 +13,7 @@ import { CheckCircle2, AlertCircle, Eye, Heart, Image, BookOpen, FileText, Credi
 import { useCallback, useEffect, useState } from "react";
 import { AIArtistAssistant } from '@/components/artist/ai-artist-assistant';
 import { getArtworkStats } from '@/lib/actions/artwork';
+import type { UserRole } from '@/lib/types/custom-types';
 
 interface DashboardClientProps {
   artworks: Array<{
@@ -23,7 +24,7 @@ interface DashboardClientProps {
     id: string;
     stripe_account_id?: string | null;
     stripe_onboarding_complete?: boolean;
-    role?: string;
+    role: UserRole;
     exhibition_badge?: boolean | null;
   };
 }
@@ -44,6 +45,28 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
     totalViews: 0,
     totalFavorites: 0
   });
+
+  useEffect(() => {
+    console.log('Artist Dashboard Debug:', {
+      profile,
+      isVerifiedArtist,
+      isEmergingArtist,
+      verificationStatus,
+      stripeInfo: {
+        stripe_account_id: profile.stripe_account_id,
+        stripe_onboarding_complete: profile.stripe_onboarding_complete,
+      }
+    });
+  }, [isVerifiedArtist, isEmergingArtist, verificationStatus, profile]);
+
+  useEffect(() => {
+    console.log('Stripe Dashboard Button Conditions:', {
+      isVerifiedArtist,
+      stripe_account_id: profile.stripe_account_id,
+      stripe_onboarding_complete: profile.stripe_onboarding_complete,
+      allConditionsMet: isVerifiedArtist && profile.stripe_account_id && profile.stripe_onboarding_complete
+    });
+  }, [isVerifiedArtist, profile.stripe_account_id, profile.stripe_onboarding_complete]);
 
   useEffect(() => {
     async function fetchStats() {
@@ -159,8 +182,9 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
       {/* Stripe Setup - Only for Verified Artists who haven't completed onboarding */}
       {isVerifiedArtist && (!profile.stripe_account_id || !profile.stripe_onboarding_complete) && (
         <StripeOnboarding 
-          stripeAccountId={profile.stripe_account_id || null} 
-          onboardingComplete={!!profile.stripe_onboarding_complete} 
+          stripeAccountId={profile.stripe_account_id ?? null}
+          onboardingComplete={profile.stripe_onboarding_complete ?? false}
+          userRole={profile.role}
         />
       )}
 
@@ -210,7 +234,7 @@ export default function DashboardClient({ artworks, profile }: DashboardClientPr
             </div>
           </CardContent>
         </Card>
-
+        
         {/* Quick Actions */}
         <Card className="sm:hover:shadow-lg transition-shadow">
           <CardHeader className="sm:p-6">

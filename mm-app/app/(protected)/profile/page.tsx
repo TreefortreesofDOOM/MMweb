@@ -1,15 +1,14 @@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
-import { getProfileAction } from "@/lib/actions"
 import { redirect } from 'next/navigation'
-import { ARTIST_ROLES } from "@/lib/types/custom-types"
 import type { Database } from '@/lib/types/database.types'
 import { VerificationBanner } from "@/components/verification/verification-banner"
 import { createActionClient } from "@/lib/supabase/supabase-action-utils"
 import { ArtistProfileCard } from "@/components/artist/artist-profile-card"
 import { getGhostProfileByEmail } from "@/lib/actions/ghost-profiles"
 import { GhostProfileNotification } from "@/components/ghost-profiles/ghost-profile-notification"
+import { isAnyArtist } from "@/lib/utils/role-utils"
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
@@ -63,7 +62,7 @@ export default async function ProfilePage() {
     }
   }
 
-  const isArtist = profile.role === ARTIST_ROLES.VERIFIED || profile.role === ARTIST_ROLES.EMERGING
+  const isArtist = isAnyArtist(profile.role)
 
   // Transform profile to match ArtistProfileCard interface
   const artistProfile = {
@@ -74,7 +73,7 @@ export default async function ProfilePage() {
     website: profile.website,
     instagram: profile.instagram,
     location: profile.location,
-    artist_type: profile.role === ARTIST_ROLES.VERIFIED ? ARTIST_ROLES.VERIFIED : ARTIST_ROLES.EMERGING,
+    role: profile.role,
     medium: profile.medium || []
   }
 

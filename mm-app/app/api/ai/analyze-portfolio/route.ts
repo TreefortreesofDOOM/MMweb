@@ -3,7 +3,6 @@ import { UnifiedAIClient, PortfolioAnalyzer, collectPortfolioData, PortfolioAnal
 import { env } from '@/lib/env'
 import { getAISettings } from '@/lib/actions/ai-settings-actions'
 import { createActionClient } from '@/lib/supabase/supabase-action-utils'
-import { ARTIST_ROLES } from '@/lib/types/custom-types'
 import { UserRole } from '@/lib/navigation/types'
 import { PERSONALITIES, getPersonalizedContext } from '@/lib/ai/personalities'
 
@@ -44,7 +43,7 @@ export async function POST(request: Request): Promise<Response> {
     // Get profile to check artist role
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('artist_type, role')
+      .select('role')
       .eq('id', profileId)
       .single()
 

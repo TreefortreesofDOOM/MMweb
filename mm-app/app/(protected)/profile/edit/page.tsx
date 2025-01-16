@@ -52,8 +52,8 @@ export default async function EditProfilePage({
   
   const params = await searchParams;
   const isArtist = profile.role === 'artist';
-  const isVerifiedArtist = isArtist && profile.artist_type === 'verified';
-  const isEmergingArtist = isArtist && profile.artist_type === 'emerging';
+  const isVerifiedArtist = isArtist && profile.role === 'verified_artist';
+  const isEmergingArtist = isArtist && profile.role === 'emerging_artist';
   const verificationProgress = profile.verification_progress || 0;
   
   // Calculate initials for avatar
