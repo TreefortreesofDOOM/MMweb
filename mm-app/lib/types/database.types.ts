@@ -1073,6 +1073,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          application_status: string | null
+          application_status_updated_at: string | null
           artist_application: Json | null
           artist_approved_at: string | null
           artist_approved_by: string | null
@@ -1080,7 +1082,6 @@ export type Database = {
           artist_status:
             | Database["public"]["Enums"]["artist_application_status"]
             | null
-          artist_type: string | null
           avatar_url: string | null
           bio: string | null
           community_engagement_score: number | null
@@ -1107,12 +1108,12 @@ export type Database = {
           updated_at: string
           verification_progress: number | null
           verification_requirements: Json | null
-          verification_status: string | null
-          verification_status_updated_at: string | null
           view_count: number | null
           website: string | null
         }
         Insert: {
+          application_status?: string | null
+          application_status_updated_at?: string | null
           artist_application?: Json | null
           artist_approved_at?: string | null
           artist_approved_by?: string | null
@@ -1120,7 +1121,6 @@ export type Database = {
           artist_status?:
             | Database["public"]["Enums"]["artist_application_status"]
             | null
-          artist_type?: string | null
           avatar_url?: string | null
           bio?: string | null
           community_engagement_score?: number | null
@@ -1147,12 +1147,12 @@ export type Database = {
           updated_at?: string
           verification_progress?: number | null
           verification_requirements?: Json | null
-          verification_status?: string | null
-          verification_status_updated_at?: string | null
           view_count?: number | null
           website?: string | null
         }
         Update: {
+          application_status?: string | null
+          application_status_updated_at?: string | null
           artist_application?: Json | null
           artist_approved_at?: string | null
           artist_approved_by?: string | null
@@ -1160,7 +1160,6 @@ export type Database = {
           artist_status?:
             | Database["public"]["Enums"]["artist_application_status"]
             | null
-          artist_type?: string | null
           avatar_url?: string | null
           bio?: string | null
           community_engagement_score?: number | null
@@ -1187,8 +1186,6 @@ export type Database = {
           updated_at?: string
           verification_progress?: number | null
           verification_requirements?: Json | null
-          verification_status?: string | null
-          verification_status_updated_at?: string | null
           view_count?: number | null
           website?: string | null
         }

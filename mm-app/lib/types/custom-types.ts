@@ -1,12 +1,9 @@
 import type { Database } from './database.types'
 
-// Artist Role Types
-export const ARTIST_ROLES = {
-  VERIFIED: 'verified_artist',
-  EMERGING: 'emerging_artist',
-} as const
-
-export type ArtistRole = typeof ARTIST_ROLES[keyof typeof ARTIST_ROLES]
+// Base Types from Database
+export type Profile = Database['public']['Tables']['profiles']['Row']
+export type Artwork = Database['public']['Tables']['artworks']['Row']
+export type UserRole = Database['public']['Enums']['user_role']
 
 // Artist Feature Access Interface
 export interface ArtistFeatures {
@@ -29,13 +26,8 @@ export interface VerificationRequirements {
   stripeConnected: boolean
 }
 
-// Base Types from Database
-export type Profile = Database['public']['Tables']['profiles']['Row']
-export type Artwork = Database['public']['Tables']['artworks']['Row']
-
 // Extended Profile Type with Artist Features
 export type ArtistProfile = Profile & {
-  artist_type: ArtistRole | null
   features: ArtistFeatures | null
   verificationProgress: VerificationRequirements | null
 }
@@ -43,4 +35,11 @@ export type ArtistProfile = Profile & {
 // Extended Artwork Type with Artist Profile
 export interface ArtworkWithArtist extends Artwork {
   profiles: Pick<Profile, 'id' | 'name' | 'avatar_url' | 'bio'>
-} 
+}
+
+// Helper functions for role checks
+export const isVerifiedArtist = (role: UserRole | null): boolean => role === 'verified_artist'
+export const isEmergingArtist = (role: UserRole | null): boolean => role === 'emerging_artist'
+export const isAnyArtist = (role: UserRole | null): boolean => isVerifiedArtist(role) || isEmergingArtist(role)
+export const isAdmin = (role: UserRole | null): boolean => role === 'admin'
+export const isPatron = (role: UserRole | null): boolean => role === 'patron' 

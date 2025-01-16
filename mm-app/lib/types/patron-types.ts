@@ -31,5 +31,5 @@ export type FollowingArtist = {
   id: string
   name: string | null
   avatar_url: string | null
-  artist_type?: string | null
+  role?: string | null
 } 

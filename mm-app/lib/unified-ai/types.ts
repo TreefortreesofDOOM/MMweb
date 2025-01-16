@@ -25,7 +25,6 @@ export const PERSONA_MAPPING = {
   admin: ASSISTANT_PERSONAS.ADVISOR,
   emerging_artist: ASSISTANT_PERSONAS.MENTOR,
   verified_artist: ASSISTANT_PERSONAS.MENTOR,
-  artist: ASSISTANT_PERSONAS.MENTOR,
   patron: ASSISTANT_PERSONAS.COLLECTOR,
   user: ASSISTANT_PERSONAS.COLLECTOR
 } as const
@@ -45,7 +44,7 @@ export interface ProfileError {
 export interface ProfileSuccess {
   status: 'success'
   data: {
-    artist_type: UserRole
+    role: UserRole
     name: string | null | undefined
     bio: string | null | undefined
     website?: string | null

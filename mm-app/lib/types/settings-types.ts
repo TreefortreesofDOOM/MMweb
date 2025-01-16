@@ -36,8 +36,6 @@ export const notificationSettingsSchema = z.record(
 export const userRoleSettingsSchema = z.object({
   current: userRoleSchema,
   medium: z.array(z.string()).optional(),
-  artist_type: z.string().optional(),
-  artist_status: artistStatusSchema.optional(),
 });
 
 // Combined settings
