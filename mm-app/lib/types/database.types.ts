@@ -107,7 +107,7 @@ export type Database = {
           },
         ]
       }
-      artwork_embeddings: {
+      artwork_embeddings_chatgpt: {
         Row: {
           artwork_id: string | null
           created_at: string | null

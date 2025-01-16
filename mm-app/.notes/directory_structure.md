@@ -14,6 +14,7 @@
         - new-ai-functions.md
         - portfolio-optimization-notes.md
         - portfolio-optimization.md
+        - unified-ai-notes.md
     - **api/**
         - api-doc.md
     - **features/**
@@ -22,6 +23,7 @@
         - registration-flow.md
         - stripe-store.md
     - database_schema_20250112_190620.md
+    - database_schema_20250114_105116.md
     - deferred.md
     - deployment-checklist.md
     - directory_structure.md
@@ -147,6 +149,7 @@
         - **artwork/**
             - **[id]/**
         - **gallery-showcase/**
+            - gallery-client.tsx
             - page.tsx
         - **vertex-test/**
             - page.tsx
@@ -323,7 +326,6 @@
     - **portfolio/**
         - portfolio-analysis.tsx
         - portfolio-filters.tsx
-        - portfolio-progress.tsx
         - portfolio-sort.tsx
     - **profile/**
         - avatar-upload.tsx
@@ -442,6 +444,7 @@
     - ghost-accounts.md
     - masterAiroadmap.md
     - masterRoadmap.md
+    - new-ai-functions.md
     - oldMasterRoadmap.md
     - progressReport.md
     - roadmap2.md
@@ -504,12 +507,17 @@
             - analytics.ts
             - base.ts
             - gemini.ts
+        - **embeddings/**
+            - chatgpt.ts
+            - gemini.ts
+            - index.ts
+            - storage.ts
+            - types.ts
         - **providers/**
             - base.ts
             - chatgpt.ts
             - gemini.ts
         - chat-history.ts
-        - embeddings.ts
         - factory.ts
         - gemini.ts
         - index.ts
@@ -677,6 +685,7 @@
         - 20240225000002_initialize_artwork_order.sql
         - 20240320000000_add_name_fields.sql
         - 20240320000000_approve_gallery_show_function.sql
+        - 20240320000000_rename_embeddings_table.sql
         - 20240320000001_add_chat_history.sql
         - 20240320000001_update_gallery_show_dates_function.sql
         - 20240321000000_add_artworks_relationship.sql

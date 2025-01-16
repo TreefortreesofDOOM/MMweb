@@ -22,7 +22,7 @@ export function Logo() {
           alt="Meaning Machine"
           width={120}
           height={40}
-          className="h-8 w-auto"
+          className="h-8 w-auto min-w-[50px] object-contain"
           priority
         />
       </Link>
@@ -41,7 +41,7 @@ export function Logo() {
         alt="Meaning Machine"
         width={120}
         height={40}
-        className="h-8 w-auto"
+        className="h-8 w-auto min-w-[50px] object-contain"
         priority
       />
     </Link>
