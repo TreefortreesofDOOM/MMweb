@@ -36,7 +36,7 @@ const stripeArtists = [
     stripe_onboarding_complete: true,
     exhibition_badge: true,
     artist_type: 'verified',
-    role: 'artist',
+    role: 'verified_artist',
     artist_status: 'approved'
   },
   {
@@ -49,7 +49,7 @@ const stripeArtists = [
     stripe_onboarding_complete: true,
     exhibition_badge: true,
     artist_type: 'verified',
-    role: 'artist',
+    role: 'verified_artist',
     artist_status: 'approved'
   },
   {
@@ -62,7 +62,7 @@ const stripeArtists = [
     stripe_onboarding_complete: true,
     exhibition_badge: true,
     artist_type: 'verified',
-    role: 'artist',
+    role: 'verified_artist',
     artist_status: 'approved'
   }
 ];

@@ -36,9 +36,7 @@ BEGIN
         'role', (
             SELECT json_build_object(
                 'current', role,
-                'medium', COALESCE(medium, ARRAY[]::text[]),
-                'artist_type', artist_type,
-                'artist_status', artist_status
+                'medium', COALESCE(medium, ARRAY[]::text[])
             )
             FROM profiles
             WHERE id::UUID = p_user_id

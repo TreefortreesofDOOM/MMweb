@@ -241,8 +241,7 @@ async function createArtist(artist: typeof testArtists[0]) {
         website: artist.website,
         instagram: artist.instagram,
         exhibition_badge: artist.exhibition_badge,
-        artist_type: 'verified',
-        role: 'artist',
+        role: 'verified_artist',
         artist_status: 'approved'
       })
       .eq('id', authData.user.id);

@@ -5,12 +5,15 @@ import { useEffect, useState } from 'react';
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import type { Database } from '@/lib/types/database.types';
 import { 
-  ARTIST_ROLES, 
-  type ArtistProfile, 
-  type ArtistFeatures, 
+  type Profile,
+  type ArtistProfile,
+  type ArtistFeatures,
   type VerificationRequirements,
-  type ArtistRole,
-  type Profile 
+  isVerifiedArtist,
+  isEmergingArtist,
+  isAnyArtist,
+  isAdmin,
+  isPatron
 } from '@/lib/types/custom-types';
 
 export interface AuthState {
@@ -21,6 +24,8 @@ export interface AuthState {
   isArtist: boolean;
   isVerifiedArtist: boolean;
   isEmergingArtist: boolean;
+  isAdmin: boolean;
+  isPatron: boolean;
   isLoaded: boolean;
 }
 
@@ -58,7 +63,6 @@ export function useAuth(): AuthState {
       // Convert database profile to ArtistProfile type
       const artistProfile: ArtistProfile = {
         ...dbProfile,
-        artist_type: dbProfile.artist_type as ArtistRole,
         features: null, // This will be computed by the useArtist hook
         verificationProgress: null // This will be computed by the useVerification hook
       };
@@ -136,18 +140,16 @@ export function useAuth(): AuthState {
     return () => subscription.unsubscribe();
   }, [supabase]);
 
-  const isVerifiedArtist = profile?.artist_type === ARTIST_ROLES.VERIFIED;
-  const isEmergingArtist = profile?.artist_type === ARTIST_ROLES.EMERGING;
-  const isArtist = isVerifiedArtist || isEmergingArtist;
-
   return {
     user,
     profile,
     isLoading,
     error,
-    isArtist,
-    isVerifiedArtist,
-    isEmergingArtist,
+    isArtist: isAnyArtist(profile?.role ?? null),
+    isVerifiedArtist: isVerifiedArtist(profile?.role ?? null),
+    isEmergingArtist: isEmergingArtist(profile?.role ?? null),
+    isAdmin: isAdmin(profile?.role ?? null),
+    isPatron: isPatron(profile?.role ?? null),
     isLoaded: !isLoading,
   };
 } 
