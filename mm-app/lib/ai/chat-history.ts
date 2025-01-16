@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/supabase-server';
 import { generateEmbedding } from './embeddings';
+import { env } from '@/lib/env';
 
 interface ChatHistoryMatch {
   message: string;
@@ -25,7 +26,7 @@ export async function findRelevantChatHistory(
 }> {
   try {
     const supabase = await createClient();
-    const [promptEmbedding] = await generateEmbedding(prompt);
+    const [promptEmbedding] = await generateEmbedding(prompt, { provider: env.AI_PRIMARY_PROVIDER as 'openai' | 'gemini' });
 
     // Find similar conversations
     const { data: similarConversations, error: similarError } = await supabase.rpc(

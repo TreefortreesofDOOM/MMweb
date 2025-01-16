@@ -8,7 +8,8 @@ import type {
   ArtworkEmbedding, 
   TextEmbedding,
   SearchOptions,
-  SimilarityMatch
+  SimilarityMatch,
+  EmbeddingType
 } from './types';
 
 export async function generateEmbedding(
@@ -48,40 +49,75 @@ export async function findSimilarArtworks(
   }
 }
 
+interface ArtworkEmbeddingInput {
+  artwork_id: string;
+  title: string;
+  description: string;
+  tags?: string[];
+  alt_texts?: string[];
+  ai_context?: any;
+  ai_metadata?: any;
+  status?: string;
+  artist_id?: string;
+  provider?: EmbeddingProvider;
+}
+
 // Helper function to update embeddings when artwork is updated
-export async function updateArtworkEmbeddings(
-  artwork_id: string,
-  title: string,
-  description: string,
-  provider: EmbeddingProvider = 'openai'
-) {
+export async function updateArtworkEmbeddings({
+  artwork_id,
+  title,
+  description,
+  tags = [],
+  alt_texts = [],
+  ai_context,
+  ai_metadata,
+  status = 'draft',
+  artist_id,
+  provider = 'openai'
+}: ArtworkEmbeddingInput) {
   try {
-    // Generate embeddings for title and description
-    const [titleEmbedding] = await generateEmbedding(title, { provider });
-    const [descriptionEmbedding] = await generateEmbedding(description, { provider });
-    const [combinedEmbedding] = await generateEmbedding(`${title} ${description}`, { provider });
+    // Generate individual embeddings
+    const embeddings = await Promise.all([
+      // Core content embeddings
+      generateEmbedding(title, { provider }).then(([e]) => ({ type: 'title', content: e })),
+      generateEmbedding(description, { provider }).then(([e]) => ({ type: 'description', content: e })),
+      generateEmbedding(tags.join(' '), { provider }).then(([e]) => ({ type: 'tags', content: e })),
+      generateEmbedding(alt_texts.join(' '), { provider }).then(([e]) => ({ type: 'alt_texts', content: e })),
+      
+      // Combined content embeddings for different search scenarios
+      generateEmbedding(`${title} ${description}`, { provider })
+        .then(([e]) => ({ type: 'title_description', content: e })),
+      generateEmbedding(`${title} ${tags.join(' ')}`, { provider })
+        .then(([e]) => ({ type: 'title_tags', content: e })),
+      generateEmbedding(`${title} ${description} ${tags.join(' ')} ${alt_texts.join(' ')}`, { provider })
+        .then(([e]) => ({ type: 'all_text', content: e })),
+      
+      // AI-specific content embedding if available
+      ...(ai_context || ai_metadata ? [
+        generateEmbedding(
+          JSON.stringify({ context: ai_context, metadata: ai_metadata }), 
+          { provider }
+        ).then(([e]) => ({ type: 'ai_content', content: e }))
+      ] : []),
+      
+      // Status and metadata embedding
+      generateEmbedding(
+        JSON.stringify({ status, artist_id }), 
+        { provider }
+      ).then(([e]) => ({ type: 'metadata', content: e }))
+    ]);
 
     // Store all embeddings in parallel
-    await Promise.all([
-      storeArtworkEmbedding({
-        artwork_id,
-        embedding_type: 'title',
-        content: JSON.stringify(titleEmbedding),
-        provider,
-      }),
-      storeArtworkEmbedding({
-        artwork_id,
-        embedding_type: 'description',
-        content: JSON.stringify(descriptionEmbedding),
-        provider,
-      }),
-      storeArtworkEmbedding({
-        artwork_id,
-        embedding_type: 'combined',
-        content: JSON.stringify(combinedEmbedding),
-        provider,
-      }),
-    ]);
+    await Promise.all(
+      embeddings.map(({ type, content }) =>
+        storeArtworkEmbedding({
+          artwork_id,
+          embedding_type: type as EmbeddingType,
+          content: JSON.stringify(content),
+          provider,
+        })
+      )
+    );
   } catch (error) {
     console.error('Error updating artwork embeddings:', error);
     throw error;

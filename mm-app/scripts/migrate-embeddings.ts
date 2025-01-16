@@ -134,7 +134,7 @@ async function migrateEmbeddings() {
           }
 
           // Generate new embedding using Gemini
-          const [newEmbedding] = await generateEmbedding(content);
+          const [newEmbedding] = await generateEmbedding(content, { provider: 'gemini' });
           
           // Verify the embedding is a proper array of numbers
           if (!Array.isArray(newEmbedding) || !newEmbedding.every(n => typeof n === 'number')) {

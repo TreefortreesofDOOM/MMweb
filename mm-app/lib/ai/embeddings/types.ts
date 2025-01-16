@@ -1,33 +1,44 @@
 export type EmbeddingProvider = 'openai' | 'gemini';
 
+export type EmbeddingType = 
+  | 'title'
+  | 'description'
+  | 'tags'
+  | 'alt_texts'
+  | 'title_description'
+  | 'title_tags'
+  | 'all_text'
+  | 'ai_content'
+  | 'metadata';
+
 export interface EmbeddingOptions {
   provider: EmbeddingProvider;
 }
 
 export interface ArtworkEmbedding {
   artwork_id: string;
-  embedding_type: 'description' | 'title' | 'combined';
+  embedding_type: EmbeddingType;
   content: string;
   provider: EmbeddingProvider;
   metadata?: Record<string, any>;
 }
 
 export interface TextEmbedding {
-  content_type: string;
-  content_id: string;
+  text_id: string;
+  embedding_type: EmbeddingType;
   content: string;
   provider: EmbeddingProvider;
   metadata?: Record<string, any>;
 }
 
 export interface SearchOptions {
+  provider?: EmbeddingProvider;
   match_threshold?: number;
   match_count?: number;
-  provider?: EmbeddingProvider;
+  embedding_type?: EmbeddingType;
 }
 
 export interface SimilarityMatch {
   id: string;
-  artwork_id: string;
   similarity: number;
 } 

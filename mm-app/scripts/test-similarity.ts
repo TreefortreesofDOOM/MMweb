@@ -30,7 +30,7 @@ async function testSimilaritySearch() {
     
     try {
       // Generate embedding for the query
-      const [embedding] = await generateEmbedding(query);
+      const [embedding] = await generateEmbedding(query, { provider: 'gemini' });
       const formattedEmbedding = `[${embedding.join(',')}]`;
 
       // Search for similar artworks

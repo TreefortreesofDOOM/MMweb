@@ -1,7 +1,7 @@
 'use server';
 
 import { createActionClient } from '@/lib/supabase/supabase-action-utils';
-import { updateArtworkEmbeddings, findSimilarArtworks } from '@/lib/ai/embeddings';
+import { updateArtworkEmbeddings, findSimilarArtworks } from '@/lib/ai/embeddings/index';
 import { getArtist } from './helpers';
 
 export async function uploadArtworkImage(formData: FormData) {
@@ -168,7 +168,11 @@ export async function createArtwork(formData: FormData) {
           ...keywords
         ].join(' ');
         
-        await updateArtworkEmbeddings(artworkWithArtist.id, title, fullText);
+        await updateArtworkEmbeddings({
+          artwork_id: artworkWithArtist.id,
+          title,
+          description: fullText
+        });
       } catch (embeddingError) {
         console.error('Error generating embeddings:', embeddingError);
         // Don't fail the artwork creation if embeddings fail
@@ -294,7 +298,11 @@ export async function updateArtwork(artworkId: string, formData: FormData) {
           ...techniques,
           ...keywords
         ].join(' ');
-        await updateArtworkEmbeddings(artwork.id, title, fullText);
+        await updateArtworkEmbeddings({
+          artwork_id: artwork.id,
+          title,
+          description: fullText
+        });
       } catch (embeddingError) {
         console.error('Error updating embeddings:', embeddingError);
         // Don't fail the artwork update if embeddings fail
@@ -466,20 +474,21 @@ export async function getSimilarArtworks(artworkId: string) {
     if (!similarArtworks) return { artworks: [] };
 
     // Get the full artwork details for the similar artworks
-    const { data: artworksData, error: artworksError } = await supabase
+    const { data: similarArtworkDetails, error: artworksError } = await supabase
       .from('artworks_with_artist')
       .select('*')
-      .in('id', similarArtworks.map((a: { artwork_id: string }) => a.artwork_id))
+      .in('id', similarArtworks.map(match => match.id))
       .neq('id', artworkId)
       .eq('status', 'published');
 
     if (artworksError) throw artworksError;
+    if (!similarArtworkDetails) return { artworks: [] };
 
     // Sort by similarity score
-    const sortedArtworks = artworksData
+    const sortedArtworks = similarArtworkDetails
       .map(artwork => ({
         ...artwork,
-        similarity: similarArtworks.find((a: { artwork_id: string; similarity: number }) => a.artwork_id === artwork.id)?.similarity || 0
+        similarity: similarArtworks.find(match => match.id === artwork.id)?.similarity || 0
       }))
       .sort((a, b) => b.similarity - a.similarity);
 

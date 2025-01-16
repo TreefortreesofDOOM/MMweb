@@ -3,7 +3,7 @@ import { createActionClient } from '@/lib/supabase/supabase-action'
 import { ok, err, type Result } from '@/lib/utils/result'
 import { logError } from '@/lib/utils/error-utils'
 import { validateParams } from '@/lib/utils/mm-ai-validation'
-import { updateArtworkEmbeddings } from '@/lib/ai/embeddings'
+import { updateArtworkEmbeddings } from '@/lib/ai/embeddings/index'
 import type { ArtworkGenerationContext, ArtworkGenerationMetadata } from '../unified-ai/artwork-types'
 import type { MMAIError } from '@/lib/types/admin/mm-ai-types'
 import type { Database, TablesInsert } from '@/lib/types/database.types'
@@ -31,7 +31,13 @@ export async function postUnifiedAIArtwork(
     // Validate input parameters
     const validationResult = await validateParams({
       ...artwork,
-      aiGenerated: true
+      aiGenerated: true,
+      aiContext: {
+        ...artwork.aiContext,
+        route: '/artwork/create',
+        pageType: 'artwork',
+        persona: 'mentor'
+      }
     })
     if (!validationResult.ok) {
       logError({
@@ -92,13 +98,17 @@ export async function postUnifiedAIArtwork(
 
     // Generate and store embeddings for search
     try {
-      const fullText = [
-        artwork.title,
-        artwork.description || '',
-        ...(artwork.tags || [])
-      ].join(' ')
-      
-      await updateArtworkEmbeddings(data.id, artwork.title, fullText)
+      await updateArtworkEmbeddings({
+        artwork_id: data.id,
+        title: artwork.title,
+        description: artwork.description,
+        tags: artwork.tags,
+        alt_texts: artwork.images.map(img => img.alt),
+        ai_context: artwork.aiContext,
+        ai_metadata: artwork.metadata,
+        status: 'published',
+        artist_id: '00000000-0000-4000-a000-000000000001' // MM AI ID
+      });
     } catch (embeddingError) {
       logError({
         code: 'MMAI_004',

@@ -37,11 +37,11 @@ export async function storeArtworkEmbedding({
 }
 
 export async function storeTextEmbedding({
-  content_type,
-  content_id,
+  text_id,
+  embedding_type,
   content,
   provider,
-  metadata = {},
+  metadata = {}
 }: TextEmbedding) {
   try {
     const client = await createClient();
@@ -50,8 +50,8 @@ export async function storeTextEmbedding({
     const { data, error } = await client
       .from(tableName)
       .insert({
-        content_type,
-        content_id,
+        text_id,
+        embedding_type,
         embedding: content,
         metadata
       })

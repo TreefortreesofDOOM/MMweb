@@ -241,8 +241,8 @@ export async function POST(request: Request): Promise<NextResponse> {
     });
 
     // Generate embeddings for message and response
-    const [messageEmbedding] = await generateEmbedding(prompt);
-    const [responseEmbedding] = await generateEmbedding(response.content);
+    const [messageEmbedding] = await generateEmbedding(prompt, { provider: 'openai' });
+    const [responseEmbedding] = await generateEmbedding(response.content, { provider: 'openai' });
 
     // Store chat history with embeddings
     const { error: insertError } = await supabase

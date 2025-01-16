@@ -203,7 +203,7 @@ const functions = {
         throw new Error('User ID not found in context');
       }
 
-      const [queryEmbedding] = await generateEmbedding(query);
+      const [queryEmbedding] = await generateEmbedding(query, { provider: 'gemini' });
 
       const supabase = await createClient();
       const { data: conversations } = await supabase.rpc(
