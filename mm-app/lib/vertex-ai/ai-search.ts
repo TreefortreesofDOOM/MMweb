@@ -1,14 +1,14 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/supabase-server'
-import { ARTIST_ROLES, type ArtistRole } from '@/lib/types/custom-types'
+import { type UserRole } from '@/lib/types/custom-types'
 import { searchDataStore } from './vertex-client'
 
 interface AISearchParams {
   location?: string
   mediums?: string[]
   style?: string[]
-  artistType?: ArtistRole
+  artistType?: UserRole
   themes?: string[]
   customCriteria?: string
 }
@@ -81,13 +81,13 @@ export async function aiArtistSearch(query: string): Promise<AISearchResponse> {
         created_at,
         exhibition_badge,
         view_count,
-        artist_type,
+        role,
         location,
         artworks (count)
       `)
       .in('id', artistIds)
       // Only show verified or emerging artists
-      .in('artist_type', [ARTIST_ROLES.VERIFIED, ARTIST_ROLES.EMERGING])
+      .in('role', ['verified_artist', 'emerging_artist'])
 
     if (error) {
       console.error('Error fetching artist details:', error)

@@ -1,6 +1,6 @@
 import { BigQuery } from '@google-cloud/bigquery'
 import { extractArtistData } from './data-extraction-utils'
-import type { Database } from '@/lib/database.types'
+import type { Database } from '@/lib/types/database.types'
 import path from 'path'
 import fs from 'fs'
 
@@ -13,7 +13,7 @@ interface ArtistFeature {
   feature_timestamp: string
   artist_id: string
   artist_name: string
-  artist_type: string | null
+  role: string | null
   location: string | null
   artist_status: string | null
   
@@ -36,7 +36,7 @@ interface ArtistFeature {
   
   // Verification & Status
   verification_progress: number | null
-  verification_status: string | null
+  application_status: string | null
   verification_requirements: any | null
   exhibition_badge: boolean | null
   community_engagement_score: number | null
@@ -79,7 +79,7 @@ export async function setupBigQueryTable(forceRecreate = false) {
         feature_timestamp: new Date().toISOString(),
         artist_id: profile.id,
         artist_name: profile.name || 'Unknown Artist',
-        artist_type: profile.artist_type || null,
+        role: profile.role || null,
         location: profile.location || null,
         artist_status: profile.artist_status || null,
         
@@ -102,7 +102,7 @@ export async function setupBigQueryTable(forceRecreate = false) {
         
         // Verification & Status
         verification_progress: profile.verification_progress,
-        verification_status: profile.verification_status || null,
+        application_status: profile.application_status || null,
         verification_requirements: profile.verification_requirements,
         exhibition_badge: profile.exhibition_badge || null,
         community_engagement_score: profile.community_engagement_score || null,
@@ -132,7 +132,7 @@ export async function setupBigQueryTable(forceRecreate = false) {
     const csvPath = path.resolve(process.cwd(), 'artist_features.csv')
     const csvHeader = [
       // Basic Info
-      'entity_id', 'feature_timestamp', 'artist_id', 'artist_name', 'artist_type', 'location', 'artist_status',
+      'entity_id', 'feature_timestamp', 'artist_id', 'artist_name', 'role', 'location', 'artist_status',
       // Profile Details
       'bio', 'avatar_url', 'website', 'email', 'first_name', 'last_name', 'full_name',
       // Social Media
@@ -140,7 +140,7 @@ export async function setupBigQueryTable(forceRecreate = false) {
       // Artist Categories
       'styles', 'techniques', 'keywords',
       // Verification & Status
-      'verification_progress', 'verification_status', 'verification_requirements', 'exhibition_badge',
+      'verification_progress', 'application_status', 'verification_requirements', 'exhibition_badge',
       'community_engagement_score', 'view_count',
       // Artwork Details
       'artwork_count', 'artwork_titles', 'artwork_descriptions', 'artwork_statuses',
@@ -158,7 +158,7 @@ export async function setupBigQueryTable(forceRecreate = false) {
         row.feature_timestamp,
         row.artist_id,
         `"${row.artist_name.replace(/"/g, '""')}"`,
-        row.artist_type || '',
+        row.role || '',
         row.location ? `"${row.location.replace(/"/g, '""')}"` : '',
         row.artist_status || '',
         
@@ -181,7 +181,7 @@ export async function setupBigQueryTable(forceRecreate = false) {
         
         // Verification & Status
         row.verification_progress || '',
-        row.verification_status || '',
+        row.application_status || '',
         row.verification_requirements ? `"${JSON.stringify(row.verification_requirements).replace(/"/g, '""')}"` : '',
         row.exhibition_badge || '',
         row.community_engagement_score || '',

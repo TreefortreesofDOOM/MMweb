@@ -91,8 +91,6 @@ export const updateRoleSettings = async (
     .from('profiles')
     .update({
       medium: roleSettings.medium,
-      artist_type: roleSettings.artist_type,
-      artist_status: roleSettings.artist_status,
       updated_at: new Date().toISOString(),
     })
     .eq('id', user.id);

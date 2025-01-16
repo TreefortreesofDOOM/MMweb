@@ -91,7 +91,6 @@ export const signInAction = async (formData: FormData) => {
     switch (profile?.role) {
       case 'admin':
         return redirect("/admin-dashboard");
-      case 'artist':
       case 'verified_artist':
       case 'emerging_artist':
         return redirect("/artist/dashboard");

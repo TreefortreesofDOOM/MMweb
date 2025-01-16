@@ -2,177 +2,90 @@
 
 import { createActionClient } from '@/lib/supabase/supabase-action-utils';
 import { headers } from 'next/headers';
-import { trackArtistVerificationProgress } from '@/lib/actions/analytics';
+import { 
+  trackVerificationComplete, 
+  trackRequirementsCheck,
+  trackProfileComplete,
+  trackPortfolioComplete,
+  trackEngagementThreshold,
+  type VerificationDetails 
+} from '@/lib/analytics/verification-tracking';
 
 export async function checkVerificationRequirements(userId: string) {
   try {
     const supabase = await createActionClient();
 
-    // Get user profile with essential fields only
-    const { data: profile, error: profileError } = await supabase
+    // Get profile data
+    const { data: profile } = await supabase
       .from('profiles')
       .select(`
-        role,
-        verification_status,
-        verification_progress,
-        verification_requirements,
-        first_name,
-        last_name,
+        full_name,
         bio,
         avatar_url,
-        website,
-        instagram,
-        view_count,
+        social_links,
+        community_engagement_score,
         created_at,
-        community_engagement_score
+        profile_views
       `)
       .eq('id', userId)
       .single();
 
-    if (profileError) {
-      throw profileError;
-    }
-
-    if (!profile || profile.role !== 'emerging_artist') {
-      return {
-        requirements: {
-          profile_complete: { complete: false, message: "Must be an emerging artist" },
-          portfolio_quality: { complete: false, message: "Must be an emerging artist" },
-          platform_engagement: { complete: false, message: "Must be an emerging artist" }
-        },
-        progress: 0,
-        isVerified: false,
-        details: null
-      };
-    }
-
-    // Check profile completeness
-    const hasFullName = Boolean(profile.first_name && profile.last_name);
-    const hasBio = Boolean(profile.bio && profile.bio.length >= 100);
-    const hasAvatar = Boolean(profile.avatar_url);
-    const hasContactInfo = Boolean(profile.website || profile.instagram);
-
-    const profile_complete = {
-      complete: hasFullName && hasBio && hasAvatar && hasContactInfo,
-      message: !hasFullName
-        ? "Add your full name"
-        : !hasBio
-        ? "Add a bio (at least 100 characters)"
-        : !hasAvatar
-        ? "Add a profile photo"
-        : !hasContactInfo
-        ? "Add a website or Instagram link"
-        : "Profile complete",
-      details: {
-        hasFullName,
-        hasBio,
-        hasAvatar,
-        hasContactInfo
-      }
-    };
-
-    // Check portfolio quality
-    const { count: artworkCount } = await supabase
+    // Get artwork counts
+    const { data: artworks } = await supabase
       .from('artworks')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', userId);
+      .select('status')
+      .eq('artist_id', userId);
 
-    const minimumArtworks = 5;
-    const hasMinimumArtworks = (artworkCount || 0) >= minimumArtworks;
+    const totalArtworks = artworks?.length || 0;
+    const publishedArtworks = artworks?.filter(a => a.status === 'published').length || 0;
 
-    const portfolio_quality = {
-      complete: hasMinimumArtworks,
-      message: !hasMinimumArtworks
-        ? `Upload at least ${minimumArtworks} artworks`
-        : "Portfolio complete",
-      details: {
-        hasMinimumArtworks,
-        currentCount: artworkCount || 0
-      }
-    };
+    // Calculate account age in days
+    const accountAgeDays = profile?.created_at 
+      ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
+      : 0;
 
-    // Check platform engagement
-    const minimumDays = 30;
-    const minimumViews = 50;
-    const accountAgeInDays = Math.floor(
-      (Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24)
-    );
-    const hasMinimumAge = accountAgeInDays >= minimumDays;
-    const hasMinimumViews = (profile.view_count || 0) >= minimumViews;
-    const hasCommunityEngagement = Boolean(profile.community_engagement_score >= 50);
-
-    const platform_engagement = {
-      complete: hasMinimumAge && hasMinimumViews && hasCommunityEngagement,
-      message: !hasMinimumAge
-        ? `Account must be ${minimumDays} days old (${accountAgeInDays} days currently)`
-        : !hasMinimumViews
-        ? `Gain ${minimumViews} profile views (${profile.view_count || 0} currently)`
-        : !hasCommunityEngagement
-        ? "Increase your community engagement"
-        : "Engagement complete",
-      details: {
-        hasMinimumAge,
-        hasMinimumViews,
-        hasCommunityEngagement,
-        currentAge: accountAgeInDays,
-        currentViews: profile.view_count || 0,
-        engagementScore: profile.community_engagement_score || 0
-      }
-    };
-
-    // Calculate overall progress
-    const requirements = {
-      profile_complete,
-      portfolio_quality,
-      platform_engagement,
-    };
-
-    const progress = Math.floor(
-      (Object.values(requirements).filter((r) => r.complete).length / 3) * 100
+    // Check requirements
+    const profileComplete = !!(
+      profile?.full_name &&
+      profile?.bio?.length >= 100 &&
+      profile?.avatar_url &&
+      profile?.social_links?.length > 0
     );
 
-    const isVerified = Object.values(requirements).every((r) => r.complete);
+    const portfolioComplete = publishedArtworks >= 5;
+    const engagementComplete = (
+      accountAgeDays >= 30 &&
+      (profile?.profile_views || 0) >= 50 &&
+      (profile?.community_engagement_score || 0) >= 50
+    );
 
-    // Update verification progress in database
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({
-        verification_requirements: {
-          profile_complete: profile_complete.details,
-          portfolio_quality: portfolio_quality.details,
-          platform_engagement: platform_engagement.details
-        },
-        verification_progress: progress,
-        verification_status: isVerified ? 'verified' : 'in_progress'
-      })
-      .eq('id', userId);
+    const verificationDetails: VerificationDetails = {
+      profileComplete,
+      portfolioComplete,
+      engagementScore: profile?.community_engagement_score || 0,
+      artworkCount: totalArtworks,
+      publishedArtworkCount: publishedArtworks,
+      accountAgeDays,
+      profileViews: profile?.profile_views || 0
+    };
 
-    if (updateError) {
-      throw updateError;
-    }
+    const isVerified = profileComplete && portfolioComplete && engagementComplete;
+
+    // Track the check
+    await trackRequirementsCheck(userId, verificationDetails, isVerified);
+
+    // Track individual completions
+    if (profileComplete) await trackProfileComplete(userId, verificationDetails);
+    if (portfolioComplete) await trackPortfolioComplete(userId, verificationDetails);
+    if (engagementComplete) await trackEngagementThreshold(userId, verificationDetails);
 
     return {
-      requirements,
-      progress,
       isVerified,
-      details: {
-        profile: profile_complete.details,
-        portfolio: portfolio_quality.details,
-        engagement: platform_engagement.details
-      }
+      details: verificationDetails
     };
   } catch (error) {
     console.error('Error checking verification requirements:', error);
-    return {
-      requirements: {
-        profile_complete: { complete: false, message: "Failed to check requirements" },
-        portfolio_quality: { complete: false, message: "Failed to check requirements" },
-        platform_engagement: { complete: false, message: "Failed to check requirements" }
-      },
-      progress: 0,
-      isVerified: false,
-      details: null
-    };
+    return { isVerified: false, details: null, error };
   }
 }
 
@@ -182,7 +95,7 @@ export async function upgradeToVerifiedArtist(userId: string) {
 
     // Check requirements first
     const { isVerified, details } = await checkVerificationRequirements(userId);
-    if (!isVerified) {
+    if (!isVerified || !details) {
       throw new Error('Verification requirements not met');
     }
 
@@ -192,22 +105,14 @@ export async function upgradeToVerifiedArtist(userId: string) {
       .update({
         role: 'verified_artist',
         verified_at: new Date().toISOString(),
-        verification_status: 'verified'
+        application_status: 'approved'
       })
       .eq('id', userId);
 
     if (updateError) throw updateError;
 
     // Track successful verification
-    await trackArtistVerificationProgress({
-      step: 'verification_complete',
-      status: 'completed',
-      metadata: {
-        userId,
-        verifiedAt: new Date().toISOString(),
-        verificationDetails: details
-      }
-    });
+    await trackVerificationComplete(userId, details);
 
     return { success: true, error: null };
   } catch (error) {

@@ -52,12 +52,12 @@ export function useChat(options: UseChatOptions = {}) {
 
       // Only send user context on first message
       const isFirstMessage = !hasInitialContext
-      const userContext = isFirstMessage ? {
-        id: profile?.id,
-        role: profile?.artist_type || 'user',
-        name: profile?.name,
+      const userContext = profile ? {
+        id: profile.id,
+        role: profile.role,
+        name: profile.full_name,
         bio: profile?.bio,
-        artist_type: profile?.artist_type,
+        artist_type: profile.role === 'verified_artist' ? 'verified' : profile.role === 'emerging_artist' ? 'emerging' : undefined,
         website: profile?.website
       } : undefined
 
@@ -82,7 +82,7 @@ export function useChat(options: UseChatOptions = {}) {
             analysis: completedAnalysis
           },
           systemInstruction: options.systemInstruction,
-          role: options.role || profile?.artist_type,
+          role: options.role || profile?.role,
           artworkId: options.artworkId,
           imageUrl: options.imageUrl,
           userContext

@@ -29,7 +29,6 @@ export async function getProfileAction() {
         website,
         instagram,
         role,
-        artist_type,
         artist_status,
         verification_progress,
         verification_requirements,

@@ -4,6 +4,7 @@ import { createActionClient } from '@/lib/supabase/supabase-action-utils'
 import type { AnalyticsData } from '@/lib/types/analytics.types'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
+import { UserRole } from '../types/custom-types'
 
 interface DateRange {
   startDate: string
@@ -118,7 +119,7 @@ async function fetchPlatformMetrics(supabase: SupabaseClient, dateRange: DateRan
     supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
-      .eq('role', 'artist'),
+      .in('role', ['verified_artist', 'emerging_artist']),
     supabase
       .from('artworks')
       .select('*', { count: 'exact', head: true })
@@ -126,7 +127,8 @@ async function fetchPlatformMetrics(supabase: SupabaseClient, dateRange: DateRan
     supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
-      .eq('artist_status', 'pending')
+      .eq('role', 'emerging_artist')
+      .eq('application_status', 'pending')
   ])
 
   return {
@@ -230,14 +232,22 @@ async function getOrCreateSession(userId: string): Promise<string> {
   return sessionId
 }
 
-async function trackEvent(data: {
-  userId: string
-  eventType: string
-  eventName: string
-  eventData?: Record<string, any>
-  sessionId?: string
-}) {
-  const supabase = await createActionClient()
+// Add proper type for event tracking
+interface EventTrackingData {
+  userId: string;
+  eventType: string;
+  eventName: string;
+  eventData?: {
+    role?: UserRole;
+    artistId?: string;
+    artworkId?: string;
+    [key: string]: unknown;
+  };
+  sessionId?: string;
+}
+
+async function trackEvent(data: EventTrackingData) {
+  const supabase = await createActionClient();
   
   await supabase.from('user_events').insert({
     user_id: data.userId,
@@ -245,7 +255,7 @@ async function trackEvent(data: {
     event_name: data.eventName,
     event_data: data.eventData,
     session_id: data.sessionId
-  })
+  });
 }
 
 export async function trackPageView(pathname: string) {
@@ -295,17 +305,9 @@ export async function trackProfileCompletion({ fieldName, completed, metadata }:
   })
 }
 
-export async function trackArtistVerificationProgress(userId: string, step: string) {
-  await trackEvent({
-    userId,
-    eventType: 'verification',
-    eventName: step
-  })
-}
-
 export async function trackArtistView(data: {
   artistId: string
-  artistType: string
+  role: UserRole
   position: number
   totalArtists: number
   interactionType: 'click' | 'keyboard'
@@ -321,7 +323,7 @@ export async function trackArtistView(data: {
     eventName: 'view_artist_profile',
     eventData: {
       artist_id: data.artistId,
-      artist_type: data.artistType,
+      role: data.role,
       position: data.position,
       total_artists: data.totalArtists,
       interaction_type: data.interactionType

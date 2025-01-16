@@ -1,5 +1,6 @@
 import { createServiceRoleClient } from '@/lib/supabase/service-role'
 import type { Database } from '@/lib/types/database.types'
+import type { UserRole } from '@/lib/types/custom-types'
 
 type UserSession = Database['public']['Tables']['user_sessions']['Row']
 type UserEvent = Database['public']['Tables']['user_events']['Row']
@@ -80,7 +81,7 @@ export interface ArtworkMetricsResult {
 }
 
 interface ArtistFeatureMetricsResult {
-  artistType: string
+  role: UserRole
   status: string
   totalArtists: number
   featuresEnabled: number
@@ -472,7 +473,7 @@ export async function executeAnalyticsFunction(
         const featuresEnabled = features?.length || 0
 
         return {
-          artistType,
+          role: artistType,
           status,
           totalArtists,
           featuresEnabled,

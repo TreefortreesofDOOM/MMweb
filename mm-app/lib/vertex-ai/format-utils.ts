@@ -10,6 +10,13 @@ interface VertexAIData {
   documents: VertexAIDocument[];
 }
 
+interface Artwork {
+  id: string;
+  display_order?: number;
+  title: string;
+  artist_id: string;
+}
+
 export function formatForVertexAI(data: ExtractedData): VertexAIData {
   // Create a map of artist IDs to their artwork counts
   const artworkCounts = data.artworks.reduce((acc, artwork) => {
@@ -24,7 +31,7 @@ export function formatForVertexAI(data: ExtractedData): VertexAIData {
     }
     acc[artwork.artist_id].push(artwork);
     return acc;
-  }, {} as Record<string, typeof data.artworks>);
+  }, {} as Record<string, Artwork[]>);
 
   return {
     documents: [
@@ -47,14 +54,14 @@ export function formatForVertexAI(data: ExtractedData): VertexAIData {
 
         // Get a list of artwork titles
         const artworkTitles = artistArtworkList
-          .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
-          .map(a => a.title)
+          .sort((a: Artwork, b: Artwork) => (a.display_order || 0) - (b.display_order || 0))
+          .map((a: Artwork) => a.title)
           .join(', ');
 
         return {
           id: `artist-${profile.id}`,
           content: [
-            `Summary: ${profile.first_name} ${profile.last_name} is a ${profile.artist_type} ${artistStatus} based in ${profile.location || 'Unknown Location'} with ${artworkCount} published artworks. ${profile.exhibition_badge ? 'They are featured in our exhibition.' : ''} ${verificationProgress}`,
+            `Summary: ${profile.first_name} ${profile.last_name} is a ${profile.role} based in ${profile.location || 'Unknown Location'} with ${artworkCount} published artworks. ${profile.exhibition_badge ? 'They are featured in our exhibition.' : ''} ${verificationProgress}`,
             profile.bio && `Biography: ${profile.bio}`,
             profile.location && `Location: ${profile.location}`,
             profile.instagram && `Instagram: ${profile.instagram}`,
@@ -62,7 +69,7 @@ export function formatForVertexAI(data: ExtractedData): VertexAIData {
             `Exhibition Featured: ${profile.exhibition_badge ? 'Yes' : 'No'}`,
             `Total Artworks: ${artworkCount}`,
             artworkTitles && `Published Works: ${artworkTitles}`,
-            `Verification Status: ${profile.verification_status}`,
+            `Application Status: ${profile.application_status}`,
             verificationInfo && `Verification Achievements: ${verificationInfo}`,
             `Community Engagement Level: ${profile.community_engagement_score}/100`,
             profile.artist_application && `Application Notes: ${JSON.stringify(profile.artist_application)}`
@@ -70,7 +77,7 @@ export function formatForVertexAI(data: ExtractedData): VertexAIData {
           metadata: {
             docType: 'artist',
             artworkCount,
-            artworkIds: artistArtworkList.map(a => a.id),
+            artworkIds: artistArtworkList.map((a: Artwork) => a.id),
             verificationProgress: profile.verification_progress,
             ...profile
           }
@@ -88,7 +95,7 @@ export function formatForVertexAI(data: ExtractedData): VertexAIData {
           content: [
             `Summary: "${artwork.title}" is a ${artwork.status} artwork by ${artist?.first_name} ${artist?.last_name}${artwork.price ? ` priced at $${artwork.price}` : ''}. ${imageCount ? `Includes ${imageCount} images.` : ''}`,
             artwork.description && `Description: ${artwork.description}`,
-            artist && `Artist: ${artist.first_name} ${artist.last_name} - ${artist.artist_type} artist from ${artist.location || 'Unknown Location'}`,
+            artist && `Artist: ${artist.first_name} ${artist.last_name} - ${artist.role} from ${artist.location || 'Unknown Location'}`,
             artwork.styles?.length && `Art Styles: ${artwork.styles.join(', ')}`,
             artwork.techniques?.length && `Techniques Used: ${artwork.techniques.join(', ')}`,
             artwork.keywords?.length && `Keywords: ${artwork.keywords.join(', ')}`,
@@ -99,7 +106,7 @@ export function formatForVertexAI(data: ExtractedData): VertexAIData {
             docType: 'artwork',
             artistId: artwork.artist_id,
             artistName: `${artist?.first_name} ${artist?.last_name}`,
-            artistType: artist?.artist_type,
+            artistRole: artist?.role,
             artistLocation: artist?.location,
             imageCount,
             displayOrder: artwork.display_order,

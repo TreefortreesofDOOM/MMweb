@@ -12,7 +12,6 @@ cache.startCleanupInterval();
 function transformArtistData(data: any[]): ArtistWithCount[] {
   return data.map(artist => ({
     ...artist,
-    artist_type: artist.role === 'verified_artist' ? 'verified' : 'emerging',
     artworks: [{ count: artist.artworks?.[0]?.count || 0 }]
   })) as ArtistWithCount[];
 }

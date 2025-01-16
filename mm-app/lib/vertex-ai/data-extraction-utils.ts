@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@/lib/database.types'
+import type { Database } from '@/lib/types/database.types'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -29,7 +29,7 @@ export async function extractArtistData(): Promise<ExtractedData> {
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
     .select('*')
-    .in('artist_type', ['verified', 'emerging'])
+    .in('role', ['verified_artist', 'emerging_artist'])
 
   if (profilesError) {
     console.error('Error fetching profiles:', profilesError)
