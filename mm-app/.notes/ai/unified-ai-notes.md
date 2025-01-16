@@ -30,6 +30,19 @@ Applied Rules:
 - Fixed race conditions
 - Added proper dependency management
 
+#### 4. Role & Type System Improvements ✅
+- Fixed role type imports to use `UserRole` instead of `ArtistRole`
+- Updated artist type derivation in chat context
+- Improved type safety in AI search functionality
+- Added proper role-based type checking
+- Fixed profile type mismatches
+
+Recent Changes:
+- Fixed type error in `use-chat.ts` by properly deriving artist_type from role
+- Updated AI search to use correct role types from custom-types
+- Improved type safety in vertex AI integration
+- Added proper null checks for optional profile fields
+
 ### Verified Fixes
 
 1. **Type System**
@@ -49,6 +62,12 @@ Applied Rules:
    - ✅ Dependency optimization
    - ✅ Race condition prevention
    - ✅ Cleanup handling
+
+4. **Role System**
+   - ✅ Proper role type usage
+   - ✅ Type-safe role checks
+   - ✅ Role-to-type mapping
+   - ✅ Profile type alignment
 
 ### Next Steps
 
@@ -113,41 +132,309 @@ interface ProfileState {
 }
 ```
 
-#### B. State Management Pattern
+#### B. Role Value Mismatch Issue
 ```typescript
-// Current implementation (non-compliant)
-const preferredCharacter = settings.preferences?.aiPersonality?.toUpperCase() || 'JARVIS'
+// Database values don't match type system
+// In database: artist_type = 'verified'
+// In code: ARTIST_ROLES.VERIFIED = 'verified_artist'
 
-// Should follow proper state management rules
-interface AISettings {
-  status: 'loading' | 'ready' | 'error'
-  preferences: {
-    aiPersonality: keyof typeof PERSONALITIES
-  }
+// Current implementation causing role check failures
+const isVerifiedArtist = profile?.artist_type === ARTIST_ROLES.VERIFIED // false due to mismatch
+
+// Two potential fixes:
+// 1. Update database values (requires migration)
+update profiles 
+set artist_type = 'verified_artist' 
+where artist_type = 'verified';
+
+// 2. Update type system (simpler but needs thorough testing)
+export const ARTIST_ROLES = {
+  VERIFIED: 'verified',           // Match database value
+  EMERGING: 'emerging_artist',
+} as const
+
+// Action Items:
+// - Audit all role values in database
+// - Ensure consistent role values across system
+// - Add runtime validation for role values
+// - Consider adding role value migration system
+
+// Additional Role Mismatch Found in ArtistBadge:
+interface ArtistBadgeProps {
+  type: 'verified' | 'emerging';  // UI component expects different values
+}
+// But receiving ArtistRole from database:
+type ArtistRole = 'verified' | 'emerging_artist'  // Database values
+
+// Known Instances of Role Type Mismatches:
+// 1. Dashboard Stripe Button Visibility
+// File: mm-app/app/(protected)/artist/dashboard/dashboard-client.tsx
+// Line: ~90 (Quick Actions section)
+isVerifiedArtist && profile.stripe_account_id && profile.stripe_onboarding_complete
+// Role check fails due to 'verified' vs 'verified_artist'
+
+// 2. ArtistBadge Component Type Mismatch
+// File: mm-app/components/ui/artist-badge.tsx
+// Line: 8
+interface ArtistBadgeProps {
+  type: 'verified' | 'emerging';  // UI expects different values
+}
+// File: mm-app/app/(public)/artists/artist-card.tsx
+// Line: ~40
+const badgeType = artistType === ARTIST_ROLES.VERIFIED ? 'verified' : 'emerging';
+
+// 3. Analytics Tracking
+// File: mm-app/app/(public)/artists/artist-card.tsx
+// Line: ~30
+trackArtistView({
+  artistType: artist.artist_type || '', // Raw database value
+})
+
+// 4. Role-Based Access Control
+// File: mm-app/hooks/use-auth.ts
+// Line: ~120
+const isVerifiedArtist = profile?.artist_type === ARTIST_ROLES.VERIFIED;
+
+// 5. AI Persona Selection
+// File: mm-app/lib/ai/types.ts
+// Persona mapping using artist_type directly from database
+
+// 6. URL/Route Guards
+// File: mm-app/middleware.ts
+// Route protection checking artist_type
+
+// 7. Artist Portfolio Display
+// File: mm-app/app/(public)/artists/[id]/portfolio/page.tsx
+// Conditional rendering based on artist.artist_type
+
+// Impact Areas and File Patterns:
+// - Feature Access: /app/(protected)/**/*.tsx
+// - UI Components: /components/ui/*.tsx
+// - Analytics: /lib/actions/analytics.ts
+// - AI System: /lib/ai/**/*.ts
+// - Route Guards: /middleware.ts, /lib/auth/*.ts
+// - Database: /lib/types/database.types.ts
+
+// Current workaround using inline mapping:
+const badgeType = artistType === ARTIST_ROLES.VERIFIED ? 'verified' : 'emerging';
+<ArtistBadge type={badgeType} />
+
+// Proposed Solutions:
+// 1. Create a central role mapping utility:
+const mapArtistTypeToUIRole = (type: ArtistRole): 'verified' | 'emerging' => {
+  return type === ARTIST_ROLES.VERIFIED ? 'verified' : 'emerging';
+}
+
+// 2. Update UI components to use same types as database
+// 3. Consider creating a proper type hierarchy:
+type DatabaseArtistRole = 'verified' | 'emerging_artist'
+type UIArtistRole = 'verified' | 'emerging'
+interface RoleMapping {
+  [K in DatabaseArtistRole]: UIArtistRole
 }
 ```
 
-#### C. Effect Pattern
-```typescript
-// Non-compliant with cleanup rules
-useEffect(() => {
-  if (!isLoaded || !settings) return
-  // ... context update logic
-}, [pathname, profile?.artist_type, isLoaded, settings])
+#### A.3 Role Consolidation Migration Plan
 
-// Should implement proper cleanup
-useEffect(() => {
-  let mounted = true
-  
-  const updateContext = async () => {
-    if (!mounted) return
-    // ... context update logic
-  }
-  
-  updateContext()
-  return () => { mounted = false }
-}, [pathname, profile?.artist_type, isLoaded, settings])
+##### Phase 1: Audit & Preparation
+```typescript
+// 1. Database Tables to Update
+- profiles (artist_type → role) ⏳ Pending
+- artist_verification_requests (update status checks) ⏳ Pending
+- artist_analytics (update role references) ⏳ Pending
+- gallery_exhibitions (artist role checks) ⏳ Pending
+
+// 2. Code Files to Update
+// A. Core Types & Utils
+- lib/types/database.types.ts (remove artist_type) ⏳ Pending database migration
+- lib/types/custom-types.ts (remove ARTIST_ROLES, use UserRole) ✅ Complete
+- lib/utils/role-utils.ts (update role checks) ✅ Complete
+
+// B. Components
+- components/ui/artist-badge.tsx (use UserRole) ✅ Complete
+- components/artist/stripe-onboarding.tsx (role checks) ✅ Complete
+- mm-app\app\(protected)\artist\verification\page.tsx (role checks) ✅ Complete
+- app/(protected)/artist/dashboard/dashboard-client.tsx (role checks) ✅ Complete
+- app/(public)/artists/artist-card.tsx (role display) ✅ Complete
+- app/(protected)/profile/page.tsx (role handling) ✅ Complete
+
+// C. Hooks & Context
+- hooks/use-auth.ts (update isVerifiedArtist logic) ✅ Complete
+- hooks/use-artist.ts (update role checks) ✅ Complete
+- context/auth-context.tsx (update role handling) ✅ Complete
+
+// D. API & Server Actions
+- ✅ app/api/auth/[...nextauth]/route.ts (role assignments)
+- ✅ lib/actions/artist.ts (verification logic)
+- ✅ lib/actions/analytics.ts (role tracking)
+
+// Phase 4 Progress Summary:
+- Profile page role handling updated to use new role system ✅
+- Removed deprecated ARTIST_ROLES usage ✅
+- Using isAnyArtist utility from role-utils ✅
+- Artist profile transformation properly typed ✅
 ```
+
+##### Phase 2: Database Migration (Status Update)
+- Migration Status: ✅ Complete
+- File: mm-app/supabase/migrations/20240422000001_consolidate_artist_roles.sql
+
+1. Profile Role Updates ✅
+   - Successfully migrated artist_type values to role column
+   - 'verified' -> 'verified_artist'
+   - 'emerging' -> 'emerging_artist'
+
+2. Column Cleanup ✅
+   - Safely dropped artist_type column from profiles table
+
+3. Role Validation ✅
+   - Added trigger to validate role values
+   - Enforces: 'admin', 'verified_artist', 'emerging_artist', 'patron', 'user'
+
+4. Migration Verification ✅
+   - Tested migration success
+   - Confirmed no data loss
+   - Verified role values are correctly updated
+
+Next Steps:
+1. Monitor for any role-related issues in production
+2. Update documentation to reflect new role system
+3. Clean up any remaining artist_type references in the codebase
+
+
+##### Phase 3: Code Updates ✅
+
+#### A. Role System Consolidation
+
+1. Core Role Utilities (✅)
+- Centralized role permissions in role-utils.ts
+- Removed canAccessGallery from permissions (now controlled by exhibition_badge)
+- Updated maxArtworks limits (verified: 100, emerging: 10)
+- Added stripe requirements configuration
+- Implemented proper type safety
+
+2. Protected Routes (✅)
+```typescript
+export const PROTECTED_ROUTES = {
+  '/artist/gallery': ['verified_artist'], // Exhibition badge required
+  '/analytics': ['admin', 'verified_artist'],
+  '/messaging': ['admin', 'verified_artist', 'patron']
+} as const;
+```
+
+3. Feature Access (✅)
+- Messaging: Admin, Verified Artists, Patrons
+- Analytics: Admin, Verified Artists
+- Gallery: Controlled by exhibition_badge
+- Artwork Limits: 
+  - Verified: 100
+  - Emerging: 10
+  - Others: 0
+
+// 4. Implementation Status
+✅ Role constants and types
+✅ Permission configuration
+✅ Route protection
+✅ Feature access controls
+✅ Gallery access separation (exhibition badge vs public showcase)
+✅ Type safety improvements
+
+#### B. Next Steps (Phase 4)
+1. Analytics Updates
+- ✅ Update role checks in profile page analytics
+- ✅ Implement new role-based tracking in artist profile
+- ✅ Migrate historical analytics data
+  - Updated user_events table with new role values
+  - Migrated verification events data
+  - Updated event_data JSON fields
+- ✅ Update analytics dashboard views
+  - Added role-based feature access control
+  - Updated sales/collector tabs for verified artists only
+  - Added proper role checks using isVerifiedArtist
+  - Conditional rendering of sales metrics
+- 🚧 Add role transition tracking
+
+2. UI Components
+- ✅ Update profile page role handling
+- ✅ Update artist profile card role display
+- ✅ Implement proper role checks in verification banner
+- ✅ Update ghost profile notification handling
+- 🚧 Refresh role-based permission checks
+- ⏳ Update navigation guards for new role system
+
+3. Testing & Validation
+- ✅ Verify role checks in profile page
+- ✅ Test artist profile transformations
+- ✅ Validate ghost profile handling
+- ✅ Verify analytics data migration
+- 🚧 Test role-based feature access
+- ⏳ Add integration tests for role system
+- ⏳ Performance testing for analytics updates
+
+4. Documentation
+- ✅ Update role system migration notes
+- ✅ Document new profile page implementation
+- ✅ Document analytics data migration
+- 🚧 Update analytics tracking documentation
+- ⏳ Add role transition guides
+- ⏳ Update permission matrix docs
+
+#### C. Dependency Chain
+```
+Database Schema (artist_role ENUM)
+  └─ database.types.ts (Generated Types)
+     └─ custom-types.ts (ARTIST_ROLES + ArtistRole)
+        ├─ hooks/use-auth.ts (isVerifiedArtist)
+        │  └─ All Protected Components
+        ├─ components/ui/artist-badge.tsx
+        │  └─ All Artist Display Components
+        ├─ lib/ai/types.ts (Persona System)
+        │  └─ AI Assistant Components
+        └─ lib/actions/analytics.ts
+           └─ Tracking Components
+```
+
+#### D. Impact Flow of Role Changes
+1. **Database Layer**
+   - Schema changes affect generated types
+   - Migration required for value changes
+
+2. **Type System Layer**
+   - database.types.ts → Generated from schema
+   - custom-types.ts → Depends on database types
+   - Component types → Depend on custom types
+
+3. **Application Layer**
+   - Auth hooks → Role checks
+   - UI Components → Display logic
+   - Analytics → Tracking
+   - AI System → Persona selection
+
+4. **Protection Layer**
+   - Middleware → Route guards
+   - API Routes → Access control
+   - Server Actions → Permissions
+
+#### E. Change Requirements
+When modifying roles:
+1. Database migration
+2. Regenerate types
+3. Update constants
+4. Update UI components
+5. Update auth checks
+6. Update analytics
+7. Update AI system
+8. Test all layers
+
+#### F. Current Role Value Flow
+```
+Database ('verified')
+  → Generated Types ('verified')
+  → ARTIST_ROLES.VERIFIED ('verified_artist') ❌ Mismatch
+  → UI Components ('verified') ❌ Another mismatch
+```
+
+This dependency map shows why a centralized fix is needed rather than point solutions.
 
 ### 3. Root Causes
 
@@ -230,121 +517,87 @@ function mapChatRoleToPersona(role: string): AssistantPersona {
 // This ensures type safety and eliminates role duplication
 ```
 
-#### B. Hook Pattern
-```typescript
-interface UseContextAwarenessResult {
-  pageContext: AIContext
-  isLoading: boolean
-  error?: Error
-}
+## Role System Migration Status
 
-function useContextAwareness(): UseContextAwarenessResult {
-  // Implementation following hook rules
-}
+### Phase 1 Progress (✅ = Complete, 🚧 = In Progress, ⏳ = Pending)
+
+#### Core Updates
+- ✅ Removed `ARTIST_ROLES` constants
+- ✅ Added role check helper functions (`isVerifiedArtist`, `isEmergingArtist`, etc.)
+- ✅ Updated type imports across components
+- ✅ Added proper TypeScript interfaces for artist data structures
+
+#### Component Updates
+- ✅ `ArtistBadge`: Updated to use `UserRole` directly
+- ✅ `ArtistProvider`: Updated to use new role check functions
+- ✅ `UserNav`: Updated to use `UserRole` and new badge component
+- ✅ `ArtistCard`: Updated role checks and analytics tracking
+- ✅ `ArtistProfileCard`: Updated to use `UserRole` and new badge component
+- ✅ `ArtistSearch`: Moved to proper component directory and updated types
+- ✅ `format-utils.ts`: Added proper TypeScript interfaces and type annotations
+
+#### Auth Updates
+- ✅ `useAuth`: Updated to use new role check functions
+- ✅ Removed redundant role checks
+
+#### Refactoring
+- ✅ Moved artist-specific components to `components/artist/` directory
+- ✅ Updated imports to use absolute paths
+- ✅ Improved type safety with readonly properties
+- ✅ Added proper TypeScript discriminated unions
+- ✅ Fixed implicit 'any' type errors in array methods
+
+#### Known Issues
+1. Role Value Mismatch:
+   - Database uses `artist_type = 'verified'`
+   - Code expects `role = 'verified_artist'`
+   - Current solution: Updated code to match database values
+
+2. UI Component Type Mismatches:
+   - `ArtistBadge` expects `'verified' | 'emerging'`
+   - Database/role system uses different values
+   - Solution: Added type mapping in components
+
+### Next Steps
+1. Database Migration (Phase 2): ✅
+   - Plan database value standardization
+   - Create migration scripts
+   - Update existing records
+
+2. Type System Enhancement (Phase 3):
+   - Create central role type definitions
+   - Implement proper type hierarchy
+   - Add runtime type validation
+
+3. Testing & Verification (Phase 4):
+   - Add test coverage for role checks
+   - Verify all role-gated features
+   - Document role requirements
+
+## Analytics System Regression Note
+
+### Verification Progress Tracking
+We identified a potential regression in the artist verification tracking system. The original implementation captured detailed metadata:
+
+```typescript
+trackArtistVerificationProgress({
+  step: 'verification_complete',
+  status: 'completed',
+  metadata: {
+    userId,
+    verifiedAt: string,
+    verificationDetails: {...}
+  }
+});
 ```
 
-### 5. Critical Paths
-Following proper data flow patterns:
+This was later simplified to:
+```typescript
+trackArtistVerificationProgress(userId: string, step: string)
+```
 
-1. Server Components → Data Fetch → State Update
-2. Route Change → Context Update → UI Refresh
-3. User Action → Server Action → State Sync
-
-### 6. Implementation Priority
-
-1. **Type System Compliance**
-   - Implement proper interfaces
-   - Use discriminated unions
-   - Add const assertions
-
-2. **State Management**
-   - Follow Context patterns
-   - Implement proper reducers
-   - Add state machines
-
-3. **Error Handling**
-   - Add error boundaries
-   - Implement fallbacks
-   - Add error logging
-
-4. **Performance**
-   - Optimize re-renders
-   - Implement proper memoization
-   - Add loading states
-
-### 7. Architectural Concerns
-
-#### A. Separation of Concerns
-
-1. **Current Issues**
-   - Mixing of database roles and AI chat roles in type definitions
-   - Redundant role mapping logic across components
-   - Tight coupling between UnifiedAI context and API route handlers
-
-2. **Recommended Structure**
-   - Database Layer: Use `UserRole` type strictly for database interactions
-   - Application Layer: Map database roles to domain-specific roles (e.g., `AIRole`, `ChatRole`)
-   - Presentation Layer: Use view-specific types for UI components
-
-3. **Benefits**
-   - Clear boundaries between data, logic, and presentation
-   - Easier to modify one layer without affecting others
-   - Improved testability and maintainability
-
-#### B. Type System Optimization
-
-1. **Current Anti-patterns**
-   - Creating custom types where primitive types suffice
-   - Redundant type definitions across different contexts
-   - Over-specific type constraints limiting reusability
-
-2. **Best Practices**
-   ```typescript
-   // Instead of custom types for basic concepts
-   type Status = 'loading' | 'success' | 'error'  // ❌
-
-   // Use standardized types from project
-   import { RequestStatus } from '@/lib/types/common'  // ✅
-   ```
-
-3. **Type Hierarchy**
-   ```typescript
-   // Database Layer
-   type UserRole = 'admin' | 'verified_artist' | 'emerging_artist' | 'patron' | 'user'
-
-   // Application Layer THIS IS REDUNDANT AND SHOULD BE REMOVED.
-   type AIRole = 'gallery' | 'artist' | 'patron' | 'visitor'
-
-   // View Layer
-   interface AIViewProps {
-     role: AIRole
-     // view-specific props
-   }
-   ```
-
-4. **Role Mapping Strategy**
-   - Keep role mapping logic in a single location
-   - Use type guards for runtime validation
-   - Implement proper error handling for invalid mappings
-
-### 8. Refactoring Priorities
-
-1. **Immediate**
-   - Move role mapping to a dedicated utility
-   - Standardize common types across the application
-   - Remove redundant type definitions
-
-2. **Short-term**
-   - Implement proper layer separation
-   - Add type validation at boundaries
-   - Update documentation with type usage guidelines
-
-3. **Long-term**
-   - Create comprehensive type system documentation
-   - Implement automated type checks in CI
-   - Regular type system audits
-
-#### C. Type System Audit
-
-1. **Essential Types**
-   ```
+**Action Items:**
+- [ ] Review if this was an intentional simplification or accidental regression
+- [ ] If regression, restore detailed tracking including metadata
+- [ ] If intentional, document why we removed the detailed tracking
+- [ ] Ensure analytics dashboards/reports haven't been affected
