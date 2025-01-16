@@ -10,22 +10,22 @@ export default function Hero() {
   return (
     <div className="flex flex-col items-center text-center space-y-8 py-12">
       <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
-        AI-Powered Art Marketplace
+        Meaning Machine
       </h1>
       
       <p className="text-xl text-muted-foreground max-w-[600px] mx-auto">
-        Join our community of artists and collectors.
+        A curated collection of art from emerging and established artists. We use cutting edge AI to help artists, collectors, and galleries find the right art and artists for them. 
       </p>
 
       <div className="flex gap-4">
         <Button asChild size="lg">
-          <Link href="/gallery">
-            Explore Art
+          <Link href="/gallery-showcase">
+            Explore
           </Link>
         </Button>
         <Button asChild variant="outline" size="lg">
           <Link href={user ? "/profile/application" : "/sign-in"}>
-            Create Art
+            Create
           </Link>
         </Button>
       </div>

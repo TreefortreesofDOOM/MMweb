@@ -10,18 +10,20 @@ interface ArtworkGalleryProps {
   artworks: Array<{
     id: string;
     title: string;
-    description?: string;
-    price: number;
-    status: string;
+    description: string | null;
+    price: number | null;
+    status?: 'draft' | 'published';
     images: Array<{
       url: string;
-      isPrimary: boolean;
+      isPrimary?: boolean;
       order: number;
     }>;
-    artist?: {
-      name?: string;
-      bio?: string;
-    };
+    artist_id: string;
+    profiles?: {
+      id: string;
+      name: string;
+      avatar_url: string;
+    } | null;
   }>;
   isLoading?: boolean;
 }
@@ -41,6 +43,27 @@ export function ArtworkGallery({ artworks, isLoading = false }: ArtworkGalleryPr
   const handleSelectArtwork = useCallback((index: number) => {
     setSelectedIndex(index);
   }, []);
+
+  const handleToggleFavorite = useCallback((artworkId: string) => {
+    toggleFavorite(artworkId);
+  }, [toggleFavorite]);
+
+  // Transform artworks for modal
+  const modalArtworks = useMemo(() => artworks.map(artwork => ({
+    id: artwork.id,
+    title: artwork.title,
+    description: artwork.description || undefined,
+    price: artwork.price || 0,
+    images: artwork.images.map(img => ({
+      url: img.url,
+      isPrimary: img.isPrimary || false
+    })),
+    artist: artwork.profiles ? {
+      id: artwork.profiles.id,
+      name: artwork.profiles.name,
+      avatar_url: artwork.profiles.avatar_url
+    } : undefined
+  })), [artworks]);
 
   if (isLoading) {
     return (
@@ -68,21 +91,21 @@ export function ArtworkGallery({ artworks, isLoading = false }: ArtworkGalleryPr
             onSelect={() => handleSelectArtwork(index)}
             isFavorited={favorites[artwork.id] || false}
             isLoading={isFavoriteLoading[artwork.id] || false}
-            onToggleFavorite={toggleFavorite}
+            onToggleFavorite={() => handleToggleFavorite(artwork.id)}
           />
         ))}
       </div>
 
-      {isModalOpen && artworks[selectedIndex] && (
+      {isModalOpen && modalArtworks[selectedIndex] && (
         <ArtworkModal
-          artworks={artworks}
+          artworks={modalArtworks}
           currentIndex={selectedIndex}
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           onNavigate={handleSelectArtwork}
           favorites={favorites}
           isLoading={isFavoriteLoading}
-          onToggleFavorite={toggleFavorite}
+          onToggleFavorite={handleToggleFavorite}
         />
       )}
     </>

@@ -11,7 +11,7 @@ export class ArtistQuery {
       .select(`
         id, first_name, last_name, full_name, avatar_url,
         bio, instagram, website, created_at, exhibition_badge,
-        view_count, role, location, artworks (count)
+        view_count, role, location, artworks!artworks_artist_id_fkey (count)
       `);
   }
 
