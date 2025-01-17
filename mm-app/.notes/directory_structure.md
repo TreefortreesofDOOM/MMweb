@@ -22,7 +22,7 @@
         - qr-code-feature.md
         - registration-flow.md
         - stripe-store.md
-    - database_schema_20250116_145837.md
+    - database_schema_20250116_152815.md
     - deferred.md
     - deployment-checklist.md
     - directory_structure.md
@@ -34,6 +34,8 @@
     - role-system.md
     - stripe-store-tasks.md
     - task_list.md
+    - types-info.md
+    - utils-info.md
     - uxTodo2.md
     - verification-system.md
 - **app/**
@@ -149,11 +151,16 @@
             - page.tsx
         - **artwork/**
             - **[id]/**
+        - **collections/**
+            - **[id]/**
         - **gallery-showcase/**
             - gallery-client.tsx
             - page.tsx
-        - **vertex-test/**
-            - page.tsx
+        - **store/**
+            - **cancel/**
+                - page.tsx
+            - **success/**
+                - page.tsx
         - layout.tsx
         - page.tsx
     - **api/**
@@ -200,29 +207,9 @@
             - route.ts
         - **verification/**
             - **refresh/**
-        - **vertex-ai/**
-            - **search/**
-                - route.ts
-            - **setup/**
-                - route.ts
-            - **setup-bigquery/**
-                - route.ts
-            - **test/**
-                - route.ts
-            - **test-setup/**
-                - route.ts
         - **webhooks/**
             - **stripe/**
                 - route.ts
-    - **collections/**
-        - **[id]/**
-    - **portfolio/**
-        - **[id]/**
-    - **store/**
-        - **cancel/**
-            - page.tsx
-        - **success/**
-            - page.tsx
     - favicon.ico
     - globals.css
     - layout.tsx
@@ -534,8 +521,10 @@
         - track.ts
         - verification-tracking.ts
     - **constants/**
+        - env.ts
         - error-codes.ts
         - mediums.ts
+        - mm-ai-constants.ts
     - **emails/**
         - artist-notifications.ts
     - **navigation/**
@@ -554,17 +543,15 @@
         - supabase-client.ts
         - supabase-server.ts
     - **types/**
-        - **admin/**
-            - mm-ai-types.ts
-        - **feed/**
-            - feed-types.ts
-        - ai-settings.ts
-        - analytics.types.ts
+        - ai-settings-types.ts
+        - analytics-types.ts
         - custom-types.ts
         - database.types.ts
+        - feed-types.ts
         - gallery-error-types.ts
         - gallery-types.ts
-        - ghost-profiles.ts
+        - ghost-profiles-types.ts
+        - mm-ai-types.ts
         - patron-types.ts
         - search-artist-types.ts
         - settings-types.ts
@@ -584,30 +571,26 @@
         - use-chat.ts
         - utils.ts
     - **utils/**
-        - artist-cache-utils.ts
-        - artist-query-utils.ts
-        - artist-search-utils.ts
-        - common-utils.ts
-        - error-utils.ts
-        - format-utils.ts
-        - mm-ai-validation.ts
-        - patron-utils.ts
-        - post-artwork-utils.ts
-        - result.ts
-        - role-utils.ts
-        - settings-utils.ts
-    - **vertex-ai/**
-        - ai-search.ts
-        - bigquery-setup.ts
-        - data-extraction-utils.ts
-        - format-utils.ts
-        - test-extraction.ts
-        - types.ts
-        - vertex-client.ts
+        - **artist/**
+            - artist-service-utils.ts
+        - **auth/**
+            - patron-utils.ts
+            - role-utils.ts
+        - **content/**
+            - image-utils.ts
+            - mm-ai-validation-utils.ts
+            - post-artwork-utils.ts
+        - **core/**
+            - common-utils.ts
+            - format-utils.ts
+            - result-utils.ts
+        - **error/**
+            - error-service-utils.ts
+            - gallery-error-utils.ts
+        - **user/**
+            - ghost-profile-utils.ts
+            - settings-utils.ts
     - env.ts
-    - utils.ts
-- **migrations/**
-    - 20240421000003_add_payment_link_columns.sql
 - **public/**
     - **images/**
         - **favicons/**
@@ -751,6 +734,7 @@
         - 20240421000001_add_payment_link_and_inventory.sql
         - 20240421000001_add_store_price_rules.sql
         - 20240421000002_add_payment_link_id.sql
+        - 20240421000003_add_payment_link_columns.sql
         - 20240422000001_consolidate_artist_roles.sql
         - 20240422000002_update_analytics_roles.sql
         - 20241224140133_enable_storage_rls.sql
