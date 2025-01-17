@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { UnifiedAIClient } from '@/lib/ai/unified-client'
-import { env } from '@/lib/env'
+import { env } from '@/lib/constants/env'
 
 export async function POST(request: Request) {
   try {

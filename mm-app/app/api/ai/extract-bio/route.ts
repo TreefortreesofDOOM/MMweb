@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
 import { extractBioFromWebsite } from '@/lib/ai/website-bio-extractor'
 import { UnifiedAIClient } from '@/lib/ai/unified-client'
-import { env } from '@/lib/env'
+import { env } from '@/lib/constants/env'
 import { getAISettings } from '@/lib/actions/ai-settings-actions'
-import { AISettings } from '@/lib/types/ai-settings'
+import { AISettings } from '@/lib/types/ai-settings-types'
 
 export async function POST(request: Request) {
   try {

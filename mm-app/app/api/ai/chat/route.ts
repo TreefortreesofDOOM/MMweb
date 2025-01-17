@@ -8,7 +8,7 @@ import { findRelevantChatHistory, formatChatContext } from '@/lib/ai/chat-histor
 import { UnifiedAIClient } from '@/lib/ai/unified-client';
 import { AIFunction } from '@/lib/ai/providers/base';
 import { artworkTools } from '@/lib/ai/gemini';
-import { env } from '@/lib/env';
+import { env } from '@/lib/constants/env';
 import type { UserRole } from '@/lib/navigation/types';
 import { type AssistantPersona, PERSONA_MAPPING } from '@/lib/unified-ai/types';
 
@@ -75,7 +75,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       prompt, 
       artworkId, 
       imageUrl, 
-      role = PERSONA_MAPPING[(profile?.mapped_role as UserRole) || 'user'],
+      role = PERSONA_MAPPING[profile?.mapped_role as keyof typeof PERSONA_MAPPING || 'user'],
       chatHistory = [],
       context,
       systemInstruction: customInstruction,

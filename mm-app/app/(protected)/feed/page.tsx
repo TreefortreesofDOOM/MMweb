@@ -2,7 +2,9 @@ import { Metadata } from 'next'
 import { FeedView } from '@/components/feed/feed-view'
 import { createClient } from '@/lib/supabase/supabase-server'
 import { redirect } from 'next/navigation'
-import { logError } from '@/lib/utils/error-utils'
+import { ErrorService } from '@/lib/utils/error/error-service-utils'
+
+const errorService = ErrorService.getInstance()
 
 export const metadata: Metadata = {
   title: 'Feed | Modern Masterpieces',
@@ -14,7 +16,7 @@ export default async function FeedPage() {
   const { data: { session } } = await supabase.auth.getSession()
 
   if (!session) {
-    logError({
+    errorService.logError({
       code: 'UI_FEED_001',
       message: 'No session found for feed page',
       context: 'FeedPage',
@@ -33,7 +35,7 @@ export default async function FeedPage() {
 
   const isArtist = profile?.role === 'verified_artist' || profile?.role === 'emerging_artist'
 
-  logError({
+  errorService.logError({
     code: 'UI_FEED_002',
     message: 'Feed page loaded',
     context: 'FeedPage',

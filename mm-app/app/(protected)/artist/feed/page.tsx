@@ -2,10 +2,11 @@ import { Metadata } from 'next'
 import { FeedView } from '@/components/feed/feed-view'
 import { getArtistProfile } from '@/lib/actions/artist/artist-actions'
 import { redirect } from 'next/navigation'
-import { logError } from '@/lib/utils/error-utils'
+import { ErrorService } from '@/lib/utils/error/error-service-utils'
 import { createClient } from '@/lib/supabase/supabase-server'
-import type { Profile } from '@/lib/types/feed/feed-types'
 import type { Database } from '@/lib/types/database.types'
+
+const errorService = ErrorService.getInstance()
 
 type ArtistProfile = Database['public']['Tables']['profiles']['Row']
 
@@ -20,7 +21,7 @@ export default async function ArtistFeedPage(): Promise<React.ReactElement> {
   const { data: { session } } = await supabase.auth.getSession()
   
   if (!session) {
-    logError({
+    errorService.logError({
       code: 'UI_FEED_001',
       message: 'User not authenticated for artist feed',
       context: 'ArtistFeedPage',
@@ -33,7 +34,7 @@ export default async function ArtistFeedPage(): Promise<React.ReactElement> {
   const artist: ArtistProfile | null = await getArtistProfile()
   
   if (!artist) {
-    logError({
+    errorService.logError({
       code: 'UI_FEED_002',
       message: 'User is not an artist',
       context: 'ArtistFeedPage',
@@ -45,7 +46,7 @@ export default async function ArtistFeedPage(): Promise<React.ReactElement> {
     redirect('/patron/feed')
   }
 
-  logError({
+  errorService.logError({
     code: 'UI_FEED_003',
     message: 'Artist feed page loaded',
     context: 'ArtistFeedPage',
@@ -63,7 +64,7 @@ export default async function ArtistFeedPage(): Promise<React.ReactElement> {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Artist Feed</h1>
           <p className="text-muted-foreground">
-            Stay connected with your art community and followers
+            Stay connected with artists and followers
           </p>
         </div>
         <FeedView artistId={artist.id} />

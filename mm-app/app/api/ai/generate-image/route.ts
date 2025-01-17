@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { env } from '@/lib/env'
+import { env } from '@/lib/constants/env'
 import { createClient } from '@supabase/supabase-js'
 
 // Initialize Supabase client

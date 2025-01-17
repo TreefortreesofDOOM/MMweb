@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { UnifiedAIClient, PortfolioAnalyzer, collectPortfolioData, PortfolioAnalysisType } from '@/lib/ai'
-import { env } from '@/lib/env'
+import { env } from '@/lib/constants/env'
 import { getAISettings } from '@/lib/actions/ai-settings-actions'
 import { createActionClient } from '@/lib/supabase/supabase-action-utils'
 import { UserRole } from '@/lib/navigation/types'

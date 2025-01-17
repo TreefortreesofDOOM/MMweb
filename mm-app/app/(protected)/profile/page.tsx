@@ -8,7 +8,7 @@ import { createActionClient } from "@/lib/supabase/supabase-action-utils"
 import { ArtistProfileCard } from "@/components/artist/artist-profile-card"
 import { getGhostProfileByEmail } from "@/lib/actions/ghost-profiles"
 import { GhostProfileNotification } from "@/components/ghost-profiles/ghost-profile-notification"
-import { isAnyArtist } from "@/lib/utils/role-utils"
+import { isAnyArtist } from "@/lib/utils/auth/role-utils"
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 

@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
 import type { UserRole } from '@/lib/types/custom-types'
-import { searchArtists } from '@/lib/utils/artist-search-utils'
+import { ArtistService } from '@/lib/utils/artist/artist-service-utils'
 import { trackArtistDirectoryView } from '@/lib/actions/analytics'
 import { useDebounceValue } from '@/hooks/use-debounce'
 import { ArtistSearch, type ArtistFilters } from '@/components/artist/artist-search'
@@ -83,7 +83,7 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
       setIsLoading(true);
       setError(null);
       
-      const { artists: newArtists, hasMore: moreResults } = await searchArtists({
+      const results = await ArtistService.getInstance().searchArtists({
         query: debouncedQuery,
         artistType: filters.artistType === 'all' ? undefined : filters.artistType,
         sortBy: filters.sortBy,
@@ -98,12 +98,12 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
         console.log('State update:', {
           currentPage: currentPageRef.current,
           existingArtists: prev.length,
-          newArtists: newArtists.length,
+          newArtists: results.artists.length,
           existingIds: Array.from(existingIds),
         });
         
         // Filter out any artists we've already rendered
-        const uniqueNewArtists = newArtists.filter(artist => !existingIds.has(artist.id));
+        const uniqueNewArtists = results.artists.filter(artist => !existingIds.has(artist.id));
         
         // Sort unique artists to maintain consistent order
         uniqueNewArtists.sort((a, b) => {
@@ -134,13 +134,13 @@ export function ArtistsClient({ initialArtists }: ArtistsClientProps) {
         
         // If we're on page 1, return just the new artists
         // Otherwise append unique new artists to existing ones
-        const updatedArtists = currentPageRef.current === 1 ? newArtists : [...prev, ...uniqueNewArtists];
+        const updatedArtists = currentPageRef.current === 1 ? results.artists : [...prev, ...uniqueNewArtists];
         
         // Update hasMore based on whether we found any unique artists
-        setHasMore(moreResults && uniqueNewArtists.length > 0);
+        setHasMore(results.hasMore && uniqueNewArtists.length > 0);
         
         // Update page number if we found unique artists
-        if (moreResults && uniqueNewArtists.length > 0) {
+        if (results.hasMore && uniqueNewArtists.length > 0) {
           currentPageRef.current += 1;
         }
         

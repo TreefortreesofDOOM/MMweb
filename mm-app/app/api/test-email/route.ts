@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { Resend } from 'resend'
-import { env } from '@/lib/env'
+import { env } from '@/lib/constants/env'
 
 // TODO: Change to noreply@meaningmachine.com after domain verification is complete
 const resend = new Resend(env.RESEND_API_KEY)

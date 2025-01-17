@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/supabase-server';
 import { ArtworkQR } from '@/components/artwork/artwork-qr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-import { formatPrice } from '@/lib/utils/common-utils';
+import { formatPrice } from '@/lib/utils/core/common-utils';
 import { PageViewTracker } from '@/components/analytics/page-view-tracker';
 import { FavoriteButton } from '@/components/social';
 

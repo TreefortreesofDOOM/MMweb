@@ -10,7 +10,7 @@ import { SettingsProvider } from '@/components/providers/settings-provider';
 import { UnifiedAIProvider } from '@/lib/unified-ai/context';
 import { UnifiedAI } from '@/components/unified-ai/unified-ai';
 import { QueryProvider } from '@/components/providers/query-provider';
-import { cn } from '@/lib/utils/common-utils';
+import { cn } from '@/lib/utils/core/common-utils';
 
 const inter = Inter({ subsets: ['latin'] });
 

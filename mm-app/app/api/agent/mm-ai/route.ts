@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { validateAgentAuth } from '@/lib/auth/agent'
 import { validateAdminAuth } from '@/lib/auth/admin'
 import { postMMAIArtwork } from '@/lib/actions/admin/mm-ai-actions'
-import type { PostArtworkParams } from '@/lib/types/admin/mm-ai-types'
+import type { PostArtworkParams } from '@/lib/types/mm-ai-types'
 
 export async function POST(request: NextRequest) {
   // Try agent auth first
