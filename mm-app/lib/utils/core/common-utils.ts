@@ -1,18 +1,14 @@
-import { clsx, type ClassValue } from "clsx";
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { redirect } from "next/navigation";
+export { formatCurrency as formatPrice } from './format-utils';
 
+/**
+ * Combines multiple class names using clsx and tailwind-merge
+ * Useful for conditional and dynamic Tailwind CSS classes
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
-}
-
-export function formatPrice(price: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(price);
 }
 
 /**

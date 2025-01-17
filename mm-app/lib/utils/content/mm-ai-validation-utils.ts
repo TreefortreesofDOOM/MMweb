@@ -1,5 +1,5 @@
-import { ok, err, type Result } from '@/lib/utils/result'
-import type { MMAIError, PostArtworkParams } from '@/lib/types/admin/mm-ai-types'
+import { ok, err, type Result } from '@/lib/utils/core/result-utils'
+import type { MMAIError, PostArtworkParams } from '@/lib/types/mm-ai-types'
 
 const MAX_TITLE_LENGTH = 500
 const MAX_DESCRIPTION_LENGTH = 2000

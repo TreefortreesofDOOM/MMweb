@@ -1,12 +1,15 @@
-import { env } from '@/lib/env'
+import { env } from '@/lib/constants/env'
 import { createActionClient } from '@/lib/supabase/supabase-action'
-import { ok, err, type Result } from '@/lib/utils/result'
-import { logError } from '@/lib/utils/error-utils'
-import { validateParams } from '@/lib/utils/mm-ai-validation'
+import { ok, err, type Result } from '@/lib/utils/core/result-utils'
+import { ErrorService } from '@/lib/utils/error/error-service-utils'
+import { validateParams } from '@/lib/utils/content/mm-ai-validation-utils'
 import { updateArtworkEmbeddings } from '@/lib/ai/embeddings/index'
-import type { ArtworkGenerationContext, ArtworkGenerationMetadata } from '../unified-ai/artwork-types'
-import type { MMAIError } from '@/lib/types/admin/mm-ai-types'
+import { MM_AI_PROFILE_ID } from '@/lib/constants/mm-ai-constants'
+import type { ArtworkGenerationContext, ArtworkGenerationMetadata } from '@/lib/unified-ai/artwork-types'
+import type { MMAIError } from '@/lib/types/mm-ai-types'
 import type { Database, TablesInsert } from '@/lib/types/database.types'
+
+const errorService = ErrorService.getInstance()
 
 export interface UnifiedAIArtworkParams {
   title: string
@@ -40,7 +43,7 @@ export async function postUnifiedAIArtwork(
       }
     })
     if (!validationResult.ok) {
-      logError({
+      errorService.logError({
         code: 'MMAI_001',
         message: 'Validation failed',
         context: 'postUnifiedAIArtwork:validation',
@@ -59,7 +62,7 @@ export async function postUnifiedAIArtwork(
       description: artwork.description,
       images: artwork.images as Database['public']['Tables']['artworks']['Insert']['images'],
       keywords: artwork.tags,
-      artist_id: '00000000-0000-4000-a000-000000000001', // MM AI ID
+      artist_id: MM_AI_PROFILE_ID,
       status: 'published',
       ai_generated: true,
       ai_context: artwork.aiContext as Database['public']['Tables']['artworks']['Insert']['ai_context'],
@@ -81,7 +84,7 @@ export async function postUnifiedAIArtwork(
       .single()
 
     if (error) {
-      logError({
+      errorService.logError({
         code: 'MMAI_003',
         message: 'Failed to insert artwork',
         context: 'postUnifiedAIArtwork:insert',
@@ -107,10 +110,10 @@ export async function postUnifiedAIArtwork(
         ai_context: artwork.aiContext,
         ai_metadata: artwork.metadata,
         status: 'published',
-        artist_id: '00000000-0000-4000-a000-000000000001' // MM AI ID
+        artist_id: MM_AI_PROFILE_ID
       });
     } catch (embeddingError) {
-      logError({
+      errorService.logError({
         code: 'MMAI_004',
         message: 'Failed to generate embeddings',
         context: 'postUnifiedAIArtwork:embeddings',
@@ -123,7 +126,7 @@ export async function postUnifiedAIArtwork(
 
     return ok({ id: data.id })
   } catch (error) {
-    logError({
+    errorService.logError({
       code: 'MMAI_005',
       message: 'Unexpected error in unified-ai artwork post',
       context: 'postUnifiedAIArtwork:unexpected',
