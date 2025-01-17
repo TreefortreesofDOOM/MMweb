@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
-import { ARTIST_ROLES, type ArtistProfile, type ArtistFeatures, type VerificationRequirements } from '@/lib/types/custom-types';
+import type { ArtistProfile, ArtistFeatures, VerificationRequirements } from '@/lib/types/custom-types';
 
 type ArtistWithCount = ArtistProfile & {
   artworks: [{

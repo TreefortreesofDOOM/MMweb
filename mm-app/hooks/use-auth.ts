@@ -4,17 +4,8 @@ import { createBrowserClient } from '@/lib/supabase/supabase-client';
 import { useEffect, useState } from 'react';
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import type { Database } from '@/lib/types/database.types';
-import { 
-  type Profile,
-  type ArtistProfile,
-  type ArtistFeatures,
-  type VerificationRequirements,
-  isVerifiedArtist,
-  isEmergingArtist,
-  isAnyArtist,
-  isAdmin,
-  isPatron
-} from '@/lib/types/custom-types';
+import type { Profile, ArtistProfile, ArtistFeatures, VerificationRequirements } from '@/lib/types/custom-types';
+import { isVerifiedArtist, isEmergingArtist, isAnyArtist, isAdmin, isPatron } from '@/lib/utils/auth/role-utils';
 
 export interface AuthState {
   user: User | null;
