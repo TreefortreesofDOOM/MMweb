@@ -9,7 +9,7 @@ import {
   ResponsiveContainer
 } from 'recharts'
 import { format } from 'date-fns'
-import { formatPrice } from '@/lib/utils/common-utils'
+import { formatPrice } from '@/lib/utils/core/common-utils'
 
 interface ChartDataPoint {
   date: string

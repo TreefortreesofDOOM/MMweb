@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
 import { useAnalysis } from '@/lib/unified-ai/use-analysis';
 import { useUnifiedAIActions } from '@/lib/unified-ai/hooks';
-import { ANALYSIS_TYPES } from '@/lib/unified-ai/types';
 import { createAnalysisResult } from '@/lib/unified-ai/utils';
 import { useUnifiedAI } from '@/lib/unified-ai/context';
 

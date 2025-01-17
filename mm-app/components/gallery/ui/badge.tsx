@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/core/common-utils';
 import { Badge } from '@/components/ui/badge';
 import { GalleryWallType } from '@/lib/types/gallery-types';
 

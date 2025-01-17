@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils/core/common-utils'
 import { fadeIn } from '@/lib/unified-ai/animations'
 import type { UnifiedAITransitionProps } from '@/lib/unified-ai/types'
 

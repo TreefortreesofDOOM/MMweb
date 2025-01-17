@@ -5,7 +5,7 @@ import { useFormContext } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
 import { Switch } from '@/components/ui/switch';
 import { type UserSettings, type NotificationSettings } from '@/lib/types/settings-types';
-import { NOTIFICATION_TYPES, getNotificationSettingsWithDefaults } from '@/lib/utils/settings-utils';
+import { NOTIFICATION_TYPES, getNotificationSettingsWithDefaults } from '@/lib/utils/user/settings-utils';
 
 type NotificationKey = keyof NotificationSettings;
 

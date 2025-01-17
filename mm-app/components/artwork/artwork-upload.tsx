@@ -2,10 +2,9 @@
 
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Button } from '@/components/ui/button';
 import { uploadArtworkImage } from '@/lib/actions';
 import { Loader2, ImageIcon } from 'lucide-react';
-import { cn } from '@/lib/utils/common-utils';
+import { cn } from '@/lib/utils/core/common-utils';
 import { SortableImageGrid } from './sortable-image-grid';
 
 export interface ArtworkImage {

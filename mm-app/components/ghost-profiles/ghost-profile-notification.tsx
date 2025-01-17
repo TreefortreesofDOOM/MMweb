@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import type { GhostProfile } from '@/lib/types/ghost-profiles';
+import type { GhostProfile } from '@/lib/types/ghost-profiles-types';
 
 interface GhostProfileNotificationProps {
   ghostProfile: GhostProfile;

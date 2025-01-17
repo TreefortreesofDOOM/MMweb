@@ -15,7 +15,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { toast } from 'sonner'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { cn } from '@/lib/utils/common-utils'
+import { cn } from '@/lib/utils/core/common-utils'
 import { EditNotesDialog } from './edit-notes-dialog'
 import { CollectionArtworkCard } from './collection-artwork-card'
 

@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2 } from 'lucide-react'
-import type { AnalyticsData } from '@/lib/types/analytics.types'
+import type { AnalyticsData } from '@/lib/types/analytics-types'
 import { getArtistAnalytics } from '@/lib/actions/analytics'
 import { MetricsCard } from './ui/metrics-card'
 import { AnalyticsChart } from './ui/analytics-chart'
 import { EmptyState } from './ui/empty-state'
-import { formatPrice } from '@/lib/utils/common-utils'
+import { formatPrice } from '@/lib/utils/core/common-utils'
 import { useAuth } from '@/hooks/use-auth'
-import { isVerifiedArtist } from '@/lib/utils/role-utils'
+import { isVerifiedArtist } from '@/lib/utils/auth/role-utils'
 
 interface ArtistDashboardProps {
   artistId: string

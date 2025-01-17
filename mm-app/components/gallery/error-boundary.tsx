@@ -2,7 +2,7 @@
 
 import { ErrorBoundary } from 'react-error-boundary';
 import { Button } from '@/components/ui/button';
-import { GalleryError } from '@/lib/types/gallery-error-types';
+import { GalleryError } from '@/lib/utils/error/error-service-utils';
 import { GALLERY_ERROR_CODES } from '@/lib/constants/error-codes';
 
 interface FallbackProps {

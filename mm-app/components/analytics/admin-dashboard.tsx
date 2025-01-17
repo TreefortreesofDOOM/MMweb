@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, Users, Palette, ShoppingBag, UserCheck2 } from 'lucide-react'
-import type { AnalyticsData } from '@/lib/types/analytics.types'
+import type { AnalyticsData } from '@/lib/types/analytics-types'
 import { getAdminAnalytics } from '@/lib/actions/analytics'
 import { MetricsCard } from './ui/metrics-card'
 import { AnalyticsChart } from './ui/analytics-chart'

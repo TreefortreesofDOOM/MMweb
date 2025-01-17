@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Database } from '@/lib/types/database.types'
-import { formatCurrency } from '@/lib/utils/format-utils'
+import { formatCurrency } from '@/lib/utils/core/format-utils'
 
 type GhostProfile = Database['public']['Tables']['ghost_profiles']['Row']
 

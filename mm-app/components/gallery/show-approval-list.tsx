@@ -6,9 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import type { GalleryShowWithDetails } from '@/lib/types/gallery-types';
-import type { Database } from '@/lib/types/database.types';
 import Image from 'next/image';
-import { getImageUrl } from '@/lib/utils';
+import { getImageUrl } from '@/lib/utils/content/image-utils';
 import { useState } from 'react';
 
 interface ArtworkImage {

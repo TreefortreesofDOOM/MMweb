@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils/core/common-utils'
 import { useUnifiedAIMode, useUnifiedAIVisibility, useUnifiedAIActions } from '@/lib/unified-ai/hooks'
 import type { UnifiedAIContainerProps } from '@/lib/unified-ai/types'
 import { useState } from 'react'

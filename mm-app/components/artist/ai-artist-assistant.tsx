@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import Link from "next/link";
 import { Wand2, FileText, Image, BookOpen } from "lucide-react";
 import { useCallback } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/core/common-utils";
 import { useUnifiedAIActions } from "@/lib/unified-ai/hooks";
 
 interface AIArtistAssistantProps {

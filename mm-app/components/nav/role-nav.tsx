@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { useUnifiedAIVisibility } from '@/lib/unified-ai/hooks';
 import { UnifiedAI } from '@/components/unified-ai/unified-ai';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/core/common-utils';
 
 interface RoleNavProps {
   role: unknown;

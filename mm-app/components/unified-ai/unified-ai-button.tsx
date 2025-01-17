@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils/core/common-utils'
 import { useUnifiedAIMode, useUnifiedAIActions, useUnifiedAIVisibility } from '@/lib/unified-ai/hooks'
 import type { UnifiedAIButtonProps } from '@/lib/unified-ai/types'
 import { MessageCircle } from 'lucide-react'

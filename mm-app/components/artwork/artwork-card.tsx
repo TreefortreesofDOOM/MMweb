@@ -3,12 +3,12 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatPrice } from "@/lib/utils/common-utils";
+import { formatPrice } from "@/lib/utils/core/common-utils";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from "@/lib/utils/common-utils";
+import { cn } from "@/lib/utils/core/common-utils";
 import { FavoriteButton } from '@/components/social';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 

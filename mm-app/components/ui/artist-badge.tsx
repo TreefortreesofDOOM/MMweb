@@ -1,10 +1,11 @@
 'use client';
 
+import { cn } from '@/lib/utils/core/common-utils';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CheckCircle2, Star } from 'lucide-react';
 import { type UserRole } from '@/lib/types/custom-types';
-import { isVerifiedArtist } from '@/lib/utils/role-utils';
+import { isVerifiedArtist } from '@/lib/utils/auth/role-utils';
 
 export interface ArtistBadgeProps {
   role: UserRole;

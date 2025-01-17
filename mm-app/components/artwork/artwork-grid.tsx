@@ -8,15 +8,21 @@ import { Loader2 } from 'lucide-react';
 interface Artwork {
   id: string;
   title: string;
-  description: string;
-  price: number;
-  status: string;
+  description: string | null;
+  price: number | null;
+  status: 'draft' | 'published';
+  artist_id: string;
   images: Array<{
     url: string;
-    isPrimary: boolean;
+    isPrimary?: boolean;
     order: number;
   }>;
   similarity?: number;
+  profiles?: {
+    id: string;
+    avatar_url: string;
+    name: string;
+  };
 }
 
 interface ArtworkGridProps {

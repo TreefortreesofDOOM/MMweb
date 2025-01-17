@@ -7,8 +7,10 @@ import { FeedItem } from './ui/feed-item'
 import { FeedSkeleton } from './ui/feed-skeleton'
 import { Button } from '@/components/ui/button'
 import { EmptyFeed } from './ui/empty-feed'
-import type { FeedView as FeedViewType } from '@/lib/types/feed/feed-types'
-import { logError } from '@/lib/utils/error-utils'
+import type { FeedView as FeedViewType } from '@/lib/types/feed-types'
+import { ErrorService } from '@/lib/utils/error/error-service-utils'
+
+const errorService = ErrorService.getInstance()
 
 export interface FeedViewProps {
   patronId?: string
@@ -35,7 +37,7 @@ export function FeedView({ patronId, artistId }: FeedViewProps) {
     if (loadingRef.current) return
     loadingRef.current = true
 
-    logError({
+    errorService.logError({
       code: 'UI_FEED_001',
       message: 'Load feed called',
       context: 'FeedView:loadFeedStart',
@@ -47,7 +49,7 @@ export function FeedView({ patronId, artistId }: FeedViewProps) {
 
     // Early return if no userId
     if (!userId) {
-      logError({
+      errorService.logError({
         code: 'UI_FEED_002',
         message: 'No user ID provided for feed',
         context: 'FeedView:noUserId',
@@ -63,7 +65,7 @@ export function FeedView({ patronId, artistId }: FeedViewProps) {
     setIsLoading(true)
     try {
       const feedData = await getFeed(userId, currentPage)
-      logError({
+      errorService.logError({
         code: 'UI_FEED_003',
         message: 'Feed data received',
         context: 'FeedView:dataReceived',
@@ -82,7 +84,7 @@ export function FeedView({ patronId, artistId }: FeedViewProps) {
         hasMore: feedData.hasMore
       }))
     } catch (error) {
-      logError({
+      errorService.logError({
         code: 'UI_FEED_004',
         message: 'Feed load error',
         context: 'FeedView:loadError',

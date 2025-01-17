@@ -1,7 +1,7 @@
 'use client';
 
 import { useSettings } from '@/hooks/use-settings';
-import { AI_PERSONALITIES } from '@/lib/utils/settings-utils';
+import { AI_PERSONALITIES } from '@/lib/utils/user/settings-utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { useFormContext } from 'react-hook-form';

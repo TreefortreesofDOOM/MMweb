@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils/common-utils';
+import { cn } from '@/lib/utils/core/common-utils';
 import { RoleNavigation, NavItem } from '@/lib/navigation/types';
 import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertTriangle } from 'lucide-react'
-import type { FeedError } from '@/lib/types/feed/feed-types'
+import type { FeedError } from '@/lib/types/feed-types'
 
 export interface FeedErrorProps {
   error: FeedError

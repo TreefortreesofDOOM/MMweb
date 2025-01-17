@@ -6,9 +6,9 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/core/common-utils';
 import { type UserSettings } from '@/lib/types/settings-types';
-import { ART_MEDIUMS, getValidArtMediums } from '@/lib/utils/settings-utils';
+import { ART_MEDIUMS, getValidArtMediums } from '@/lib/utils/user/settings-utils';
 
 export const MediumSelector: FC = () => {
   const { control, watch } = useFormContext<UserSettings>();

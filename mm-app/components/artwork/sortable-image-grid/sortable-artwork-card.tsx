@@ -9,10 +9,11 @@ interface SortableArtworkCardProps {
   artwork: {
     id: string;
     title: string;
-    price: number;
-    status: string;
+    price: number | null;
+    status: 'draft' | 'published';
     images: ArtworkImage[];
-    description?: string;
+    description: string | null;
+    artist_id: string;
     profiles?: {
       id: string;
       avatar_url: string;

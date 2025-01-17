@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { isVerifiedArtist } from '@/lib/types/custom-types';
+import { isAnyArtist, isVerifiedArtist } from '@/lib/utils/auth/role-utils';
 import type { UserRole } from '@/lib/types/custom-types';
 
 interface StripeOnboardingProps {

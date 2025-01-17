@@ -10,7 +10,7 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import type { Database } from '@/lib/types/database.types';
 import type { DayProps } from 'react-day-picker';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/core/common-utils';
 import { buttonVariants } from '@/components/ui/button';
 
 type GalleryDateRow = Database['public']['Tables']['gallery_dates']['Row'];

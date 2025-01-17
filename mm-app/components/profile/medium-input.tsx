@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { cn } from '@/lib/utils/common-utils'
+import { cn } from '@/lib/utils/core/common-utils'
 import { SUGGESTED_MEDIUMS, MAX_MEDIUM_LENGTH, MAX_MEDIUMS_PER_PROFILE } from '@/lib/constants/mediums'
 
 interface MediumInputProps {

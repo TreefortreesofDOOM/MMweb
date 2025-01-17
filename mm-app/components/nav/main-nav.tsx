@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils/common-utils';
+import { cn } from '@/lib/utils/core/common-utils';
 import { Logo } from '@/components/nav/logo';
 import type { UserRole } from '@/lib/navigation/types';
 import { LayoutDashboard } from 'lucide-react';

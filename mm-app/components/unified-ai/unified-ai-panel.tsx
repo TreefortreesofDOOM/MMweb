@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils/core/common-utils'
 import { slideIn } from '@/lib/unified-ai/animations'
 import { useUnifiedAIMode } from '@/lib/unified-ai/hooks'
 import type { UnifiedAIPanelProps } from '@/lib/unified-ai/types'

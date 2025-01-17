@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useSettings } from '@/hooks/use-settings';
 import { useAuth } from '@/hooks/use-auth';
 import { UserSettings, userSettingsSchema } from '@/lib/types/settings-types';
-import { defaultSettings, canUpdateRoleSettings } from '@/lib/utils/settings-utils';
+import { defaultSettings, canUpdateRoleSettings } from '@/lib/utils/user/settings-utils';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';

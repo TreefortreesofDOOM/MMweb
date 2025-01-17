@@ -4,7 +4,7 @@ import { useVerification } from "@/hooks/use-verification";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, XCircle, ExternalLink, AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils/common-utils";
+import { cn } from "@/lib/utils/core/common-utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {

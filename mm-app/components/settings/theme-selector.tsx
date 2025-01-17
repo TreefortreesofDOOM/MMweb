@@ -5,7 +5,7 @@ import { useFormContext } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type UserSettings } from '@/lib/types/settings-types';
-import { getThemeWithFallback } from '@/lib/utils/settings-utils';
+import { getThemeWithFallback } from '@/lib/utils/user/settings-utils';
 
 export const ThemeSelector: FC = () => {
   const { control } = useFormContext<UserSettings>();

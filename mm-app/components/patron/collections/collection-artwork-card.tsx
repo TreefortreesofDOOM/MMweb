@@ -2,12 +2,12 @@
 
 import { type FC } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
-import { formatPrice } from "@/lib/utils/common-utils"
+import { formatPrice } from "@/lib/utils/core/common-utils"
 import Image from "next/image"
 import { useState } from "react"
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils/common-utils"
+import { cn } from "@/lib/utils/core/common-utils"
 import type { CollectionItem } from "@/lib/types/patron-types"
 
 interface CollectionArtworkCardProps {

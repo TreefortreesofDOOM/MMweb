@@ -2,7 +2,7 @@
 
 import { createContext, useContext, type ReactNode } from 'react'
 import type { ArtistProfile } from '@/lib/types/custom-types'
-import { isVerifiedArtist, isEmergingArtist, getRolePermissions } from '@/lib/utils/role-utils'
+import { isVerifiedArtist, isEmergingArtist, getRolePermissions } from '@/lib/utils/auth/role-utils'
 
 interface ArtistContextType {
   profile: ArtistProfile | null

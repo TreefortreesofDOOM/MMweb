@@ -3,8 +3,8 @@ import Image from 'next/image'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { formatDistanceToNow } from 'date-fns'
-import type { FeedItem as FeedItemType } from '@/lib/types/feed/feed-types'
-import { cn } from '@/lib/utils'
+import type { FeedItem as FeedItemType } from '@/lib/types/feed-types'
+import { cn } from '@/lib/utils/core/common-utils'
 import { Badge } from '@/components/ui/badge'
 
 export interface FeedItemProps {

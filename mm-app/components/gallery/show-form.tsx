@@ -22,8 +22,8 @@ import { DateRangePicker } from './calendar/date-picker';
 import { ArtworkSelector } from './artwork-selector';
 import { GalleryErrorBoundary } from './error-boundary';
 import { createGalleryShow, updateGalleryShow } from '@/lib/actions/gallery';
-import { GalleryError } from '@/lib/types/gallery-error-types';
 import { GALLERY_ERROR_CODES } from '@/lib/constants/error-codes';
+import { GalleryError } from '@/lib/utils/error/error-service-utils';
 import type { GalleryShow, GalleryShowWithDetails } from '@/lib/types/gallery-types';
 import type { DateRange } from 'react-day-picker';
 
