@@ -35,11 +35,4 @@ export type ArtistProfile = Profile & {
 // Extended Artwork Type with Artist Profile
 export interface ArtworkWithArtist extends Artwork {
   profiles: Pick<Profile, 'id' | 'name' | 'avatar_url' | 'bio'>
-}
-
-// Helper functions for role checks
-export const isVerifiedArtist = (role: UserRole | null): boolean => role === 'verified_artist'
-export const isEmergingArtist = (role: UserRole | null): boolean => role === 'emerging_artist'
-export const isAnyArtist = (role: UserRole | null): boolean => isVerifiedArtist(role) || isEmergingArtist(role)
-export const isAdmin = (role: UserRole | null): boolean => role === 'admin'
-export const isPatron = (role: UserRole | null): boolean => role === 'patron' 
+} 

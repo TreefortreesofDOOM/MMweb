@@ -1,5 +1,4 @@
 import { type SupabaseClient } from '@supabase/supabase-js';
-import { type ArtistWithCount } from '@/app/(public)/artists/artists-client';
 
 export interface SearchParams {
   query?: string;

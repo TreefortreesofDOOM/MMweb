@@ -1,4 +1,4 @@
-import type { Database } from '../database.types'
+import type { Database } from './database.types'
 
 type DbProfile = Database['public']['Tables']['profiles']['Row']
 type DbArtwork = Database['public']['Tables']['artworks']['Row']
