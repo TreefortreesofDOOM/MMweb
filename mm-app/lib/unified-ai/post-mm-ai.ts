@@ -1,6 +1,6 @@
 import { postUnifiedAIArtwork } from '../utils/post-artwork-utils'
-import type { Result } from '@/lib/utils/result'
-import type { MMAIError } from '@/lib/types/admin/mm-ai-types'
+import type { Result } from '@/lib/utils/core/result-utils'
+import type { MMAIError } from '@/lib/types/mm-ai-types'
 
 /**
  * Simple interface for posting MM AI content
