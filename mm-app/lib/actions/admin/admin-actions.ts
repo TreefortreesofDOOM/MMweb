@@ -4,7 +4,7 @@ import { createActionClient } from '@/lib/supabase/supabase-action-utils';
 import { redirect } from 'next/navigation';
 import { sendArtistApplicationEmail } from '@/lib/emails/artist-notifications';
 import { getAdmin } from '../helpers';
-import { encodedRedirect } from "@/lib/utils/common-utils";
+import { encodedRedirect } from "@/lib/utils/core/common-utils";
 
 export async function getArtistApplications() {
   const user = await getAdmin();

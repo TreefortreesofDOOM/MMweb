@@ -1,10 +1,10 @@
 'use server'
 
 import { createActionClient } from '@/lib/supabase/supabase-action'
-import { logError } from '@/lib/utils/error-utils'
-import type { FeedView, Profile, Artwork } from '@/lib/types/feed/feed-types'
+import { ErrorService } from '@/lib/utils/error/error-service-utils'
+import type { FeedView, Profile, Artwork } from '@/lib/types/feed-types'
 import type { Json } from '@/lib/types/database.types'
-import { MM_AI_PROFILE_ID } from '@/lib/types/admin/mm-ai-types'
+import { MM_AI_PROFILE_ID } from '@/lib/constants/mm-ai-constants'
 
 type ImageObject = {
   url: string
@@ -14,12 +14,14 @@ type ImageObject = {
   [key: string]: string | number | undefined
 }
 
+const errorService = ErrorService.getInstance()
+
 export async function getFeed(
   userId: string,
   page = 1
 ): Promise<FeedView> {
   if (!userId) {
-    logError({
+    errorService.logError({
       code: 'FEED_001',
       message: 'Feed requested without userId',
       context: 'getFeed:initialization',
@@ -35,7 +37,7 @@ export async function getFeed(
   
   try {
     // Log the start of profile verification
-    logError({
+    errorService.logError({
       code: 'FEED_002',
       message: 'Starting profile verification',
       context: 'getFeed:profileCheck',
@@ -52,7 +54,7 @@ export async function getFeed(
       .single()
 
     if (profileError) {
-      logError({
+      errorService.logError({
         code: 'FEED_003',
         message: 'Profile fetch error',
         context: 'getFeed:profileError',
@@ -69,7 +71,7 @@ export async function getFeed(
     }
 
     if (!profile) {
-      logError({
+      errorService.logError({
         code: 'FEED_004',
         message: 'Profile not found',
         context: 'getFeed:profileMissing',
@@ -82,7 +84,7 @@ export async function getFeed(
     }
 
     // Log start of follows fetch with more details
-    logError({
+    errorService.logError({
       code: 'FEED_005',
       message: 'Starting follows fetch',
       context: 'getFeed:followsCheck',
@@ -102,7 +104,7 @@ export async function getFeed(
       .eq('follower_id', userId)
 
     if (followsError) {
-      logError({
+      errorService.logError({
         code: 'FEED_006',
         message: 'Follows fetch error',
         context: 'getFeed:followsError',
@@ -121,7 +123,7 @@ export async function getFeed(
     const followedIds = follows?.map(f => f.following_id) || []
     
     // Log follows data
-    logError({
+    errorService.logError({
       code: 'FEED_007',
       message: followedIds.length === 0 ? 'User has no follows' : `User follows ${followedIds.length} artists`,
       context: 'getFeed:followsData',
@@ -140,7 +142,7 @@ export async function getFeed(
     }
 
     // Log start of artworks fetch with query details
-    logError({
+    errorService.logError({
       code: 'FEED_008',
       message: 'Starting artworks fetch',
       context: 'getFeed:artworksCheck',
@@ -179,7 +181,7 @@ export async function getFeed(
       .range((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
 
     // Log raw items data
-    logError({
+    errorService.logError({
       code: 'FEED_009',
       message: items ? `Found ${items.length} artworks` : 'No artworks found',
       context: 'getFeed:artworksData',
@@ -200,7 +202,7 @@ export async function getFeed(
     })
 
     if (itemsError) {
-      logError({
+      errorService.logError({
         code: 'FEED_010',
         message: 'Failed to fetch artwork items',
         context: 'getFeed:artworksQuery',
@@ -224,7 +226,7 @@ export async function getFeed(
     // Data transformation error logging
     const feedItems = items?.map(item => {
       if (!item.created_at || !item.images || !item.artist) {
-        logError({
+        errorService.logError({
           code: 'FEED_011',
           message: 'Invalid artwork data structure',
           context: 'getFeed:dataTransformation',
@@ -257,7 +259,7 @@ export async function getFeed(
       }
 
       if (images.length === 0) {
-        logError({
+        errorService.logError({
           code: 'FEED_012',
           message: 'Artwork has no valid images',
           context: 'getFeed:imageValidation',
@@ -295,7 +297,7 @@ export async function getFeed(
     }).filter((item): item is NonNullable<typeof item> => item !== null) || []
 
     // Log final transformed items
-    logError({
+    errorService.logError({
       code: 'FEED_013',
       message: `Transformed ${feedItems.length} valid items`,
       context: 'getFeed:finalItems',
@@ -314,7 +316,7 @@ export async function getFeed(
       items: feedItems,
       hasMore: (items?.length || 0) === ITEMS_PER_PAGE
     }
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Feed error:', error)
     throw error instanceof Error 
       ? error 

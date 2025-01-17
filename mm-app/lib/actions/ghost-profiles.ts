@@ -1,8 +1,7 @@
 import { createActionClient } from '@/lib/supabase/supabase-action-utils'
 import { createServiceRoleClient } from '@/lib/supabase/service-role'
-import { stripe } from '@/lib/stripe/stripe-server-utils'
-import type { GhostProfile, StripeTransaction, PaymentStatus, DbGhostProfile } from '@/lib/types/ghost-profiles'
-import { toGhostProfile, toTransaction } from '@/lib/types/ghost-profiles'
+import type { GhostProfile, PaymentStatus } from '@/lib/types/ghost-profiles-types'
+import { toGhostProfile, toTransaction } from '@/lib/utils/user/ghost-profile-utils'
 import type { Database } from '@/lib/types/database.types'
 
 interface GuestPurchaseData {

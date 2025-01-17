@@ -4,7 +4,7 @@ import { createServiceRoleClient } from '@/lib/supabase/service-role'
 import { revalidatePath } from 'next/cache'
 import { type Database } from '@/lib/types/database.types'
 import type { CollectionWithItems, CollectionWithCount } from '@/lib/types/patron-types'
-import { toTransaction } from '@/lib/types/ghost-profiles'
+import { toTransaction } from '@/lib/utils/user/ghost-profile-utils'
 
 type DbCollectionItem = Database['public']['Tables']['collection_items']['Row'] & {
   transactions?: Database['public']['Tables']['transactions']['Row'] | null

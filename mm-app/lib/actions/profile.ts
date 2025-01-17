@@ -2,7 +2,7 @@
 
 import { createActionClient } from '@/lib/supabase/supabase-action-utils';
 import { redirect } from "next/navigation";
-import { encodedRedirect } from "@/lib/utils/common-utils";
+import { encodedRedirect } from "@/lib/utils/core/common-utils";
 import { Database } from "@/lib/types/database.types";
 import { trackProfileCompletion } from '@/lib/actions/analytics';
 

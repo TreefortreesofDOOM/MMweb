@@ -1,7 +1,7 @@
 'use server';
 
 import { createActionClient } from '@/lib/supabase/supabase-action-utils';
-import { encodedRedirect } from '@/lib/utils/common-utils';
+import { encodedRedirect } from '@/lib/utils/core/common-utils';
 import { trackOnboardingStep } from '@/lib/actions/analytics';
 import type { UserRole } from '@/lib/types/custom-types';
 

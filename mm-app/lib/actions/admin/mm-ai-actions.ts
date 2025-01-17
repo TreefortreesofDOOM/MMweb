@@ -1,11 +1,14 @@
 'use server'
 
 import { createActionClient } from '@/lib/supabase/supabase-action-utils'
-import { logError } from '@/lib/utils/error-utils'
-import { ok, err, type Result } from '@/lib/utils/result'
-import { validateParams } from '@/lib/utils/mm-ai-validation'
+import { ok, err, type Result } from '@/lib/utils/core/result-utils'
+import { validateParams } from '@/lib/utils/content/mm-ai-validation-utils'
 import { updateArtworkEmbeddings } from '@/lib/ai/embeddings'
-import type { MMAIError, PostArtworkParams } from '@/lib/types/admin/mm-ai-types'
+import { ErrorService } from '@/lib/utils/error/error-service-utils'
+import { MM_AI_PROFILE_ID } from '@/lib/constants/mm-ai-constants'
+import type { MMAIError, PostArtworkParams } from '@/lib/types/mm-ai-types'
+
+const errorService = ErrorService.getInstance()
 
 export async function postMMAIArtwork(
   params: PostArtworkParams,
@@ -14,7 +17,7 @@ export async function postMMAIArtwork(
   // Early return for validation
   const validationResult = await validateParams(params)
   if (!validationResult.ok) {
-    logError({
+    errorService.logError({
       code: 'MMAI_001',
       message: 'Validation failed',
       context: 'postMMAIArtwork:validation',
@@ -36,7 +39,7 @@ export async function postMMAIArtwork(
         description: params.description,
         images: params.images,
         keywords: params.tags,
-        artist_id: '00000000-0000-4000-a000-000000000001', // MM AI ID
+        artist_id: MM_AI_PROFILE_ID,
         status: 'published',
         ai_generated: true,
         ai_context: params.aiContext,
@@ -47,7 +50,7 @@ export async function postMMAIArtwork(
       .single()
 
     if (error) {
-      logError({
+      errorService.logError({
         code: 'MMAI_003',
         message: 'Failed to insert artwork',
         context: 'postMMAIArtwork:insert',
@@ -64,15 +67,19 @@ export async function postMMAIArtwork(
 
     // Generate and store embeddings for the artwork
     try {
-      const fullText = [
-        params.title,
-        params.description || '',
-        ...(params.tags || [])
-      ].join(' ')
-      
-      await updateArtworkEmbeddings(data.id, params.title, fullText)
+      await updateArtworkEmbeddings({
+        artwork_id: data.id,
+        title: params.title,
+        description: params.description || '',
+        tags: params.tags || [],
+        alt_texts: params.images.map(img => img.alt),
+        ai_context: params.aiContext,
+        ai_metadata: metadata,
+        status: 'published',
+        artist_id: MM_AI_PROFILE_ID
+      })
     } catch (embeddingError) {
-      logError({
+      errorService.logError({
         code: 'MMAI_004',
         message: 'Failed to generate embeddings',
         context: 'postMMAIArtwork:embeddings',
@@ -85,7 +92,7 @@ export async function postMMAIArtwork(
 
     return ok({ id: data.id })
   } catch (error) {
-    logError({
+    errorService.logError({
       code: 'MMAI_005',
       message: 'Unexpected error in MM AI post',
       context: 'postMMAIArtwork:unexpected',

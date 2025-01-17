@@ -3,9 +3,10 @@
 import { createActionClient } from '@/lib/supabase/supabase-action-utils';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { updateArtworkEmbeddings, findSimilarArtworks } from '@/lib/ai/embeddings';
+import type { SimilarityMatch } from '@/lib/ai/embeddings/types';
 import { blobToBase64 } from './helpers';
 import { getGeminiResponse } from '@/lib/ai/gemini';
-import { env } from '@/lib/env';
+import { env } from '@/lib/constants/env';
 import { ANALYSIS_PROMPTS, AI_TEMPERATURE } from '@/lib/ai/instructions';
 
 const genAI = new GoogleGenerativeAI(env.GOOGLE_AI_API_KEY);
@@ -113,7 +114,11 @@ export async function updateEmbeddings(artworkId: string, title: string, descrip
     if (!artwork) throw new Error('Artwork not found');
 
     // Update embeddings
-    await updateArtworkEmbeddings(artworkId, title, description);
+    await updateArtworkEmbeddings({
+      artwork_id: artworkId,
+      title,
+      description
+    });
     return { success: true };
   } catch (error: any) {
     console.error('Error updating embeddings:', error);
@@ -137,10 +142,10 @@ export async function getSimilar(artworkId: string) {
 
     // Find similar artworks
     const queryText = `${artwork.title} ${artwork.description || ''}`;
-    const similarArtworks = await findSimilarArtworks(queryText, {
+    const similarArtworks = (await findSimilarArtworks(queryText, {
       match_threshold: 0.7,
       match_count: 6
-    });
+    })) as SimilarityMatch[];
 
     if (!similarArtworks) return { artworks: [] };
 
@@ -148,7 +153,7 @@ export async function getSimilar(artworkId: string) {
     const { data: artworksData, error: artworksError } = await supabase
       .from('artworks')
       .select('*')
-      .in('id', similarArtworks.map(a => a.artwork_id))
+      .in('id', similarArtworks.map(a => a.id))
       .neq('id', artworkId)
       .eq('status', 'published');
 
@@ -158,7 +163,7 @@ export async function getSimilar(artworkId: string) {
     const sortedArtworks = artworksData
       .map(artwork => ({
         ...artwork,
-        similarity: similarArtworks.find(a => a.artwork_id === artwork.id)?.similarity || 0
+        similarity: similarArtworks.find(a => a.id === artwork.id)?.similarity || 0
       }))
       .sort((a, b) => b.similarity - a.similarity);
 
