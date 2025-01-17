@@ -1,6 +1,6 @@
+import { env } from '@/lib/constants/env'
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, Content, Tool as GoogleTool, SchemaType, Part, FunctionCallingMode } from '@google/generative-ai'
 import { AIServiceProvider, Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult } from './base'
-import { env } from '@/lib/env'
 
 interface GeminiFunctionCall {
   name: string;

@@ -1,5 +1,5 @@
 import { ChatGPTProvider } from '@/lib/ai/providers/chatgpt';
-import { env } from '@/lib/env';
+import { env } from '@/lib/constants/env';
 
 const OPENAI_DIMENSIONS = 1536;
 export const EMBEDDINGS_TABLE = 'artwork_embeddings_chatgpt';

@@ -1,6 +1,6 @@
-import { AIServiceFactory, AIConfig } from '@/lib/ai/factory'
 import { Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult, AIServiceProvider } from '@/lib/ai/providers/base'
-import { env } from '@/lib/env'
+import { AIServiceFactory, AIConfig } from '@/lib/ai/factory'
+import { env } from '@/lib/constants/env'
 
 // Default configuration using environment variables for provider selection
 const defaultConfig: AIConfig = {

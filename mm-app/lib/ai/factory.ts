@@ -1,7 +1,7 @@
+import { env } from '@/lib/constants/env'
 import { AIServiceProvider, Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult } from './providers/base'
 import { GeminiProvider, GeminiConfig } from './providers/gemini'
 import { ChatGPTProvider, ChatGPTConfig } from './providers/chatgpt'
-import { env } from '@/lib/env'
 import { createClient } from '@/lib/supabase/supabase-server'
 
 export type AIProvider = 'gemini' | 'chatgpt'

@@ -3,7 +3,7 @@ import type { AssistantCreateParams, AssistantTool } from 'openai/resources/beta
 import type { MessageContent } from 'openai/resources/beta/threads/messages'
 import type { ChatCompletionMessageParam, ChatCompletionContentPart } from 'openai/resources/chat/completions'
 import { AIServiceProvider, Message, Response, AIFunction, ImageData, Analysis, Vector, SearchResult } from './base'
-import { env } from '@/lib/env'
+import { env } from '@/lib/constants/env'
 import ms from 'ms'
 
 // Type guard for text content

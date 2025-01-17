@@ -1,6 +1,6 @@
+import { env } from '@/lib/constants/env';
 import { createClient } from '@/lib/supabase/supabase-server';
 import { generateEmbedding } from './embeddings';
-import { env } from '@/lib/env';
 
 interface ChatHistoryMatch {
   message: string;

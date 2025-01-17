@@ -1,6 +1,6 @@
-import { createClient } from "@/lib/supabase/supabase-server"
 import { Resend } from 'resend'
-import { env } from '@/lib/env'
+import { createClient } from "@/lib/supabase/supabase-server"
+import { env } from '@/lib/constants/env'
 
 type NotificationType = 'submission' | 'approval' | 'rejection'
 

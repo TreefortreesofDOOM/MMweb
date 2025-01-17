@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { env } from '@/lib/env';
+import { env } from '@/lib/constants/env';
 
 const GEMINI_DIMENSIONS = 768;
 export const EMBEDDINGS_TABLE = 'artwork_embeddings_gemini';
