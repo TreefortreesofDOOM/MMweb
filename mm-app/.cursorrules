@@ -36,11 +36,106 @@ mm-app/
 │   ├── types/       # Type definitions
 │   ├── unified-ai/  # Unified AI system
 │   ├── utils/       # Common utilities
-│   └── vertex-ai/   # AI integration
 ├── public/          # Static assets
 ├── scripts/         # Utility scripts
 └── supabase/        # Database config & migrations
 ```
+
+## Types Directory Structure
+```
+@/lib/types/
+├── analytics-types.ts     # Analytics and tracking types
+├── ai-settings-types.ts   # AI configuration types
+├── custom-types.ts        # Shared custom type definitions
+├── database.types.ts      # Generated database types
+├── feed-types.ts         # Feed and content types
+├── gallery-types.ts      # Gallery and artwork types
+├── gallery-error-types.ts # Error handling types
+├── ghost-profiles-types.ts # Profile system types
+├── mm-ai-types.ts        # AI system types
+├── patron-types.ts       # Patron system types
+├── search-artist-types.ts # Artist search types
+└── settings-types.ts     # User settings types
+```
+
+## Utils Directory Structure
+```
+@/lib/utils/
+├── auth/           # Authentication and authorization utilities
+├── artist/         # Artist-specific utilities
+├── content/        # Content and media handling utilities
+├── core/           # Core/common utilities used across the application
+├── error/          # Error handling and logging utilities
+└── user/           # User management utilities
+```
+
+## Constants Directory Structure
+```
+@/lib/constants/
+├── env.ts          # Environment variable validation and types
+├── error-codes.ts  # Error code constants
+├── mm-ai-constants.ts # AI-related constants
+└── other domain-specific constant files
+```
+
+## Constants Organization Rules
+1. **File Names**
+   - Use kebab-case for files
+   - No suffix needed for env.ts
+   - Use `-constants` suffix for other constant files
+   - Group related constants by domain
+
+2. **Environment Variables**
+   - Keep all env validation in `env.ts`
+   - Use Zod for schema validation
+   - Include proper TypeScript types
+   - Document required vs optional variables
+
+3. **Constants Organization**
+   - Group related constants together
+   - Use 'as const' assertion
+   - Export named constants
+   - Include proper JSDoc documentation
+
+## Types Organization Rules
+1. **File Names**
+   - Use kebab-case with `-types` suffix (e.g., `gallery-types.ts`)
+   - Group related types in domain-specific files
+   - Keep database types separate in `database.types.ts`
+
+2. **Type Definitions**
+   - Use interfaces for object shapes
+   - Use type for unions and complex types
+   - Avoid enums, use const objects with 'as const'
+   - Export all types with clear, descriptive names
+
+3. **Type Documentation**
+   - Include JSDoc comments for complex types
+   - Document type parameters
+   - Add examples for non-obvious usage
+
+## Utils Organization Rules
+1. **Directory Structure**
+   - Group utilities by domain/purpose
+   - Keep core utilities separate from domain-specific ones
+   - Maintain clear separation of concerns
+
+2. **File Names**
+   - Use kebab-case with `-utils` suffix (e.g., `image-utils.ts`)
+   - Add domain prefix for domain-specific utilities
+   - Use descriptive names that indicate functionality
+
+3. **Function Organization**
+   - Keep related functions together
+   - Export named functions (no default exports)
+   - Include proper TypeScript types
+   - Add JSDoc documentation for complex functions
+
+4. **Best Practices**
+   - Follow DRY principles
+   - Implement proper error handling
+   - Include type definitions
+   - Write unit tests for utilities
 
 ## Naming Conventions
 
